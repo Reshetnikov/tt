@@ -49,6 +49,10 @@ func main() {
 	}
 	fmt.Println(":" + cfg.Port)
 
+	// static
+	fs := http.FileServer(http.Dir("./web/static"))
+	http.Handle("/static/", http.StripPrefix("/static/", fs))
+
 	http.HandleFunc("/", indexHandler)
 	http.HandleFunc("/dashboard", handler)
 	//http.HandleFunc("/projects", handler)
