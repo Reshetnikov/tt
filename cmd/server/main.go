@@ -5,9 +5,8 @@ import (
 	"log"
 	"net/http"
 	"time-tracker/internal/config"
-	"time-tracker/internal/handlers"
-	"time-tracker/internal/repository"
-	"time-tracker/internal/services"
+	"time-tracker/internal/modules/pages"
+	"time-tracker/internal/modules/users"
 )
 
 func main() {
@@ -17,9 +16,9 @@ func main() {
 	}
 	fmt.Printf("%+v\n", cfg)
 
-	userRepo := repository.NewUserRepositoryMem()
-	userService := services.NewUserService(userRepo)
-	userHandler := handlers.NewUserHandler(userService)
+	userRepo := users.NewUserRepositoryMem()
+	userService := users.NewUserService(userRepo)
+	userHandler := users.NewUserHandler(userService)
 
 	mux := http.NewServeMux()
 
@@ -27,16 +26,16 @@ func main() {
 	fs := http.FileServer(http.Dir("./web/static"))
 	mux.Handle("/static/", http.StripPrefix("/static/", fs))
 
-	mux.HandleFunc("/", handlers.IndexHandler)
-	mux.HandleFunc("/dashboard", handlers.IndexHandler)
+	mux.HandleFunc("/", pages.IndexHandler)
+	mux.HandleFunc("/dashboard", pages.IndexHandler)
 	//mux.HandleFunc("/projects", handler)
 	//http.HandleFunc("/projects/{project_id}", handler)
-	mux.HandleFunc("/tasks", handlers.IndexHandler)
-	mux.HandleFunc("/reports", handlers.IndexHandler)
-	mux.HandleFunc("/login", handlers.IndexHandler)
+	mux.HandleFunc("/tasks", pages.IndexHandler)
+	mux.HandleFunc("/reports", pages.IndexHandler)
+	mux.HandleFunc("/login", pages.IndexHandler)
 	mux.HandleFunc("/signup", userHandler.SignupHandler)
-	mux.HandleFunc("/profile", handlers.IndexHandler)
-	mux.HandleFunc("/settings", handlers.IndexHandler)
+	mux.HandleFunc("/profile", pages.IndexHandler)
+	mux.HandleFunc("/settings", pages.IndexHandler)
 
 	log.Fatal(http.ListenAndServe(":"+cfg.Port, mux))
 }

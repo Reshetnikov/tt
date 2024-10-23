@@ -1,4 +1,4 @@
-package handlers
+package utils
 
 import (
 	"log"
@@ -7,7 +7,7 @@ import (
 	"text/template"
 )
 
-func renderTemplate(w http.ResponseWriter, tmpl string, data interface{}) {
+func RenderTemplate(w http.ResponseWriter, tmpl string, data interface{}) {
 	layout := filepath.Join("web", "templates", "layout.gohtml")
 	tmplPath := filepath.Join("web", "templates", tmpl+".gohtml")
 	templates, err := template.ParseFiles(layout, tmplPath)

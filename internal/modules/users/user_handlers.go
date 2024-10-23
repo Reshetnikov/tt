@@ -1,22 +1,22 @@
-package handlers
+package users
 
 import (
 	"net/http"
-	"time-tracker/internal/services"
+	"time-tracker/internal/utils"
 )
 
 type UserHandler struct {
-	userService *services.UserService // Зависимость от сервиса пользователя
+	userService *UserService // Зависимость от сервиса пользователя
 }
 
 // Конструктор для UserHandler
-func NewUserHandler(userService *services.UserService) *UserHandler {
+func NewUserHandler(userService *UserService) *UserHandler {
 	return &UserHandler{userService: userService}
 }
 
 // Обработчик для регистрации
 func (h *UserHandler) SignupHandler(w http.ResponseWriter, r *http.Request) {
-	renderTemplate(w, "signup", map[string]interface{}{
+	utils.RenderTemplate(w, "signup", map[string]interface{}{
 		"Title": "Sign Up",
 	})
 }

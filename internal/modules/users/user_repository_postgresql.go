@@ -1,8 +1,7 @@
-package repository
+package users
 
 import (
 	"database/sql"
-	"time-tracker/internal/models"
 )
 
 type UserRepositoryPostgreSQL struct {
@@ -13,22 +12,22 @@ func NewUserRepositoryPostgresql(db *sql.DB) *UserRepositoryPostgreSQL {
 	return &UserRepositoryPostgreSQL{db: db}
 }
 
-func (r *UserRepositoryPostgreSQL) Create(user *models.User) error {
+func (r *UserRepositoryPostgreSQL) Create(user *User) error {
 	// Реализация создания пользователя
 	return nil
 }
 
-func (r *UserRepositoryPostgreSQL) GetByID(id int) (*models.User, error) {
+func (r *UserRepositoryPostgreSQL) GetByID(id int) (*User, error) {
 	// Реализация получения пользователя по ID
 	return nil, nil
 }
 
-func (r *UserRepositoryPostgreSQL) GetByUsername(username string) (*models.User, error) {
+func (r *UserRepositoryPostgreSQL) GetByUsername(username string) (*User, error) {
 	// Реализация получения пользователя по имени
 	return nil, nil
 }
 
-func (r *UserRepositoryPostgreSQL) Update(user *models.User) error {
+func (r *UserRepositoryPostgreSQL) Update(user *User) error {
 	// Реализация обновления пользователя
 	return nil
 }

@@ -1,28 +1,27 @@
-package repository
+package users
 
 import (
 	"errors"
 	"sync"
-	"time-tracker/internal/models"
 )
 
 // UserRepositoryMem is an in-memory implementation of UserRepository
 type UserRepositoryMem struct {
 	mu     sync.Mutex
-	users  map[int]*models.User
+	users  map[int]*User
 	nextID int
 }
 
 // UserRepositoryMem creates a new instance of UserRepositoryMem
 func NewUserRepositoryMem() *UserRepositoryMem {
 	return &UserRepositoryMem{
-		users:  make(map[int]*models.User),
+		users:  make(map[int]*User),
 		nextID: 1,
 	}
 }
 
 // Create adds a new user to the in-memory store
-func (repo *UserRepositoryMem) Create(user *models.User) error {
+func (repo *UserRepositoryMem) Create(user *User) error {
 	repo.mu.Lock()
 	defer repo.mu.Unlock()
 
@@ -33,7 +32,7 @@ func (repo *UserRepositoryMem) Create(user *models.User) error {
 }
 
 // GetByID retrieves a user by their ID
-func (repo *UserRepositoryMem) GetByID(id int) (*models.User, error) {
+func (repo *UserRepositoryMem) GetByID(id int) (*User, error) {
 	repo.mu.Lock()
 	defer repo.mu.Unlock()
 
@@ -45,7 +44,7 @@ func (repo *UserRepositoryMem) GetByID(id int) (*models.User, error) {
 }
 
 // GetByUsername retrieves a user by their username
-func (repo *UserRepositoryMem) GetByUsername(username string) (*models.User, error) {
+func (repo *UserRepositoryMem) GetByUsername(username string) (*User, error) {
 	repo.mu.Lock()
 	defer repo.mu.Unlock()
 
@@ -58,7 +57,7 @@ func (repo *UserRepositoryMem) GetByUsername(username string) (*models.User, err
 }
 
 // Update updates an existing user in the in-memory store
-func (repo *UserRepositoryMem) Update(user *models.User) error {
+func (repo *UserRepositoryMem) Update(user *User) error {
 	repo.mu.Lock()
 	defer repo.mu.Unlock()
 
