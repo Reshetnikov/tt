@@ -1,16 +1,16 @@
 package users
 
-type UserService struct {
-	userRepo UserRepository
+type UsersService struct {
+	usersRepo UsersRepository
 }
 
 // Конструктор для UserService
-func NewUserService(userRepo UserRepository) *UserService {
-	return &UserService{userRepo: userRepo}
+func NewUserService(usersRepo UsersRepository) *UsersService {
+	return &UsersService{usersRepo: usersRepo}
 }
 
 // Логика регистрации
-func (s *UserService) RegisterUser(username, password string) error {
+func (s *UsersService) RegisterUser(username, password string) error {
 	// Логика регистрации пользователя, например:
 	// - Валидация данных
 	// - Хеширование пароля
@@ -19,7 +19,7 @@ func (s *UserService) RegisterUser(username, password string) error {
 }
 
 // Логика входа
-func (s *UserService) LoginUser(username, password string) (string, error) {
+func (s *UsersService) LoginUser(username, password string) (string, error) {
 	// Логика входа: проверка пароля и возврат токена
 	return "jwt-token", nil
 }

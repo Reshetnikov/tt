@@ -7,10 +7,10 @@ type User struct {
 	Email    string `json:"email"`
 }
 
-type UserRepository interface {
+type UsersRepository interface {
 	Create(user *User) error
 	GetByID(id int) (*User, error)
-	GetByUsername(username string) (*User, error)
+	GetByEmail(email string) (*User, error)
 	Update(user *User) error
 	Delete(id int) error
 }

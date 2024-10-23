@@ -5,23 +5,23 @@ import (
 	"time-tracker/internal/utils"
 )
 
-type UserHandler struct {
-	userService *UserService // Зависимость от сервиса пользователя
+type UsersHandler struct {
+	userService *UsersService // Зависимость от сервиса пользователя
 }
 
 // Конструктор для UserHandler
-func NewUserHandler(userService *UserService) *UserHandler {
-	return &UserHandler{userService: userService}
+func NewUserHandlers(userService *UsersService) *UsersHandler {
+	return &UsersHandler{userService: userService}
 }
 
 // Обработчик для регистрации
-func (h *UserHandler) SignupHandler(w http.ResponseWriter, r *http.Request) {
+func (h *UsersHandler) SignupHandler(w http.ResponseWriter, r *http.Request) {
 	utils.RenderTemplate(w, "signup", map[string]interface{}{
 		"Title": "Sign Up",
 	})
 }
 
 // Обработчик для входа
-func (h *UserHandler) LoginHandler(w http.ResponseWriter, r *http.Request) {
+func (h *UsersHandler) LoginHandler(w http.ResponseWriter, r *http.Request) {
 	// Логика входа пользователя с использованием userService
 }

@@ -18,7 +18,7 @@ func main() {
 
 	userRepo := users.NewUserRepositoryMem()
 	userService := users.NewUserService(userRepo)
-	userHandler := users.NewUserHandler(userService)
+	userHandler := users.NewUserHandlers(userService)
 
 	mux := http.NewServeMux()
 

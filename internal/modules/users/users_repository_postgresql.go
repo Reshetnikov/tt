@@ -22,7 +22,7 @@ func (r *UserRepositoryPostgreSQL) GetByID(id int) (*User, error) {
 	return nil, nil
 }
 
-func (r *UserRepositoryPostgreSQL) GetByUsername(username string) (*User, error) {
+func (r *UserRepositoryPostgreSQL) GetByEmail(email string) (*User, error) {
 	// Реализация получения пользователя по имени
 	return nil, nil
 }

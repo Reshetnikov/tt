@@ -5,14 +5,12 @@ import (
 	"sync"
 )
 
-// UserRepositoryMem is an in-memory implementation of UserRepository
 type UserRepositoryMem struct {
 	mu     sync.Mutex
 	users  map[int]*User
 	nextID int
 }
 
-// UserRepositoryMem creates a new instance of UserRepositoryMem
 func NewUserRepositoryMem() *UserRepositoryMem {
 	return &UserRepositoryMem{
 		users:  make(map[int]*User),
@@ -20,7 +18,6 @@ func NewUserRepositoryMem() *UserRepositoryMem {
 	}
 }
 
-// Create adds a new user to the in-memory store
 func (repo *UserRepositoryMem) Create(user *User) error {
 	repo.mu.Lock()
 	defer repo.mu.Unlock()
@@ -31,7 +28,6 @@ func (repo *UserRepositoryMem) Create(user *User) error {
 	return nil
 }
 
-// GetByID retrieves a user by their ID
 func (repo *UserRepositoryMem) GetByID(id int) (*User, error) {
 	repo.mu.Lock()
 	defer repo.mu.Unlock()
@@ -43,20 +39,18 @@ func (repo *UserRepositoryMem) GetByID(id int) (*User, error) {
 	return user, nil
 }
 
-// GetByUsername retrieves a user by their username
-func (repo *UserRepositoryMem) GetByUsername(username string) (*User, error) {
+func (repo *UserRepositoryMem) GetByEmail(email string) (*User, error) {
 	repo.mu.Lock()
 	defer repo.mu.Unlock()
 
 	for _, user := range repo.users {
-		if user.Username == username {
+		if user.Email == email {
 			return user, nil
 		}
 	}
 	return nil, errors.New("user not found")
 }
 
-// Update updates an existing user in the in-memory store
 func (repo *UserRepositoryMem) Update(user *User) error {
 	repo.mu.Lock()
 	defer repo.mu.Unlock()
@@ -68,7 +62,6 @@ func (repo *UserRepositoryMem) Update(user *User) error {
 	return nil
 }
 
-// Delete removes a user from the in-memory store
 func (repo *UserRepositoryMem) Delete(id int) error {
 	repo.mu.Lock()
 	defer repo.mu.Unlock()
