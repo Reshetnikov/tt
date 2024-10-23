@@ -5,20 +5,20 @@ import (
 	"sync"
 )
 
-type UserRepositoryMem struct {
+type UsersRepositoryMem struct {
 	mu     sync.Mutex
 	users  map[int]*User
 	nextID int
 }
 
-func NewUserRepositoryMem() *UserRepositoryMem {
-	return &UserRepositoryMem{
+func NewUsersRepositoryMem() *UsersRepositoryMem {
+	return &UsersRepositoryMem{
 		users:  make(map[int]*User),
 		nextID: 1,
 	}
 }
 
-func (repo *UserRepositoryMem) Create(user *User) error {
+func (repo *UsersRepositoryMem) Create(user *User) error {
 	repo.mu.Lock()
 	defer repo.mu.Unlock()
 
@@ -28,7 +28,7 @@ func (repo *UserRepositoryMem) Create(user *User) error {
 	return nil
 }
 
-func (repo *UserRepositoryMem) GetByID(id int) (*User, error) {
+func (repo *UsersRepositoryMem) GetByID(id int) (*User, error) {
 	repo.mu.Lock()
 	defer repo.mu.Unlock()
 
@@ -39,7 +39,7 @@ func (repo *UserRepositoryMem) GetByID(id int) (*User, error) {
 	return user, nil
 }
 
-func (repo *UserRepositoryMem) GetByEmail(email string) (*User, error) {
+func (repo *UsersRepositoryMem) GetByEmail(email string) (*User, error) {
 	repo.mu.Lock()
 	defer repo.mu.Unlock()
 
@@ -51,7 +51,7 @@ func (repo *UserRepositoryMem) GetByEmail(email string) (*User, error) {
 	return nil, errors.New("user not found")
 }
 
-func (repo *UserRepositoryMem) Update(user *User) error {
+func (repo *UsersRepositoryMem) Update(user *User) error {
 	repo.mu.Lock()
 	defer repo.mu.Unlock()
 
@@ -62,7 +62,7 @@ func (repo *UserRepositoryMem) Update(user *User) error {
 	return nil
 }
 
-func (repo *UserRepositoryMem) Delete(id int) error {
+func (repo *UsersRepositoryMem) Delete(id int) error {
 	repo.mu.Lock()
 	defer repo.mu.Unlock()
 

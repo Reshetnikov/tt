@@ -5,7 +5,7 @@ type UsersService struct {
 }
 
 // Конструктор для UserService
-func NewUserService(usersRepo UsersRepository) *UsersService {
+func NewUsersService(usersRepo UsersRepository) *UsersService {
 	return &UsersService{usersRepo: usersRepo}
 }
 

@@ -4,35 +4,35 @@ import (
 	"database/sql"
 )
 
-type UserRepositoryPostgreSQL struct {
+type UsersRepositoryPostgreSQL struct {
 	db *sql.DB
 }
 
-func NewUserRepositoryPostgresql(db *sql.DB) *UserRepositoryPostgreSQL {
-	return &UserRepositoryPostgreSQL{db: db}
+func NewUsersRepositoryPostgresql(db *sql.DB) *UsersRepositoryPostgreSQL {
+	return &UsersRepositoryPostgreSQL{db: db}
 }
 
-func (r *UserRepositoryPostgreSQL) Create(user *User) error {
+func (r *UsersRepositoryPostgreSQL) Create(user *User) error {
 	// Реализация создания пользователя
 	return nil
 }
 
-func (r *UserRepositoryPostgreSQL) GetByID(id int) (*User, error) {
+func (r *UsersRepositoryPostgreSQL) GetByID(id int) (*User, error) {
 	// Реализация получения пользователя по ID
 	return nil, nil
 }
 
-func (r *UserRepositoryPostgreSQL) GetByEmail(email string) (*User, error) {
+func (r *UsersRepositoryPostgreSQL) GetByEmail(email string) (*User, error) {
 	// Реализация получения пользователя по имени
 	return nil, nil
 }
 
-func (r *UserRepositoryPostgreSQL) Update(user *User) error {
+func (r *UsersRepositoryPostgreSQL) Update(user *User) error {
 	// Реализация обновления пользователя
 	return nil
 }
 
-func (r *UserRepositoryPostgreSQL) Delete(id int) error {
+func (r *UsersRepositoryPostgreSQL) Delete(id int) error {
 	// Реализация удаления пользователя
 	return nil
 }

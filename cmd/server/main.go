@@ -16,9 +16,9 @@ func main() {
 	}
 	fmt.Printf("%+v\n", cfg)
 
-	userRepo := users.NewUserRepositoryMem()
-	userService := users.NewUserService(userRepo)
-	userHandler := users.NewUserHandlers(userService)
+	usersRepo := users.NewUsersRepositoryMem()
+	usersService := users.NewUsersService(usersRepo)
+	usersHandlers := users.NewUsersHandlers(usersService)
 
 	mux := http.NewServeMux()
 
@@ -33,7 +33,7 @@ func main() {
 	mux.HandleFunc("/tasks", pages.IndexHandler)
 	mux.HandleFunc("/reports", pages.IndexHandler)
 	mux.HandleFunc("/login", pages.IndexHandler)
-	mux.HandleFunc("/signup", userHandler.SignupHandler)
+	mux.HandleFunc("/signup", usersHandlers.SignupHandler)
 	mux.HandleFunc("/profile", pages.IndexHandler)
 	mux.HandleFunc("/settings", pages.IndexHandler)
 

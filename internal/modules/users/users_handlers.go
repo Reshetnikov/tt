@@ -6,12 +6,12 @@ import (
 )
 
 type UsersHandler struct {
-	userService *UsersService // Зависимость от сервиса пользователя
+	usersService *UsersService // Зависимость от сервиса пользователя
 }
 
 // Конструктор для UserHandler
-func NewUserHandlers(userService *UsersService) *UsersHandler {
-	return &UsersHandler{userService: userService}
+func NewUsersHandlers(usersService *UsersService) *UsersHandler {
+	return &UsersHandler{usersService: usersService}
 }
 
 // Обработчик для регистрации
