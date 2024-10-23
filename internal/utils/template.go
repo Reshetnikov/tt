@@ -8,8 +8,8 @@ import (
 )
 
 func RenderTemplate(w http.ResponseWriter, tmpl string, data interface{}) {
-	layout := filepath.Join("web", "templates", "layout.gohtml")
-	tmplPath := filepath.Join("web", "templates", tmpl+".gohtml")
+	layout := filepath.Join("web", "templates", "layout.html")
+	tmplPath := filepath.Join("web", "templates", tmpl+".html")
 	templates, err := template.ParseFiles(layout, tmplPath)
 	if err != nil {
 		log.Println("Error loading template " + tmplPath)
