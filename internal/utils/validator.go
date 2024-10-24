@@ -20,15 +20,29 @@ func (fe FormErrors) HasErrors() bool {
 	return len(fe) > 0
 }
 
-// 
-func ValidateStruct(formStruct interface{}) FormErrors {
+// Example usage:
+//
+//	form := signupForm{}
+//	validator := utils.NewValidator(&form)
+//	errors := validator.Validate()
+type Validator struct {
+	formStruct interface{}
+	valFormStruct reflect.Value
+}
+func NewValidator(formStruct interface{}) *Validator {
+	return &Validator{
+		formStruct :formStruct, 
+		valFormStruct: reflect.ValueOf(formStruct).Elem(),
+	}
+}
+func (v Validator) Validate() FormErrors {
 	errors := FormErrors{}
-	if valErrors := validate.Struct(formStruct); valErrors != nil {
+	if valErrors := validate.Struct(v.formStruct); valErrors != nil {
 		for _, valError := range valErrors.(validator.ValidationErrors) {
 			fieldName := valError.Field()
-			fieldLabel := getFieldLabel(formStruct, fieldName)
+			fieldLabel := v.getFieldLabel(fieldName)
 			tag := valError.Tag()
-			errorMessage := parseValidationError(tag, valError, fieldLabel)
+			errorMessage := v.parseValidationError(tag, valError, fieldLabel)
 			errors.Add(fieldName, errorMessage)
 		}
 	}
@@ -36,7 +50,7 @@ func ValidateStruct(formStruct interface{}) FormErrors {
 }
 
 // Receives a human message
-func parseValidationError(tag string, err validator.FieldError, fieldLabel string) string {
+func (v Validator) parseValidationError(tag string, err validator.FieldError, fieldLabel string) string {
 	switch tag {
 	case "required":
 		return fmt.Sprintf("%s is required", fieldLabel)
@@ -47,7 +61,8 @@ func parseValidationError(tag string, err validator.FieldError, fieldLabel strin
 	case "max":
 		return fmt.Sprintf("%s must not exceed %s characters", fieldLabel, err.Param())
 	case "eqfield":
-		return fmt.Sprintf("%s must match %s", fieldLabel, err.Param())
+		field2Label := v.getFieldLabel(err.Param())
+		return fmt.Sprintf("%s must match %s", fieldLabel, field2Label)
 	default:
 		return fmt.Sprintf("%s is invalid", fieldLabel)
 	}
@@ -55,9 +70,8 @@ func parseValidationError(tag string, err validator.FieldError, fieldLabel strin
 
 // Gets the label for the field or use the default field name
 // Example: PasswordConfirmation string `label:"Confirm Password"`
-func getFieldLabel(formStruct interface{}, fieldName string) string {
-	val := reflect.ValueOf(formStruct)
-	field, found := val.Type().FieldByName(fieldName)
+func (v Validator) getFieldLabel(fieldName string) string {
+	field, found := v.valFormStruct.Type().FieldByName(fieldName)
 	if !found {
 		return fieldName
 	}
