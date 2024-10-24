@@ -7,7 +7,10 @@ import (
 	"text/template"
 )
 
-// Функция для создания map[string]interface{}
+// Function for registration in the template engine
+// Example:
+// T1: {{ template "T2" dict "Label" "Name" "Type" "text" "Value" .Form.Name }}
+// T2: name="{{ .Name }}" type="{{ .Type }}" value="{{ .Value }}"
 func dict(values ...interface{}) map[string]interface{} {
     if len(values)%2 != 0 {
         panic("odd number of arguments in dict()")

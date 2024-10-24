@@ -54,39 +54,22 @@ func parseValidationError(tag string, err validator.FieldError) string {
 }
 
 func (h *UsersHandler) SignupHandler(w http.ResponseWriter, r *http.Request) {
+	// fmt.Printf("-----%+v\n", r)
 	if r.Method == http.MethodPost {
-		// Парсим данные формы
-		if err := r.ParseForm(); err != nil {
-			http.Error(w, "Unable to parse form", http.StatusBadRequest)
+
+		form, err := utils.ParseFormToStruct[signupForm](r)
+		if err != nil {
+			http.Error(w, "Unable to parse form data", http.StatusBadRequest)
 			return
 		}
 
-		// Собираем данные формы
-		form := signupForm{
-			Name:                 r.FormValue("name"),
-			Email:                r.FormValue("email"),
-			Password:             r.FormValue("password"),
-			PasswordConfirmation: r.FormValue("password_confirmation"),
-		}
-
-		// Валидация
 		errors := FormErrors{}
-		if err := h.validate.Struct(&form); err != nil {
-			// Сбор ошибок
+		if err := h.validate.Struct(form); err != nil {
 			for _, err := range err.(validator.ValidationErrors) {
-				field := err.Field()
-				tag := err.Tag()
-				text := parseValidationError(tag, err)
-				switch field {
-				case "Name":
-					errors.Add("name", text)
-				case "Email":
-					errors.Add("email", text)
-				case "Password":
-					errors.Add("password", text)
-				case "PasswordConfirmation":
-					errors.Add("password_confirmation", text)
-				}
+				field := err.Field() // Name
+				tag := err.Tag() // min
+				errorMessage := parseValidationError(tag, err)
+				errors.Add(field, errorMessage)
 			}
 
 			// Передаем ошибки в шаблон
@@ -96,12 +79,17 @@ func (h *UsersHandler) SignupHandler(w http.ResponseWriter, r *http.Request) {
 				"Form":   form, // Передаем данные формы, чтобы они сохранились в полях
 			})
 			return
-		}
 		} else {
 			utils.RenderTemplate(w, "signup", map[string]interface{}{
 				"Title":  "Sign Up",
+				"Errors": errors,
+				"Form":   form, // Передаем данные формы, чтобы они сохранились в полях
 			})
 		}
+	}
+	utils.RenderTemplate(w, "signup", map[string]interface{}{
+		"Title":  "Sign Up",
+	})
 }
 
 // Обработчик для входа
