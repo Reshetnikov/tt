@@ -1,25 +1,27 @@
 {{ define "content" }}
-    <h2 class="text-2xl font-bold mb-6">Welcome to Time Tracker</h2>
+<h2 class="mb-6 text-2xl font-bold">Welcome to Time Tracker</h2>
 
-    <!-- Active Timer Section -->
-    <div class="bg-white shadow rounded-lg p-6 mb-6">
-        <h3 class="text-lg font-bold mb-4">Active Timer</h3>
-        <div x-data="{ timerActive: false, time: 0 }" class="text-center">
-            <div x-text="timerActive ? time + ' seconds' : 'No active timer'" class="text-3xl font-semibold mb-4"></div>
-            <button @click="timerActive = !timerActive; if(timerActive){ time = 0; setInterval(() => time++, 1000); }" 
-                    class="bg-blue-500 text-white px-4 py-2 rounded-md">
-                <span x-text="timerActive ? 'Stop Timer' : 'Start Timer'"></span>
-            </button>
-        </div>
-    </div>
+<!-- Active Timer Section -->
+<div class="mb-6 rounded-lg bg-white p-6 shadow">
+  <h3 class="mb-4 text-lg font-bold">Active Timer</h3>
+  <div x-data="{ timerActive: false, time: 0 }" class="text-center">
+    <div x-text="timerActive ? time + ' seconds' : 'No active timer'" class="mb-4 text-3xl font-semibold"></div>
+    <button
+      @click="timerActive = !timerActive; if(timerActive){ time = 0; setInterval(() => time++, 1000); }"
+      class="rounded-md bg-blue-500 px-4 py-2 text-white"
+    >
+      <span x-text="timerActive ? 'Stop Timer' : 'Start Timer'"></span>
+    </button>
+  </div>
+</div>
 
-    <!-- Recent Entries -->
-    <div class="bg-white shadow rounded-lg p-6">
-        <h3 class="text-lg font-bold mb-4">Recent Time Entries</h3>
-        <ul class="list-disc list-inside">
-            <li>Project A - 2 hours</li>
-            <li>Project B - 3 hours</li>
-            <li>Personal Task - 1 hour</li>
-        </ul>
-    </div>
+<!-- Recent Entries -->
+<div class="rounded-lg bg-white p-6 shadow">
+  <h3 class="mb-4 text-lg font-bold">Recent Time Entries</h3>
+  <ul class="list-inside list-disc">
+    <li>Project A - 2 hours</li>
+    <li>Project B - 3 hours</li>
+    <li>Personal Task - 1 hour</li>
+  </ul>
+</div>
 {{ end }}

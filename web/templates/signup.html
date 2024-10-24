@@ -1,29 +1,46 @@
 {{ define "content" }}
-    <h2 class="text-2xl font-bold mb-6 text-center">Sign Up</h2>
+<h2 class="mb-6 text-center text-2xl font-bold">Sign Up</h2>
 
-    <form action="/signup" method="POST" class="bg-white shadow rounded-xl p-6 max-w-md mx-auto">
-          <div class="mb-4">
-               <label class="block text-gray-700 font-bold mb-2" for="name">Name</label>
-            <input type="text" id="name" name="name" class="shadow appearance-none border rounded-xl w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" required>
-        </div>
+<form action="/signup" method="POST" class="mx-auto max-w-md rounded-xl bg-white p-6 shadow">
+  <!-- prettier-ignore -->
+  {{ template "components/inputField" dict
+    "Label" "Name"
+    "Type" "text"
+    "Name" "name"
+    "ID" "name"
+    "Value" .Form.Name
+    "Errors" .Errors.name
+  }}
+  {{ template "components/inputField" dict
+    "Label" "Email"
+    "Type" "email"
+    "Name" "email"
+    "ID" "email"
+    "Value" .Form.Email
+    "Errors" .Errors.email
+  }}
+  {{ template "components/inputField" dict 
+    "Label" "Password"
+    "Type" "password"
+    "Name" "password"
+    "ID" "password"
+    "Value" .Form.Password
+    "Errors" .Errors.password
+  }}
+  {{ template "components/inputField" dict
+    "Label" "Confirm Password"
+    "Type" "password"
+    "Name" "password_confirmation"
+    "ID" "password_confirmation"
+    "Value" .Form.PasswordConfirmation
+    "Errors" .Errors.password_confirmation
+  }}
 
-        <div class="mb-4">
-            <label class="block text-gray-700 font-bold mb-2" for="email">Email</label>
-            <input type="email" id="email" name="email" class="shadow appearance-none border rounded-xl w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" required>
-        </div>
-
-        <div class="mb-4">
-            <label class="block text-gray-700 font-bold mb-2" for="password">Password</label>
-            <input type="password" id="password" name="password" class="shadow appearance-none border rounded-xl w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" required>
-        </div>
-
-        <div class="mb-4">
-            <label class="block text-gray-700 font-bold mb-2" for="password_confirmation">Confirm Password</label>
-            <input type="password" id="password_confirmation" name="password_confirmation" class="shadow appearance-none border rounded-xl w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" required>
-        </div>
-
-        <button type="submit" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-xl focus:outline-none shadow focus:shadow-outline">
-            Sign Up
-        </button>
-    </form>
+  <button
+    type="submit"
+    class="focus:shadow-outline rounded-xl bg-blue-500 px-4 py-2 font-bold text-white shadow hover:bg-blue-700 focus:outline-none"
+  >
+    Sign Up
+  </button>
+</form>
 {{ end }}

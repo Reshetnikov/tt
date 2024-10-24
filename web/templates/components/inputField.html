@@ -1,0 +1,19 @@
+{{ define "components/inputField" }}
+<div class="mb-4">
+  <label class="mb-2 block font-bold text-gray-700" for="{{ .ID }}">{{ .Label }}</label>
+  <input
+    type="{{ .Type }}"
+    id="{{ .ID }}"
+    name="{{ .Name }}"
+    class="focus:shadow-outline w-full appearance-none rounded-xl border {{if .Errors}}border-red-500{{end}} px-3 py-2 leading-tight text-gray-700 shadow focus:outline-none"
+    value="{{ .Value }}"
+  />
+  {{ if .Errors }}
+  <ul class="text-sm text-red-500">
+    {{ range .Errors }}
+    <li>{{ . }}</li>
+    {{ end }}
+  </ul>
+  {{ end }}
+</div>
+{{ end }}
