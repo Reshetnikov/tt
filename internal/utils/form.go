@@ -6,12 +6,11 @@ import (
 )
 
 // Fills the structure with data from the form
-func ParseFormToStruct[T any](r *http.Request) (*T, error) {
+func ParseFormToStruct(r *http.Request, formStruct interface{}) error {
     if err := r.ParseForm(); err != nil {
-        return nil, err
+        return err
     }
 
-	formStruct := new(T)
     valFormStruct := reflect.ValueOf(formStruct).Elem()
 
     for i := 0; i < valFormStruct.NumField(); i++ {
@@ -25,5 +24,5 @@ func ParseFormToStruct[T any](r *http.Request) (*T, error) {
         }
     }
 
-    return formStruct, nil
+    return nil
 }
