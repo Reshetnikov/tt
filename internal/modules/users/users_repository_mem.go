@@ -34,7 +34,8 @@ func (repo *UsersRepositoryMem) GetByID(id int) (*User, error) {
 
 	user, exists := repo.users[id]
 	if !exists {
-		return nil, errors.New("user not found")
+		// return nil, errors.New("user not found")
+		return nil, nil
 	}
 	return user, nil
 }
@@ -48,7 +49,8 @@ func (repo *UsersRepositoryMem) GetByEmail(email string) (*User, error) {
 			return user, nil
 		}
 	}
-	return nil, errors.New("user not found")
+	// return nil, errors.New("user not found")
+	return nil, nil
 }
 
 func (repo *UsersRepositoryMem) Update(user *User) error {

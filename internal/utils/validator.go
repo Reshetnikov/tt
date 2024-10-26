@@ -3,6 +3,7 @@ package utils
 import (
 	"fmt"
 	"reflect"
+	"strings"
 
 	"github.com/go-playground/validator/v10"
 )
@@ -16,8 +17,15 @@ func (fe *FormErrors) Add(field, message string) {
 func (fe FormErrors) HasErrorsField(field string) bool {
 	return len(fe[field]) > 0
 }
-func (fe FormErrors) HasErrors() bool {
-	return len(fe) > 0
+// func (fe FormErrors) HasErrors() bool {
+// 	return len(fe) > 0
+// }
+func (fe FormErrors) Error() string {
+	var sb strings.Builder
+	for field, messages := range fe {
+		sb.WriteString(fmt.Sprintf("Errors for field '%s': %s\n", field, strings.Join(messages, ", ")))
+	}
+	return sb.String()
 }
 
 // Example usage:
@@ -36,8 +44,8 @@ func NewValidator(formStruct interface{}) *Validator {
 	}
 }
 func (v Validator) Validate() FormErrors {
-	errors := FormErrors{}
 	if valErrors := validate.Struct(v.formStruct); valErrors != nil {
+		errors := FormErrors{}
 		for _, valError := range valErrors.(validator.ValidationErrors) {
 			fieldName := valError.Field()
 			fieldLabel := v.getFieldLabel(fieldName)
@@ -45,8 +53,9 @@ func (v Validator) Validate() FormErrors {
 			errorMessage := v.parseValidationError(tag, valError, fieldLabel)
 			errors.Add(fieldName, errorMessage)
 		}
+		return errors
 	}
-	return errors
+	return nil
 }
 
 // Receives a human message

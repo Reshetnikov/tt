@@ -1,6 +1,6 @@
 module time-tracker
 
-go 1.22.5
+go 1.23.2
 
 require (
 	github.com/go-playground/validator/v10 v10.22.1

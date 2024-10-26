@@ -53,3 +53,7 @@ func RenderTemplate(w http.ResponseWriter, tmpl string, data interface{}) {
 		http.Error(w, "Error rendering template "+tmpl, http.StatusInternalServerError)
 	}
 }
+
+func RenderTemplateError(w http.ResponseWriter, message string) {
+	http.Error(w, message, http.StatusBadRequest)
+}
