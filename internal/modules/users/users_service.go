@@ -8,16 +8,21 @@ import (
 	"time"
 	"time-tracker/internal/utils"
 
+	"github.com/google/uuid"
 	"golang.org/x/crypto/bcrypt"
 )
 
 type UsersService struct {
 	usersRepo UsersRepository
+	sessionsRepo SessionsRepository
 }
 
 // Конструктор для UserService
-func NewUsersService(usersRepo UsersRepository) *UsersService {
-	return &UsersService{usersRepo: usersRepo}
+func NewUsersService(usersRepo UsersRepository, sessionsRepo SessionsRepository) *UsersService {
+	return &UsersService{
+		usersRepo: usersRepo,
+		sessionsRepo: sessionsRepo,
+	}
 }
 
 type RegisterUserData struct {
@@ -27,10 +32,6 @@ type RegisterUserData struct {
 }
 
 func (s *UsersService) RegisterUser(registerUserData RegisterUserData) (error) {
-	// Логика регистрации пользователя, например:
-	// - Валидация данных
-	// - Хеширование пароля
-	// - Сохранение пользователя в базу данных через userRepo
 	existingUser, err := s.usersRepo.GetByEmail(registerUserData.Email)
 	if err != nil {
 		return err
@@ -50,13 +51,15 @@ func (s *UsersService) RegisterUser(registerUserData RegisterUserData) (error) {
 	if err != nil {
 		return err
 	}
+	date := time.Now().UTC()
 	user := &User{
 		Name: registerUserData.Name,
 		Email: registerUserData.Email,
 		Password: hashedPassword,
-		DateAdd: time.Now().UTC(),
+		DateAdd: date,
 		IsActive: false,
 		ActivationHash: activationHash,
+		ActivationHashDate: date,
 	}
 	fmt.Printf("-----USER:%+v\n", user)
 	err =  s.usersRepo.Create(user)
@@ -64,10 +67,46 @@ func (s *UsersService) RegisterUser(registerUserData RegisterUserData) (error) {
 	return err
 }
 
+func (s *UsersService) ActivateUser(activationHash string) (string, *Session, error) {
+    user, err := s.usersRepo.GetByActivationHash(activationHash)
+    if err != nil || user == nil {
+        return "", nil, fmt.Errorf("user not found or activation hash is invalid")
+    }
+    
+    user.IsActive = true
+    user.ActivationHash = ""
+
+    err = s.usersRepo.Update(user)
+    if err != nil {
+        return "", nil, fmt.Errorf("could not activate user: %w", err)
+    }
+
+    sessionID, session := s.makeSession(user.ID)
+	return sessionID, session, nil
+}
+
 // Логика входа
-func (s *UsersService) LoginUser(username, password string) (string, error) {
-	// Логика входа: проверка пароля и возврат токена
-	return "jwt-token", nil
+func (s *UsersService) LoginUser(email, password string) (string, *Session, error) {
+	user, err := s.usersRepo.GetByEmail(email)
+    if err != nil || user == nil || !checkPasswordHash(password, user.Password) {
+        return "", nil, fmt.Errorf("Invalid email or password")
+    }
+	if (!user.IsActive) {
+		return "", nil, fmt.Errorf("Account not activated")
+	}
+
+	sessionID, session := s.makeSession(user.ID)
+	return sessionID, session, nil
+}
+
+func (s *UsersService) makeSession(userId int) (string, *Session){
+	sessionID := uuid.New().String()
+	session := &Session{
+		UserID: userId,
+		Expiry: time.Now().Add(time.Hour * 24),
+	}
+	s.sessionsRepo.Create(sessionID, session)
+    return sessionID, session
 }
 
 func hashPassword(password string) (string, error) {

@@ -1,0 +1,30 @@
+{{ define "content" }}
+<h2 class="mb-6 text-center text-2xl font-bold">Log In</h2>
+
+<form action="/login" method="POST" class="mx-auto max-w-md rounded-xl bg-white p-6 shadow">
+  <!-- prettier-ignore -->
+  {{ template "components/inputField" dict
+    "Label" "Email"
+    "Type" "email"
+    "Name" "email"
+    "ID" "email"
+    "Value" .Form.Email
+    "Errors" .Errors.Email
+  }}
+  {{ template "components/inputField" dict
+    "Label" "Password"
+    "Type" "password"
+    "Name" "password"
+    "ID" "password"
+    "Value" .Form.Password
+    "Errors" .Errors.Password
+  }}
+
+  <button
+    type="submit"
+    class="focus:shadow-outline rounded-xl bg-blue-500 px-4 py-2 font-bold text-white shadow hover:bg-blue-700 focus:outline-none"
+  >
+    Log In
+  </button>
+</form>
+{{ end }}

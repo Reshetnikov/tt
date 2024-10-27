@@ -45,7 +45,7 @@ func (h *UsersHandler) SignupHandler(w http.ResponseWriter, r *http.Request) {
 		}
 
 		if formErrors == nil && err != nil {
-			utils.RenderTemplateError(w, err.Error())
+			utils.RenderTemplateError(w, "Signup Failed", err.Error())
 			return
 		}
 	}

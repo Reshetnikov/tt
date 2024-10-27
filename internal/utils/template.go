@@ -8,6 +8,7 @@ import (
 )
 
 // Function for registration in the template engine
+// Used to pass multiple variables from a template to a subtemplate
 // Example:
 // T1: {{ template "T2" dict "Label" "Name" "Type" "text" "Value" .Form.Name }}
 // T2: name="{{ .Name }}" type="{{ .Type }}" value="{{ .Value }}"
@@ -54,9 +55,13 @@ func RenderTemplate(w http.ResponseWriter, tmpl string, data interface{}) {
 	}
 }
 
-func RenderTemplateError(w http.ResponseWriter, message string) {
+func RenderTemplateError(w http.ResponseWriter, title string, message string) {
 	// http.Error(w, message, http.StatusBadRequest)
+	if (title == "") {
+		title = "Error"
+	}
 	RenderTemplate(w, "error", map[string]interface{}{
+		"Title":   title,
 		"Message":  message,
 	})
 }
