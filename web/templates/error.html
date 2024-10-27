@@ -1,0 +1,10 @@
+{{ define "content" }}
+<h2 class="mb-6 text-center text-2xl font-bold text-red-500">Error</h2>
+
+<div class="mx-auto max-w-md rounded-xl bg-white p-6 text-center shadow">
+  <p class="text-lg text-gray-700">{{ .Message }}</p>
+  <a href="/" class="mt-4 inline-block rounded-xl bg-blue-500 px-4 py-2 font-bold text-white hover:bg-blue-700"
+    >Return Home</a
+  >
+</div>
+{{ end }}

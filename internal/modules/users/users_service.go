@@ -58,6 +58,7 @@ func (s *UsersService) RegisterUser(registerUserData RegisterUserData) (error) {
 		IsActive: false,
 		ActivationHash: activationHash,
 	}
+	fmt.Printf("-----USER:%+v\n", user)
 	err =  s.usersRepo.Create(user)
 
 	return err

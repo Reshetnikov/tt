@@ -55,5 +55,8 @@ func RenderTemplate(w http.ResponseWriter, tmpl string, data interface{}) {
 }
 
 func RenderTemplateError(w http.ResponseWriter, message string) {
-	http.Error(w, message, http.StatusBadRequest)
+	// http.Error(w, message, http.StatusBadRequest)
+	RenderTemplate(w, "error", map[string]interface{}{
+		"Message":  message,
+	})
 }

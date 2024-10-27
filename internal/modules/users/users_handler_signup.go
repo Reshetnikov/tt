@@ -32,7 +32,10 @@ func (h *UsersHandler) SignupHandler(w http.ResponseWriter, r *http.Request) {
 				})
 				if err == nil {
 					println("Redirect /signup-success")
-					http.Redirect(w, r, "/signup-success", http.StatusSeeOther)
+					// http.Redirect(w, r, "/signup-success", http.StatusSeeOther)
+					utils.RenderTemplate(w, "signup-success", map[string]interface{}{
+						"Title":  "Sign Up Successful",
+					})
 					return
 				} else {
 					fmt.Printf("-----%+v\n", err)
