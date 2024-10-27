@@ -89,10 +89,10 @@ func (s *UsersService) ActivateUser(activationHash string) (*Session, error) {
 func (s *UsersService) LoginUser(email, password string) (*Session, error) {
 	user, err := s.usersRepo.GetByEmail(email)
     if err != nil || user == nil || !checkPasswordHash(password, user.Password) {
-        return nil, fmt.Errorf("Invalid email or password")
+        return nil, fmt.Errorf("invalid email or password")
     }
 	if (!user.IsActive) {
-		return nil, fmt.Errorf("Account not activated")
+		return nil, fmt.Errorf("аccount not activated")
 	}
 
 	session := s.makeSession(user.ID)
@@ -105,6 +105,7 @@ func (s *UsersService) makeSession(userId int) (*Session){
 		UserID: userId,
 		Expiry: time.Now().Add(time.Hour * 24),
 	}
+	session.SessionID = sessionID
 	fmt.Printf("-----SESSION:%+v\n", session)
 	s.sessionsRepo.Create(sessionID, session)
     return session

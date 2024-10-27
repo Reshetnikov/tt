@@ -6,7 +6,7 @@ import (
 )
 
 func IndexHandler(w http.ResponseWriter, r *http.Request) {
-	utils.RenderTemplate(w, "index", map[string]interface{}{
+	utils.RenderTemplate(w, r, "index", map[string]interface{}{
 		"Title": "Dashboard",
 	})
 }

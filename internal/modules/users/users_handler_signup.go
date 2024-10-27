@@ -33,7 +33,7 @@ func (h *UsersHandler) SignupHandler(w http.ResponseWriter, r *http.Request) {
 				if err == nil {
 					println("Redirect /signup-success")
 					// http.Redirect(w, r, "/signup-success", http.StatusSeeOther)
-					utils.RenderTemplate(w, "signup-success", map[string]interface{}{
+					utils.RenderTemplate(w, r, "signup-success", map[string]interface{}{
 						"Title":  "Sign Up Successful",
 					})
 					return
@@ -45,11 +45,11 @@ func (h *UsersHandler) SignupHandler(w http.ResponseWriter, r *http.Request) {
 		}
 
 		if formErrors == nil && err != nil {
-			utils.RenderTemplateError(w, "Signup Failed", err.Error())
+			utils.RenderTemplateError(w, r, "Signup Failed", err.Error())
 			return
 		}
 	}
-	utils.RenderTemplate(w, "signup", map[string]interface{}{
+	utils.RenderTemplate(w, r, "signup", map[string]interface{}{
 		"Title":  "Sign Up",
 		"Errors": formErrors,
 		"Form":   form,

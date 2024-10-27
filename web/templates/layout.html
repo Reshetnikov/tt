@@ -19,9 +19,22 @@
 
         <!-- Навигация или другие элементы справа -->
         <nav class="space-x-4">
+          {{ if .User }}
+          <div class="group relative inline-block">
+            <span class="cursor-pointer text-gray-500 hover:text-gray-900"> {{ .User.Name }} </span>
+            <div
+              class="absolute right-0 z-10 hidden w-48 rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 group-hover:block"
+            >
+              <div class="py-1">
+                <a href="/logout" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Log Out</a>
+              </div>
+            </div>
+          </div>
           <a href="/dashboard" class="text-gray-500 hover:text-gray-900">Dashboard</a>
+          {{ else }}
           <a href="/login" class="text-gray-500 hover:text-gray-900">Log In</a>
           <a href="/signup" class="text-gray-500 hover:text-gray-900">Sign Up</a>
+          {{ end }}
         </nav>
       </div>
     </header>

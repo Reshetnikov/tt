@@ -32,12 +32,12 @@ func (h *UsersHandler) LoginHandler(w http.ResponseWriter, r *http.Request) {
         }
 
         if formErrors == nil && err != nil {
-            utils.RenderTemplateError(w, "Login Failed", err.Error())
+            utils.RenderTemplateError(w, r, "Login Failed", err.Error())
             return
         }
     }
 
-    utils.RenderTemplate(w, "login", map[string]interface{}{
+    utils.RenderTemplate(w, r, "login", map[string]interface{}{
         "Title":  "Log In",
         "Errors": formErrors,
         "Form":   form,

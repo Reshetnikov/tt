@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"path/filepath"
 	"text/template"
+	"time-tracker/internal/middleware"
 )
 
 // Function for registration in the template engine
@@ -27,15 +28,16 @@ func dict(values ...interface{}) map[string]interface{} {
     return m
 }
 
-func RenderTemplate(w http.ResponseWriter, tmpl string, data interface{}) {
+// The method also extracts the user from the context and adds the "User" to the template data.
+func RenderTemplate(w http.ResponseWriter, r *http.Request, tmpl string, data map[string]interface{}) {
     templates := template.New("").Funcs(template.FuncMap{"dict": dict})
 
 	layout := filepath.Join("web", "templates", "layout.html")
-	tmplPath := filepath.Join("web", "templates", tmpl+".html")
+	tmplPath := filepath.Join("web", "templates", tmpl + ".html")
 	templates, err := templates.ParseFiles(layout, tmplPath)
 	if err != nil {
 		log.Println("Error loading template " + tmplPath + " | " + err.Error())
-		http.Error(w, "Error loading template "+tmpl, http.StatusInternalServerError)
+		http.Error(w, "Error loading template " + tmpl, http.StatusInternalServerError)
 		return
 	}
 
@@ -43,24 +45,29 @@ func RenderTemplate(w http.ResponseWriter, tmpl string, data interface{}) {
 	templates, err = templates.ParseGlob(components)
 	if err != nil {
 		log.Println("Error loading template " + tmplPath + " | " + err.Error())
-		http.Error(w, "Error loading template "+tmpl, http.StatusInternalServerError)
+		http.Error(w, "Error loading template " + tmpl, http.StatusInternalServerError)
 		return
 	}
+
+	// Extracting a user from context
+	// Adding a user to template data
+	user:= r.Context().Value(middleware.ContextUserKey)
+	data["User"] = user
 
 	err = templates.ExecuteTemplate(w, "layout", data)
 	if err != nil {
 		log.Println("Error rendering template " + tmplPath + " | " + err.Error())
 		log.Println(err)
-		http.Error(w, "Error rendering template "+tmpl, http.StatusInternalServerError)
+		http.Error(w, "Error rendering template " + tmpl, http.StatusInternalServerError)
 	}
 }
 
-func RenderTemplateError(w http.ResponseWriter, title string, message string) {
+func RenderTemplateError(w http.ResponseWriter, r *http.Request, title string, message string) {
 	// http.Error(w, message, http.StatusBadRequest)
 	if (title == "") {
 		title = "Error"
 	}
-	RenderTemplate(w, "error", map[string]interface{}{
+	RenderTemplate(w, r, "error", map[string]interface{}{
 		"Title":   title,
 		"Message":  message,
 	})
