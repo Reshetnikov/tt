@@ -13,12 +13,12 @@ func (h *UsersHandler) ActivationHandler(w http.ResponseWriter, r *http.Request)
         return
     }
 
-    sessionID, session, err := h.usersService.ActivateUser(activationHash)
+    session, err := h.usersService.ActivateUser(activationHash)
     if err != nil {
         utils.RenderTemplateError(w, "Activation Failed", "Failed to activate the account. The activation link might be expired or invalid.")
         return
     }
-    setSessionCookie(w, sessionID, session.Expiry)
+    setSessionCookie(w, session.SessionID, session.Expiry)
 
     utils.RenderTemplate(w, "activation-success", map[string]interface{}{
         "Title": "Activation Successful - Logged In",

@@ -19,9 +19,9 @@ func (h *UsersHandler) LoginHandler(w http.ResponseWriter, r *http.Request) {
         if err == nil {
             formErrors = utils.NewValidator(&form).Validate()
             if formErrors == nil {
-                sessionID, session, err := h.usersService.LoginUser(form.Email, form.Password)
+                session, err := h.usersService.LoginUser(form.Email, form.Password)
                 if err == nil {
-                    setSessionCookie(w, sessionID, session.Expiry)
+                    setSessionCookie(w, session.SessionID, session.Expiry)
 
                     http.Redirect(w, r, "/dashboard", http.StatusSeeOther)
                     return

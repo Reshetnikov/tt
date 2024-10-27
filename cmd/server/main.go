@@ -40,5 +40,7 @@ func main() {
 	mux.HandleFunc("/profile", pages.IndexHandler)
 	mux.HandleFunc("/settings", pages.IndexHandler)
 
-	log.Fatal(http.ListenAndServe(":"+cfg.Port, mux))
+	muxSession := usersService.SessionMiddleware(mux)
+
+	log.Fatal(http.ListenAndServe(":"+cfg.Port, muxSession))
 }

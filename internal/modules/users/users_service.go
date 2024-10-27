@@ -67,10 +67,10 @@ func (s *UsersService) RegisterUser(registerUserData RegisterUserData) (error) {
 	return err
 }
 
-func (s *UsersService) ActivateUser(activationHash string) (string, *Session, error) {
+func (s *UsersService) ActivateUser(activationHash string) (*Session, error) {
     user, err := s.usersRepo.GetByActivationHash(activationHash)
     if err != nil || user == nil {
-        return "", nil, fmt.Errorf("user not found or activation hash is invalid")
+        return nil, fmt.Errorf("user not found or activation hash is invalid")
     }
     
     user.IsActive = true
@@ -78,35 +78,36 @@ func (s *UsersService) ActivateUser(activationHash string) (string, *Session, er
 
     err = s.usersRepo.Update(user)
     if err != nil {
-        return "", nil, fmt.Errorf("could not activate user: %w", err)
+        return nil, fmt.Errorf("could not activate user: %w", err)
     }
 
-    sessionID, session := s.makeSession(user.ID)
-	return sessionID, session, nil
+    session := s.makeSession(user.ID)
+	return session, nil
 }
 
 // Логика входа
-func (s *UsersService) LoginUser(email, password string) (string, *Session, error) {
+func (s *UsersService) LoginUser(email, password string) (*Session, error) {
 	user, err := s.usersRepo.GetByEmail(email)
     if err != nil || user == nil || !checkPasswordHash(password, user.Password) {
-        return "", nil, fmt.Errorf("Invalid email or password")
+        return nil, fmt.Errorf("Invalid email or password")
     }
 	if (!user.IsActive) {
-		return "", nil, fmt.Errorf("Account not activated")
+		return nil, fmt.Errorf("Account not activated")
 	}
 
-	sessionID, session := s.makeSession(user.ID)
-	return sessionID, session, nil
+	session := s.makeSession(user.ID)
+	return session, nil
 }
 
-func (s *UsersService) makeSession(userId int) (string, *Session){
+func (s *UsersService) makeSession(userId int) (*Session){
 	sessionID := uuid.New().String()
 	session := &Session{
 		UserID: userId,
 		Expiry: time.Now().Add(time.Hour * 24),
 	}
+	fmt.Printf("-----SESSION:%+v\n", session)
 	s.sessionsRepo.Create(sessionID, session)
-    return sessionID, session
+    return session
 }
 
 func hashPassword(password string) (string, error) {

@@ -6,6 +6,7 @@ import (
 
 // Сессия хранит данные пользователя и время истечения
 type Session struct {
+    SessionID string
     UserID int
     Expiry time.Time
 }
