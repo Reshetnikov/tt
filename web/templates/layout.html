@@ -4,18 +4,31 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <!-- <link rel="apple-touch-icon" sizes="180x180" href="/img/apple-touch-icon.png" />
+    <link rel="icon" type="image/png" sizes="32x32" href="/img/favicon-32x32.png" />
+    <link rel="icon" type="image/png" sizes="16x16" href="/img/favicon-16x16.png" />
+    <link rel="manifest" href="/img/site.webmanifest" /> -->
+
     <title>{{ .Title }}</title>
-    <link href="/static/css/output.css" rel="stylesheet" />
+    <link href="/css/output.css" rel="stylesheet" />
     <script src="https://cdn.jsdelivr.net/npm/alpinejs" defer></script>
   </head>
   <body class="flex h-screen flex-col bg-gray-100 font-sans">
     <!-- Header -->
     <header class="bg-white shadow">
       <div class="mx-auto flex max-w-7xl items-center justify-between px-4 py-6 sm:px-6 lg:px-8">
-        <!-- Логотип или заголовок -->
-        <h1 class="text-3xl font-bold text-gray-900">
-          <a href="/">Time Tracker</a>
-        </h1>
+        <!-- Логотип и заголовок -->
+        <div class="flex items-center space-x-3">
+          <!-- Логотип -->
+          <a href="/">
+            <img src="/img/favicon-32x32.png" alt="Логотип" class="h-10 w-10" />
+          </a>
+          <!-- Заголовок -->
+          <h1 class="text-3xl font-bold text-gray-900">
+            <a href="/">Time Tracker</a>
+          </h1>
+        </div>
 
         <!-- Навигация или другие элементы справа -->
         <nav class="space-x-4">

@@ -24,8 +24,10 @@ func main() {
 	mux := http.NewServeMux()
 
 	// static
-	fs := http.FileServer(http.Dir("./web/static"))
-	mux.Handle("/static/", http.StripPrefix("/static/", fs))
+	fsPublic := http.FileServer(http.Dir("./web/public"))
+	mux.Handle("/img/", fsPublic)
+	mux.Handle("/css/", fsPublic)
+	mux.Handle("/favicon.ico", fsPublic)
 
 	mux.HandleFunc("/", pages.IndexHandler)
 	mux.HandleFunc("/signup", usersHandlers.SignupHandler)
@@ -33,12 +35,12 @@ func main() {
 	mux.HandleFunc("/activation", usersHandlers.ActivationHandler)
 
 	mux.HandleFunc("/dashboard", pages.IndexHandler)
-	//mux.HandleFunc("/projects", handler)
-	//http.HandleFunc("/projects/{project_id}", handler)
-	mux.HandleFunc("/tasks", pages.IndexHandler)
-	mux.HandleFunc("/reports", pages.IndexHandler)
-	mux.HandleFunc("/profile", pages.IndexHandler)
-	mux.HandleFunc("/settings", pages.IndexHandler)
+	// mux.HandleFunc("/projects", handler)
+	// http.HandleFunc("/projects/{project_id}", handler)
+	// mux.HandleFunc("/tasks", pages.IndexHandler)
+	// mux.HandleFunc("/reports", pages.IndexHandler)
+	// mux.HandleFunc("/profile", pages.IndexHandler)
+	// mux.HandleFunc("/settings", pages.IndexHandler)
 
 	muxSession := usersService.SessionMiddleware(mux)
 

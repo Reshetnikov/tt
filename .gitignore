@@ -3,4 +3,4 @@
 .env.development.local
 tmp
 web/node_modules
-web/static
+web/public/css/
