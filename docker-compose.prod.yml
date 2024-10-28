@@ -1,0 +1,11 @@
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    environment:
+      - GO_ENV=production
+      - DB_HOST=<RDS_ENDPOINT>
+      - DB_PORT=5432
+      - REDIS_HOST=<ELASTICACHE_ENDPOINT>
+      - REDIS_PORT=6379

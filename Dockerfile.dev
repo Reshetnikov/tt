@@ -1,0 +1,36 @@
+# Используем базовый образ Go с Node.js
+FROM golang:1.23.2-alpine3.20
+
+# Устанавливаем необходимые зависимости
+RUN apk add --no-cache bash nodejs npm
+
+# Устанавливаем рабочую директорию
+WORKDIR /app
+
+# Копируем файлы модулей и устанавливаем зависимости Go
+COPY go.mod go.sum ./
+RUN go mod download && go mod verify
+
+# Устанавливаем air для автообновления
+# https://github.com/air-verse/air
+RUN go install github.com/air-verse/air@latest
+
+# Копируем package.json и package-lock.json для установки зависимостей Node.js
+WORKDIR /app/web
+COPY web/package*.json ./
+RUN npm install
+
+# Копируем весь проект
+WORKDIR /app
+
+# Открываем порты
+EXPOSE 8080
+
+# Экспорт переменных окружения
+# ENV TIME_TRACKER_ENV=development
+# ENV GO_ENV=development
+
+# Запуск сервера и watch-css в одной команде
+# CMD ["sh", "-c", "air & cd web && npm run watch:css"]
+# CMD ["sh", "-c", "air"]
+CMD ["sh", "/app/scripts/start.sh"]
