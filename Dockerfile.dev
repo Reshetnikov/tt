@@ -2,7 +2,8 @@
 FROM golang:1.23.2-alpine3.20
 
 # Устанавливаем необходимые зависимости
-RUN apk add --no-cache bash nodejs npm
+RUN apk update
+RUN apk add --no-cache bash nodejs npm mc
 
 # Устанавливаем рабочую директорию
 WORKDIR /app
