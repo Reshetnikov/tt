@@ -1,37 +1,22 @@
-# Используем базовый образ Go с Node.js
 FROM golang:1.23.2-alpine3.20
 
-# Устанавливаем необходимые зависимости
-RUN apk update
-RUN apk add --no-cache bash nodejs npm mc
-
-# Устанавливаем рабочую директорию
+RUN apk update && apk add --no-cache bash nodejs npm mc
 WORKDIR /app
 
-# Копируем файлы модулей и устанавливаем зависимости Go
+# Сreating and installing of non-root user
+ARG USER_ID=1000
+ARG GROUP_ID=1000
+RUN addgroup -g ${GROUP_ID} appgroup && \
+    adduser -u ${USER_ID} -G appgroup -s /bin/sh -D appuser && \
+    chown -R appuser:appgroup /app
+USER appuser
+
 COPY go.mod go.sum ./
 RUN go mod download && go mod verify
 
-# Устанавливаем air для автообновления
-# https://github.com/air-verse/air
 RUN go install github.com/air-verse/air@latest
+RUN go install -tags 'postgres' github.com/pressly/goose/v3/cmd/goose@latest
 
-# Копируем package.json и package-lock.json для установки зависимостей Node.js
-WORKDIR /app/web
-COPY web/package*.json ./
-RUN npm install
-
-# Копируем весь проект
-WORKDIR /app
-
-# Открываем порты
 EXPOSE 8080
 
-# Экспорт переменных окружения
-# ENV TIME_TRACKER_ENV=development
-# ENV GO_ENV=development
-
-# Запуск сервера и watch-css в одной команде
-# CMD ["sh", "-c", "air & cd web && npm run watch:css"]
-# CMD ["sh", "-c", "air"]
 CMD ["sh", "/app/scripts/start.sh"]

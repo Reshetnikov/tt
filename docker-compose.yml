@@ -3,6 +3,9 @@ services:
     build:
       context: .
       dockerfile: Dockerfile.dev
+      args:
+        USER_ID: ${USER_ID}
+        GROUP_ID: ${GROUP_ID}
     ports:
       - "8080:8080"
     environment:
@@ -14,7 +17,6 @@ services:
       - REDIS_PORT=6379
     volumes:
       - .:/app
-      - /app/web/node_modules # чтобы не перезаписывать node_modules
     depends_on:
       - postgres
       - redis

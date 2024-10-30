@@ -9,7 +9,7 @@ import (
 type signupForm struct {
 	Name                 string `form:"name" validate:"required,min=2,max=40"`
 	Email                string `form:"email" validate:"required,email"`
-	Password             string `form:"password" validate:"required,min=8" label1:"Password2"`
+	Password             string `form:"password" validate:"required,min=8"`
 	PasswordConfirmation string `form:"password_confirmation" validate:"required,eqfield=Password" label:"Confirm Password"`
 }
 

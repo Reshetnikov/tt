@@ -44,5 +44,5 @@ func main() {
 
 	muxSession := usersService.SessionMiddleware(mux)
 
-	log.Fatal(http.ListenAndServe(":"+cfg.Port, muxSession))
+	log.Fatal(http.ListenAndServe(":8080", muxSession))
 }
