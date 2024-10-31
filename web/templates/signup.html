@@ -36,6 +36,8 @@
     "Errors" .Errors.PasswordConfirmation
   }}
 
+  {{ template "components/errors" .Errors.Common}}
+
   <button
     type="submit"
     class="focus:shadow-outline rounded-xl bg-blue-500 px-4 py-2 font-bold text-white shadow hover:bg-blue-700 focus:outline-none"

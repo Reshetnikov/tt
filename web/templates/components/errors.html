@@ -1,0 +1,11 @@
+<!-- prettier-ignore -->
+{{ define "components/errors" }}
+{{ if . }}
+<ul class="mb-4 text-sm text-red-500">
+  {{ range . }}
+  <li>{{ . }}</li>
+  {{ end }}
+</ul>
+{{ end }}
+<!-- prettier-ignore -->
+{{ end }}

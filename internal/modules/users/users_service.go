@@ -4,9 +4,9 @@ import (
 	"crypto/rand"
 	"crypto/sha256"
 	"encoding/hex"
+	"errors"
 	"fmt"
 	"time"
-	"time-tracker/internal/utils"
 
 	"github.com/google/uuid"
 	"golang.org/x/crypto/bcrypt"
@@ -31,16 +31,15 @@ type RegisterUserData struct {
 	Password             string
 }
 
+var ErrEmailExists = errors.New("email is already in use")
+
 func (s *UsersService) RegisterUser(registerUserData RegisterUserData) (error) {
 	existingUser, err := s.usersRepo.GetByEmail(registerUserData.Email)
 	if err != nil {
 		return err
 	}
 	if existingUser != nil {
-		formErrors := utils.FormErrors{
-			"Email": {"Email is already in use"},
-		}
-		return  formErrors
+		return  ErrEmailExists
 	}
 
 	hashedPassword, err := hashPassword(registerUserData.Password)
@@ -119,7 +118,6 @@ func hashPassword(password string) (string, error) {
     return string(hashedBytes), nil
 }
 
-// Сравнивает хеш пароля с введённым паролем
 func checkPasswordHash(password, hashedPassword string) bool {
     err := bcrypt.CompareHashAndPassword([]byte(hashedPassword), []byte(password))
     return err == nil

@@ -60,7 +60,7 @@ func (r *UsersRepositoryPostgres) GetByEmail(email string) (*User, error) {
 			return nil, nil
 		}
 		log.Printf("Failed to get user by email %s: %v", email, err)
-		return nil, fmt.Errorf("failed to get user by email %s: %w", email, err)
+		return nil, fmt.Errorf("failed to get user by email")
 	}
 	return &user, nil
 }

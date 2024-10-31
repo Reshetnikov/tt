@@ -8,12 +8,7 @@
     class="focus:shadow-outline w-full appearance-none rounded-xl border {{if .Errors}}border-red-500{{end}} px-3 py-2 leading-tight text-gray-700 shadow focus:outline-none"
     value="{{ .Value }}"
   />
-  {{ if .Errors }}
-  <ul class="text-sm text-red-500">
-    {{ range .Errors }}
-    <li>{{ . }}</li>
-    {{ end }}
-  </ul>
-  {{ end }}
+
+  {{ template "components/errors" .Errors}}
 </div>
 {{ end }}
