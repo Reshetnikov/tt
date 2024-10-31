@@ -38,8 +38,8 @@ func (h *UsersHandler) SignupHandler(w http.ResponseWriter, r *http.Request) {
 					})
 					return
 				} else {
-					fmt.Printf("-----%+v\n", err)
-					formErrors = err.(utils.FormErrors)
+					fmt.Printf("SignupHandler()-----%+v\n", err)
+					formErrors, _ = err.(utils.FormErrors)
 				}
 			}
 		}

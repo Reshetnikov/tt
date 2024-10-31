@@ -1,22 +1,32 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"log"
 	"net/http"
+	"time"
 	"time-tracker/internal/config"
 	"time-tracker/internal/modules/pages"
 	"time-tracker/internal/modules/users"
+
+	"github.com/jackc/pgx/v5/pgxpool"
 )
 
 func main() {
-	cfg, err := config.LoadConfig()
-	if err != nil {
-		log.Fatalf("Could not load config: %v", err)
-	}
-	fmt.Printf("%+v\n", cfg)
+	// Load configuration
+	cfg := config.LoadConfig()
+	fmt.Printf("Config: %+v\n", cfg)
 
-	usersRepo := users.NewUsersRepositoryMem()
+    // Connect to the database
+	db, err := connectToDatabase(cfg)
+	if err != nil {
+		log.Fatalf("Database connection failed: %v", err)
+	}
+	defer db.Close()
+
+	// usersRepo := users.NewUsersRepositoryMem()
+	usersRepo := users.NewUsersRepositoryPostgres(db)
 	sessionsRepo := users.NewSessionsRepositoryMem()
 	usersService := users.NewUsersService(usersRepo, sessionsRepo)
 	usersHandlers := users.NewUsersHandlers(usersService)
@@ -45,4 +55,29 @@ func main() {
 	muxSession := usersService.SessionMiddleware(mux)
 
 	log.Fatal(http.ListenAndServe(":8080", muxSession))
+}
+
+func connectToDatabase(cfg *config.Config) (*pgxpool.Pool, error) {
+	config, err := pgxpool.ParseConfig(cfg.GetPostgresDSN())
+	if err != nil {
+		return nil, fmt.Errorf("error parsing database config: %w", err)
+	}
+
+	config.MaxConns = 10
+	config.MaxConnLifetime = time.Hour
+
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	db, err := pgxpool.NewWithConfig(ctx, config)
+	if err != nil {
+		return nil, fmt.Errorf("error connecting to database: %w", err)
+	}
+
+	if err := db.Ping(ctx); err != nil {
+		db.Close()
+		return nil, fmt.Errorf("error pinging database: %w", err)
+	}
+	fmt.Println("Successfully connected to the database")
+	return db, nil
 }

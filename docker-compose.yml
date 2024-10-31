@@ -9,11 +9,13 @@ services:
     ports:
       - "8080:8080"
     environment:
-      - GO_ENV=development
-      - TIME_TRACKER_ENV=development
-      - DB_HOST=host.docker.internal
+      - APP_ENV=development
+      - DB_HOST=postgres
       - DB_PORT=5432
-      - REDIS_HOST=host.docker.internal
+      - DB_USER=${DB_USER}
+      - DB_PASSWORD=${DB_PASSWORD}
+      - DB_NAME=${DB_NAME}
+      - REDIS_HOST=redis
       - REDIS_PORT=6379
     volumes:
       - .:/app

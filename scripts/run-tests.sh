@@ -1,3 +1,3 @@
 #!/bin/bash
-export TIME_TRACKER_ENV=test
+export APP_ENV=testing
 go test ./...
