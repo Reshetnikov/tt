@@ -75,10 +75,10 @@ func (s *UsersService) ActivateUser(activationHash string) (*Session, error) {
     user.IsActive = true
     user.ActivationHash = ""
 
-    // err = s.usersRepo.Update(user)
-    // if err != nil {
-    //      return nil, fmt.Errorf("could not activate user: %w", err)
-    // }
+    err = s.usersRepo.Update(user)
+    if err != nil {
+         return nil, fmt.Errorf("could not activate user: %w", err)
+    }
 
     session := s.makeSession(user.ID)
 	return session, nil

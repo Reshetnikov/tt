@@ -80,10 +80,19 @@ func (r *UsersRepositoryPostgres) Create(user *User) error {
 }
 
 func (r *UsersRepositoryPostgres) Update(user *User) error {
-	query := `UPDATE users SET name = $1, password = $2, email = $3, date_add = $4, activation_hash = $5, activation_hash_date = $6, is_active = $7
-	WHERE id = $8`
-
-	_, err := r.db.Exec(context.Background(), query, user.Name, user.Password, user.Email, user.DateAdd, user.ActivationHash, user.ActivationHashDate, user.IsActive, user.ID)
+	builder := utils.NewBuilderUpdate()
+    set := builder.Build(utils.Map{
+        "name":               user.Name,
+        "password":           user.Password,
+        "email":              user.Email,
+        "date_add":           user.DateAdd,
+        "activation_hash":    user.ActivationHash,
+        "activation_hash_date": user.ActivationHashDate,
+        "is_active":          user.IsActive,
+    })
+	where := builder.Build(utils.Map{"id": user.ID})
+	query := "UPDATE users SET " + set + " WHERE " + where
+	_, err := r.db.Exec(context.Background(), query, builder.Params()...)
 	if err != nil {
 		log.Printf("Failed to update user %d: %v", user.ID, err)
 		return fmt.Errorf("failed to update user %d: %w", user.ID, err)
