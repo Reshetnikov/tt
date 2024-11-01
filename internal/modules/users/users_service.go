@@ -67,7 +67,7 @@ func (s *UsersService) RegisterUser(registerUserData RegisterUserData) (error) {
 }
 
 func (s *UsersService) ActivateUser(activationHash string) (*Session, error) {
-    user, err := s.usersRepo.GetByActivationHash(activationHash)
+    user, err := s.usersRepo.GetByActivationHash( activationHash)
     if err != nil || user == nil {
         return nil, fmt.Errorf("user not found or activation hash is invalid")
     }
@@ -75,10 +75,10 @@ func (s *UsersService) ActivateUser(activationHash string) (*Session, error) {
     user.IsActive = true
     user.ActivationHash = ""
 
-    err = s.usersRepo.Update(user)
-    if err != nil {
-        return nil, fmt.Errorf("could not activate user: %w", err)
-    }
+    // err = s.usersRepo.Update(user)
+    // if err != nil {
+    //      return nil, fmt.Errorf("could not activate user: %w", err)
+    // }
 
     session := s.makeSession(user.ID)
 	return session, nil

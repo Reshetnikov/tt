@@ -9,6 +9,7 @@ import (
 	"time-tracker/internal/config"
 	"time-tracker/internal/modules/pages"
 	"time-tracker/internal/modules/users"
+	"time-tracker/internal/utils"
 
 	"github.com/jackc/pgx/v5/pgxpool"
 )
@@ -16,7 +17,7 @@ import (
 func main() {
 	// Load configuration
 	cfg := config.LoadConfig()
-	fmt.Printf("Config: %+v\n", cfg)
+	utils.Dump("Config", cfg)
 
     // Connect to the database
 	db, err := connectToDatabase(cfg)

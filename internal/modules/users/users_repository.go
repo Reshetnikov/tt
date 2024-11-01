@@ -3,14 +3,14 @@ package users
 import "time"
 
 type User struct {
-	ID					int			`json:"id"`
-	Name				string		`json:"name"`
-	Password			string		`json:"-"`
-	Email				string		`json:"email"`
-	DateAdd				time.Time	`json:"date_add"`
-	ActivationHash		string		`json:"-"`
-	ActivationHashDate	time.Time	`json:"-"`
-	IsActive			bool		`json:"-"`
+	ID                 int       `json:"id" db:"id"`
+    Name               string    `json:"name" db:"name"`
+	Password		   string	 `json:"-"`
+    Email              string    `json:"email" db:"email"`
+    DateAdd            time.Time `json:"date_add" db:"date_add"`
+    ActivationHash     string    `json:"activation_hash" db:"activation_hash"`
+    ActivationHashDate time.Time `json:"activation_hash_date" db:"activation_hash_date"`
+    IsActive           bool      `json:"is_active" db:"is_active"`
 }
 
 type UsersRepository interface {
