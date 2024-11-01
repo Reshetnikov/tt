@@ -5,11 +5,12 @@ import (
 	"strings"
 )
 
+type Map map[string]interface{}
+
 type BuilderUpdate struct {
 	params []interface{}
 	paramIndex int
 }
-type Map map[string]interface{}
 
 func NewBuilderUpdate() *BuilderUpdate {
 	return &BuilderUpdate{
@@ -17,16 +18,32 @@ func NewBuilderUpdate() *BuilderUpdate {
     }
 }
 
-func (b *BuilderUpdate) Build(fields Map) string{
-	setClauses := make([]string, 0, len(fields))
-    for column, value := range fields {
-        setClauses = append(setClauses, fmt.Sprintf("%s = $%d", column, b.paramIndex))
+func (b *BuilderUpdate) Build(fieldsValues Map) string{
+	fieldsPlaceholders := make([]string, 0, len(fieldsValues))
+    for column, value := range fieldsValues {
+        fieldsPlaceholders = append(fieldsPlaceholders, fmt.Sprintf("%s = $%d", column, b.paramIndex))
         b.params = append(b.params, value)
         b.paramIndex++
     }
-	return strings.Join(setClauses, ", ")
+	return strings.Join(fieldsPlaceholders, ", ")
 }
 
 func (b *BuilderUpdate) Params() []interface{}{
 	return b.params
+}
+
+func BuildInsert(fieldsValues Map) (fields string, placeholders string, params []interface{}) {
+	fieldsArr := make([]string, 0, len(fieldsValues))
+	placeholdersArr := make([]string, 0, len(fieldsValues))
+	// params = []interface{}{}
+	paramIndex := 1
+	for column, value := range fieldsValues {
+        fieldsArr = append(fieldsArr, column)
+		placeholdersArr = append(placeholdersArr, fmt.Sprintf("$%d", paramIndex))
+        params = append(params, value)
+        paramIndex++
+    }
+	fields = strings.Join(fieldsArr, ", ")
+	placeholders = strings.Join(placeholdersArr, ", ")
+	return
 }

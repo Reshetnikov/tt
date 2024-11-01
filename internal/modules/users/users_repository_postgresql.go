@@ -31,21 +31,6 @@ func (r *UsersRepositoryPostgres) getByField(field string, value interface{}) (*
     query := fmt.Sprintf(`SELECT id, name, password, email, date_add, activation_hash, activation_hash_date, is_active FROM users WHERE %s = $1`, field)
 	rows, _ := r.db.Query(context.Background(), query, value)
 	user, err := pgx.CollectOneRow(rows, pgx.RowToStructByName[User])
-	utils.Dump("user", user)
-	// query := fmt.Sprintf(`SELECT id, name, password, email, date_add, activation_hash, activation_hash_date, is_active 
-    //                       FROM users WHERE %s = $1`, field)
-    // user := &User{}
-    // err := r.db.QueryRow(context.Background(), query, value).Scan(
-    //     &user.ID,
-    //     &user.Name,
-	// 	&user.Password,
-    //     &user.Email,
-    //     &user.DateAdd,
-    //     &user.ActivationHash,
-    //     &user.ActivationHashDate,
-    //     &user.IsActive,
-    // )
-
     if err != nil {
         if err == pgx.ErrNoRows {
             return nil, nil
@@ -68,10 +53,17 @@ func (r *UsersRepositoryPostgres) GetByActivationHash(activationHash string) (*U
 }
 
 func (r *UsersRepositoryPostgres) Create(user *User) error {
-	query := `INSERT INTO users (name, password, email, date_add, activation_hash, activation_hash_date, is_active)
-	VALUES ($1, $2, $3, $4, $5, $6, $7)`
-
-	_, err := r.db.Exec(context.Background(), query, user.Name, user.Password, user.Email, user.DateAdd, user.ActivationHash, user.ActivationHashDate, user.IsActive)
+	fields, placeholders, params := utils.BuildInsert(utils.Map{
+        "name":               user.Name,
+        "password":           user.Password,
+        "email":              user.Email,
+        "date_add":           user.DateAdd,
+        "activation_hash":    user.ActivationHash,
+        "activation_hash_date": user.ActivationHashDate,
+        "is_active":          user.IsActive,
+    })
+	query := "INSERT INTO users (" + fields + ") VALUES (" + placeholders + ")"
+	_, err := r.db.Exec(context.Background(), query, params...)
 	if err != nil {
 		log.Printf("Failed to insert user: %v", err)
 		return fmt.Errorf("failed to insert user: %w", err)
