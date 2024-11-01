@@ -12,13 +12,13 @@ type loginForm struct {
 
 func (h *UsersHandler) LoginHandler(w http.ResponseWriter, r *http.Request) {
     var form loginForm
-    var formErrors utils.FormErrors
+    formErrors := utils.FormErrors{}
 
     if r.Method == http.MethodPost {
         err := utils.ParseFormToStruct(r, &form)
         if err == nil {
             formErrors = utils.NewValidator(&form).Validate()
-            if formErrors == nil {
+            if !formErrors.HasErrors() {
                 session, err := h.usersService.LoginUser(form.Email, form.Password)
                 if err == nil {
                     setSessionCookie(w, session.SessionID, session.Expiry)
@@ -31,10 +31,9 @@ func (h *UsersHandler) LoginHandler(w http.ResponseWriter, r *http.Request) {
             }
         }
 
-        if formErrors == nil && err != nil {
-            utils.RenderTemplateError(w, r, "Login Failed", err.Error())
-            return
-        }
+        if (err != nil) {
+			formErrors.Add("Common", utils.Ukfirst((err.Error())))
+		}
     }
 
     utils.RenderTemplate(w, r, "login", map[string]interface{}{

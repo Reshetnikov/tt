@@ -17,9 +17,11 @@ func (fe *FormErrors) Add(field, message string) {
 func (fe FormErrors) HasErrorsField(field string) bool {
 	return len(fe[field]) > 0
 }
-// func (fe FormErrors) HasErrors() bool {
-// 	return len(fe) > 0
-// }
+// Use "formErrors.HasErrors()" instead of "formErrors == nil" 
+// because "formErrors := utils.FormErrors{}" is non-nil.
+func (fe FormErrors) HasErrors() bool {
+ 	return len(fe) > 0
+}
 func (fe FormErrors) Error() string {
 	var sb strings.Builder
 	for field, messages := range fe {
@@ -36,26 +38,26 @@ func (fe FormErrors) Error() string {
 type Validator struct {
 	formStruct interface{}
 	valFormStruct reflect.Value
+	formErrors FormErrors
 }
 func NewValidator(formStruct interface{}) *Validator {
 	return &Validator{
 		formStruct :formStruct, 
 		valFormStruct: reflect.ValueOf(formStruct).Elem(),
+		formErrors: FormErrors{},
 	}
 }
 func (v Validator) Validate() FormErrors {
 	if valErrors := validate.Struct(v.formStruct); valErrors != nil {
-		errors := FormErrors{}
 		for _, valError := range valErrors.(validator.ValidationErrors) {
 			fieldName := valError.Field()
 			fieldLabel := v.getFieldLabel(fieldName)
 			tag := valError.Tag()
 			errorMessage := v.parseValidationError(tag, valError, fieldLabel)
-			errors.Add(fieldName, errorMessage)
+			v.formErrors.Add(fieldName, errorMessage)
 		}
-		return errors
 	}
-	return nil
+	return v.formErrors
 }
 
 // Receives a human message

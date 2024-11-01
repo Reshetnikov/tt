@@ -14,12 +14,12 @@ type signupForm struct {
 
 func (h *UsersHandler) SignupHandler(w http.ResponseWriter, r *http.Request) {
 	var form signupForm
-	var formErrors utils.FormErrors 
+	formErrors := utils.FormErrors{}
 	if r.Method == http.MethodPost {
 		err := utils.ParseFormToStruct(r, &form)
 		if err == nil {
 			formErrors = utils.NewValidator(&form).Validate()
-			if formErrors == nil {
+			if !formErrors.HasErrors() {
 				err = h.usersService.RegisterUser(RegisterUserData{
 					Name:                 form.Name,
 					Email:                form.Email,
@@ -35,13 +35,9 @@ func (h *UsersHandler) SignupHandler(w http.ResponseWriter, r *http.Request) {
 		}
 		if (err != nil) {
 			if (err == ErrEmailExists) {
-				formErrors = utils.FormErrors{
-					"Email": {"Email is already in use"},
-				}
+				formErrors.Add("Email", "Email is already in use")
 			} else {
-				formErrors = utils.FormErrors{
-					"Common": {utils.Ukfirst((err.Error()))},
-				}
+				formErrors.Add("Common", utils.Ukfirst((err.Error())))
 			}
 		}
 	}
