@@ -41,7 +41,7 @@ func main() {
 	mux.Handle("/css/", fsPublic)
 	mux.Handle("/favicon.ico", fsPublic)
 
-	mux.HandleFunc("/", pages.IndexHandler)
+	mux.HandleFunc("/{$}", pages.IndexHandler)
 	mux.HandleFunc("/signup", usersHandlers.SignupHandler)
 	mux.HandleFunc("/login", usersHandlers.LoginHandler)
 	mux.HandleFunc("/activation", usersHandlers.ActivationHandler)
@@ -54,6 +54,11 @@ func main() {
 	// mux.HandleFunc("/reports", pages.IndexHandler)
 	// mux.HandleFunc("/profile", pages.IndexHandler)
 	// mux.HandleFunc("/settings", pages.IndexHandler)
+
+	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+		http.NotFound(w, r)
+	})
+
 
 	muxSession := usersService.SessionMiddleware(mux)
 
