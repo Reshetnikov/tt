@@ -45,6 +45,7 @@ func main() {
 	mux.HandleFunc("/signup", usersHandlers.SignupHandler)
 	mux.HandleFunc("/login", usersHandlers.LoginHandler)
 	mux.HandleFunc("/activation", usersHandlers.ActivationHandler)
+	mux.HandleFunc("POST /logout", usersHandlers.LogoutHandler)
 
 	mux.HandleFunc("/dashboard", pages.IndexHandler)
 	// mux.HandleFunc("/projects", handler)

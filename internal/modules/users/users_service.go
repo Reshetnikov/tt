@@ -100,6 +100,10 @@ func (s *UsersService) LoginUser(email, password string) (*Session, error) {
 	return session, err
 }
 
+func (s *UsersService) LogoutUser(sessionID string) error {
+    return s.sessionsRepo.Delete(sessionID)
+}
+
 func (s *UsersService) makeSession(userId int) (*Session, error){
 	sessionID := uuid.New().String()
 	session := &Session{

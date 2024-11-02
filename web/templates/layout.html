@@ -39,7 +39,14 @@
               class="absolute right-0 z-10 hidden w-48 rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 group-hover:block"
             >
               <div class="py-1">
-                <a href="/logout" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Log Out</a>
+                <form action="/logout" method="POST" class="inline">
+                  <button
+                    type="submit"
+                    class="block w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-100"
+                  >
+                    Log Out
+                  </button>
+                </form>
               </div>
             </div>
           </div>
