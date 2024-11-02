@@ -32,6 +32,9 @@ type RegisterUserData struct {
 }
 
 var ErrEmailExists = errors.New("email is already in use")
+var ErrAccountNotActivated = errors.New("account not activated")
+var ErrInvalidEmailOrPassword = errors.New("invalid email or password")
+var ErrUserNotFoundOrActivationHashIsInvalid = errors.New("user not found or activation hash is invalid")
 
 func (s *UsersService) RegisterUser(registerUserData RegisterUserData) (error) {
 	existingUser, err := s.usersRepo.GetByEmail(registerUserData.Email)
@@ -67,9 +70,9 @@ func (s *UsersService) RegisterUser(registerUserData RegisterUserData) (error) {
 }
 
 func (s *UsersService) ActivateUser(activationHash string) (*Session, error) {
-    user, err := s.usersRepo.GetByActivationHash( activationHash)
+    user, err := s.usersRepo.GetByActivationHash(activationHash)
     if err != nil || user == nil {
-        return nil, fmt.Errorf("user not found or activation hash is invalid")
+        return nil, ErrUserNotFoundOrActivationHashIsInvalid
     }
     
     user.IsActive = true
@@ -80,34 +83,35 @@ func (s *UsersService) ActivateUser(activationHash string) (*Session, error) {
          return nil, fmt.Errorf("could not activate user: %w", err)
     }
 
-    session := s.makeSession(user.ID)
-	return session, nil
+    session, err := s.makeSession(user.ID)
+	return session, err
 }
 
 // Логика входа
 func (s *UsersService) LoginUser(email, password string) (*Session, error) {
 	user, err := s.usersRepo.GetByEmail(email)
     if err != nil || user == nil || !checkPasswordHash(password, user.Password) {
-        return nil, fmt.Errorf("invalid email or password")
+        return nil, ErrInvalidEmailOrPassword
     }
 	if (!user.IsActive) {
-		return nil, fmt.Errorf("аccount not activated")
+		return nil, ErrAccountNotActivated
 	}
-
-	session := s.makeSession(user.ID)
-	return session, nil
+	session, err := s.makeSession(user.ID)
+	return session, err
 }
 
-func (s *UsersService) makeSession(userId int) (*Session){
+func (s *UsersService) makeSession(userId int) (*Session, error){
 	sessionID := uuid.New().String()
 	session := &Session{
 		UserID: userId,
 		Expiry: time.Now().Add(time.Hour * 24),
 	}
 	session.SessionID = sessionID
-	fmt.Printf("-----SESSION:%+v\n", session)
-	s.sessionsRepo.Create(sessionID, session)
-    return session
+	err := s.sessionsRepo.Create(sessionID, session)
+	if err != nil {
+		return nil, fmt.Errorf("could not create session: %w", err)
+	}
+    return session, nil
 }
 
 func hashPassword(password string) (string, error) {

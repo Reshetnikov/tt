@@ -19,23 +19,26 @@ func (h *UsersHandler) LoginHandler(w http.ResponseWriter, r *http.Request) {
         if err == nil {
             formErrors = utils.NewValidator(&form).Validate()
             if !formErrors.HasErrors() {
-                session, err := h.usersService.LoginUser(form.Email, form.Password)
+                var session *Session
+                session, err = h.usersService.LoginUser(form.Email, form.Password)
                 if err == nil {
                     setSessionCookie(w, session.SessionID, session.Expiry)
 
                     http.Redirect(w, r, "/dashboard", http.StatusSeeOther)
                     return
-                } else {
-                    formErrors = utils.FormErrors{"Login": {"Invalid email or password"}}
                 }
             }
         }
-
         if (err != nil) {
-			formErrors.Add("Common", utils.Ukfirst((err.Error())))
+			if (err == ErrInvalidEmailOrPassword) {
+				formErrors.Add("Common", "Invalid email or password")
+			} else if (err == ErrAccountNotActivated) {
+				formErrors.Add("Common", "Account not activated. Follow the link from the email to activate your account.")
+			} else {
+				formErrors.Add("Common", utils.Ukfirst(err.Error()))
+			}
 		}
     }
-
     utils.RenderTemplate(w, r, "login", map[string]interface{}{
         "Title":  "Log In",
         "Errors": formErrors,

@@ -13,8 +13,7 @@ type Config struct {
 	DBUser      string
 	DBPassword  string
 	DBName      string
-	RedisHost   string
-	RedisPort   string
+	RedisAddr   string
 }
 
 // LoadConfig загружает конфигурацию из переменных окружения
@@ -27,8 +26,7 @@ func LoadConfig() (*Config) {
 		DBUser:     os.Getenv("DB_USER"),
 		DBPassword: os.Getenv("DB_PASSWORD"),
 		DBName:     os.Getenv("DB_NAME"),
-		RedisHost:  os.Getenv("REDIS_HOST"),
-		RedisPort:  os.Getenv("REDIS_PORT"),
+		RedisAddr:  os.Getenv("REDIS_ADDR"),
 	}
 }
 

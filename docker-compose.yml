@@ -15,8 +15,7 @@ services:
       - DB_USER=${DB_USER}
       - DB_PASSWORD=${DB_PASSWORD}
       - DB_NAME=${DB_NAME}
-      - REDIS_HOST=redis
-      - REDIS_PORT=6379
+      - REDIS_ADDR=redis:6379
     volumes:
       - .:/app
     depends_on:

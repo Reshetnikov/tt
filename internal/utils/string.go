@@ -3,13 +3,15 @@ package utils
 import (
 	"fmt"
 	"strings"
+	"unicode/utf8"
 )
 
 func Ukfirst(s string) string {
 	if len(s) == 0 {
 		return s
 	}
-	return strings.ToUpper(s[:1]) + s[1:]
+	r, size := utf8.DecodeRuneInString(s)
+	return strings.ToUpper(string(r)) + s[size:]
 }
 
 // Example:

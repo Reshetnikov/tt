@@ -28,7 +28,8 @@ func main() {
 
 	// usersRepo := users.NewUsersRepositoryMem()
 	usersRepo := users.NewUsersRepositoryPostgres(db)
-	sessionsRepo := users.NewSessionsRepositoryMem()
+	// sessionsRepo := users.NewSessionsRepositoryMem()
+	sessionsRepo := users.NewSessionsRepositoryRedis(cfg.RedisAddr, "", 0)
 	usersService := users.NewUsersService(usersRepo, sessionsRepo)
 	usersHandlers := users.NewUsersHandlers(usersService)
 
