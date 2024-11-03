@@ -1,25 +1,72 @@
 {{ define "content" }}
-    <h2 class="text-2xl font-bold mb-6">Welcome to Time Tracker</h2>
+<div class="grid grid-cols-3 gap-4">
+  <!-- Left column for tasks -->
+  <div class="col-span-1 rounded-lg bg-white p-4 shadow-md">
+    <!-- Filter options for tasks -->
+    <div class="mb-4 flex items-center justify-between">
+      <button class="px-3 py-1 text-sm font-semibold text-blue-500 hover:bg-blue-100">Active</button>
+      <button class="px-3 py-1 text-sm font-semibold text-blue-500 hover:bg-blue-100">Completed</button>
+      <button class="px-3 py-1 text-sm font-semibold text-blue-500 hover:bg-blue-100">All</button>
+    </div>
 
-    <!-- Active Timer Section -->
-    <div class="bg-white shadow rounded-lg p-6 mb-6">
-        <h3 class="text-lg font-bold mb-4">Active Timer</h3>
-        <div x-data="{ timerActive: false, time: 0 }" class="text-center">
-            <div x-text="timerActive ? time + ' seconds' : 'No active timer'" class="text-3xl font-semibold mb-4"></div>
-            <button @click="timerActive = !timerActive; if(timerActive){ time = 0; setInterval(() => time++, 1000); }" 
-                    class="bg-blue-500 text-white px-4 py-2 rounded-md">
-                <span x-text="timerActive ? 'Stop Timer' : 'Start Timer'"></span>
-            </button>
+    <!-- List of tasks -->
+    <div class="space-y-3">
+      {{ range .Tasks }}
+      <div class="flex items-center justify-between rounded-lg p-3 shadow" style="background-color: {{ .Color }}">
+        <div>
+          <h4 class="text-lg font-semibold">{{ .Title }}</h4>
+          <p class="text-sm text-gray-700">{{ .Description }}</p>
         </div>
+        <div class="space-x-2">
+          <button class="rounded bg-green-500 px-2 py-1 text-white hover:bg-green-600">Play</button>
+          <button class="rounded bg-gray-200 px-2 py-1 hover:bg-gray-300">Edit</button>
+        </div>
+      </div>
+      {{ end }}
     </div>
 
-    <!-- Recent Entries -->
-    <div class="bg-white shadow rounded-lg p-6">
-        <h3 class="text-lg font-bold mb-4">Recent Time Entries</h3>
-        <ul class="list-disc list-inside">
-            <li>Project A - 2 hours</li>
-            <li>Project B - 3 hours</li>
-            <li>Personal Task - 1 hour</li>
-        </ul>
+    <!-- Button to create a new task -->
+    <button class="mt-4 w-full rounded-lg bg-blue-500 px-4 py-2 font-semibold text-white hover:bg-blue-600">
+      Create Task
+    </button>
+  </div>
+
+  <!-- Right column for records -->
+  <div class="col-span-2 rounded-lg bg-white p-4 shadow-md">
+    <!-- Calendar picker for week navigation -->
+    <div class="mb-4 flex items-center justify-between">
+      <button class="px-3 py-1 text-sm font-semibold text-blue-500 hover:bg-blue-100">Previous Week</button>
+      <div class="text-lg font-semibold">Week of {{ .SelectedWeek | date "January 2, 2006" }}</div>
+      <button class="px-3 py-1 text-sm font-semibold text-blue-500 hover:bg-blue-100">Next Week</button>
     </div>
+
+    <!-- Records list grouped by days -->
+    <div class="grid grid-cols-7 gap-4">
+      {{ range .WeeklyRecords }}
+      <div class="flex flex-col rounded-lg bg-gray-50 p-2 shadow-md">
+        <div class="mb-2 text-sm font-semibold text-gray-600">{{ .Day | date "Monday" }}</div>
+        <div class="flex-1 space-y-2 overflow-y-auto">
+          {{ range .Records }}
+          <div class="relative rounded-lg bg-white p-2 shadow-sm">
+            <!-- Color underline for the task duration -->
+            <div
+              class="absolute bottom-0 h-1"
+              style="background-color: {{ .Task.Color }}; width: {{ .DurationPercentage }}%;"
+            ></div>
+            <p class="text-sm text-gray-700">{{ .Comment }}</p>
+            <div class="mt-2 flex justify-between text-xs">
+              <button class="text-blue-500 hover:underline">Edit</button>
+              <button class="text-red-500 hover:underline">Delete</button>
+              {{ if not .IsCompleted }}
+              <button class="text-yellow-500 hover:underline">Stop</button>
+              {{ end }}
+            </div>
+          </div>
+          {{ end }}
+        </div>
+      </div>
+      {{ end }}
+    </div>
+  </div>
+</div>
 {{ end }}
