@@ -60,6 +60,7 @@ func (s *UsersService) RegisterUser(registerUserData RegisterUserData) (error) {
 		Password: hashedPassword,
 		DateAdd: date,
 		IsActive: false,
+		// @TODO: move to sendActivationMassage()
 		ActivationHash: activationHash,
 		ActivationHashDate: date,
 	}
