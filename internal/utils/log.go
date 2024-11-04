@@ -3,7 +3,6 @@ package utils
 import (
 	"context"
 	"encoding/json"
-	"fmt"
 	"log"
 	"log/slog"
 	"os"
@@ -12,7 +11,19 @@ import (
 
 type LogHandlerDev struct {
     slog.Handler
-    l *log.Logger
+    log *log.Logger
+}
+
+func NewLogHandlerDev() *LogHandlerDev {
+    opts := &slog.HandlerOptions{
+		Level: slog.LevelDebug,
+	}
+    h := &LogHandlerDev{
+        Handler: slog.NewJSONHandler(os.Stdout, opts),
+        log:     log.New(os.Stdout, "", 0),
+    }
+
+    return h
 }
 
 func (h *LogHandlerDev) Handle(ctx context.Context, r slog.Record) error {
@@ -20,41 +31,38 @@ func (h *LogHandlerDev) Handle(ctx context.Context, r slog.Record) error {
 
     switch r.Level {
     case slog.LevelDebug:
-        level = Colors.Green + level + Colors.Reset
+        level = StrColor(level,Colors.Green)
     case slog.LevelInfo:
-        level = Colors.Blue + level + Colors.Reset
+        level = StrColor(level, Colors.Blue)
     case slog.LevelWarn:
-        level = Colors.Yellow + level + Colors.Reset
+        level = StrColor(level, Colors.Yellow)
     case slog.LevelError:
         level = Colors.Red + level + Colors.Reset
     }
 
-    fields := make(map[string]interface{}, r.NumAttrs())
+    timeStr := r.Time.Format("[15:05:05.000]")
+	msg := highlightPanicAndApp(r.Message)
+    h.log.Println(timeStr, level, msg)
+
     r.Attrs(func(a slog.Attr) bool {
-        fields[a.Key] = a.Value.Any()
+        key := a.Key
+        val := a.Value.Any()
+
+        h.log.Printf("%s%v:%s %s%T%s = %s%+v%s\n",
+            Colors.Green, key, Colors.Reset,   // Name
+            Colors.Blue, val, Colors.Reset,      // Type
+            Colors.Yellow, val, Colors.Reset)    // Value
+
+        b, err := json.MarshalIndent(val, "", "  ")
+        if err != nil {
+            return false
+        }
+        h.log.Println(string(b))
 
         return true
     })
 
-    b, err := json.MarshalIndent(fields, "", "  ")
-    if err != nil {
-        return err
-    }
-
-    timeStr := r.Time.Format("[15:05:05.000]")
-	msg := highlightPanicAndApp(r.Message)
-    h.l.Println(timeStr, level, msg, string(b))
-
     return nil
-}
-
-func NewLogHandlerDev() *LogHandlerDev {
-    h := &LogHandlerDev{
-        Handler: slog.NewJSONHandler(os.Stdout, nil),
-        l:       log.New(os.Stdout, "", 0),
-    }
-
-    return h
 }
 
 func highlightPanicAndApp(logMessage string) string {
@@ -62,10 +70,8 @@ func highlightPanicAndApp(logMessage string) string {
 	var highlightedLines []string
 
 	for _, line := range lines {
-		// Проверяем, содержит ли строка "panic" или "/app/"
 		if strings.Contains(line, "panic ") || strings.Contains(line, "/app/") || strings.Contains(line, "time-tracker/") {
-			// Подсвечиваем красным
-			line = fmt.Sprintf("\033[31m%s\033[0m", line)
+            line = StrColor(line, Colors.Red)
 		}
 		highlightedLines = append(highlightedLines, line)
 	}

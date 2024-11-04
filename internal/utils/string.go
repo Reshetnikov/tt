@@ -49,3 +49,7 @@ func Dump(args ...interface{}) {
             Colors.Yellow, value, Colors.Reset)    // Value
     }
 }
+
+func StrColor(str, color string) string{
+	return color + str + Colors.Reset
+}

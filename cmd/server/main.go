@@ -18,14 +18,11 @@ import (
 )
 
 func main() {
-	// Load configuration
+	fmt.Println()
 	cfg := config.LoadConfig()
-	utils.Dump("Config", cfg)
-
-	// Set logger
 	setLogger(cfg.AppEnv)
+	slog.Info("==================== Server start ====================", "Config", cfg)
 
-    // Connect to the database
 	db, err := connectToDatabase(cfg)
 	if err != nil {
 		log.Fatalf("Database connection failed: %v", err)
@@ -43,7 +40,6 @@ func main() {
 
 	mux := http.NewServeMux()
 
-	// static
 	fsPublic := http.FileServer(http.Dir("./web/public"))
 	mux.Handle("/img/", fsPublic)
 	mux.Handle("/css/", fsPublic)
@@ -98,7 +94,7 @@ func connectToDatabase(cfg *config.Config) (*pgxpool.Pool, error) {
 		db.Close()
 		return nil, fmt.Errorf("error pinging database: %w", err)
 	}
-	fmt.Println("Successfully connected to the database")
+	slog.Info("Successfully connected to the database")
 	return db, nil
 }
 
