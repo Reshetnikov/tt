@@ -4,7 +4,9 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"log/slog"
 	"net/http"
+	"os"
 	"time"
 	"time-tracker/internal/config"
 	"time-tracker/internal/modules/dashboard"
@@ -20,6 +22,9 @@ func main() {
 	cfg := config.LoadConfig()
 	utils.Dump("Config", cfg)
 
+	// Set logger
+	setLogger(cfg.AppEnv)
+
     // Connect to the database
 	db, err := connectToDatabase(cfg)
 	if err != nil {
@@ -27,9 +32,7 @@ func main() {
 	}
 	defer db.Close()
 
-	// usersRepo := users.NewUsersRepositoryMem()
 	usersRepo := users.NewUsersRepositoryPostgres(db)
-	// sessionsRepo := users.NewSessionsRepositoryMem()
 	sessionsRepo := users.NewSessionsRepositoryRedis(cfg.RedisAddr, "", 0)
 	usersService := users.NewUsersService(usersRepo, sessionsRepo)
 	usersHandlers := users.NewUsersHandlers(usersService)
@@ -67,7 +70,11 @@ func main() {
 
 	muxSession := usersService.SessionMiddleware(mux)
 
-	log.Fatal(http.ListenAndServe(":8080", muxSession))
+	server := &http.Server{
+        Addr:     ":8080",
+        Handler:  muxSession,
+    }
+	log.Fatal(server.ListenAndServe())
 }
 
 func connectToDatabase(cfg *config.Config) (*pgxpool.Pool, error) {
@@ -93,4 +100,15 @@ func connectToDatabase(cfg *config.Config) (*pgxpool.Pool, error) {
 	}
 	fmt.Println("Successfully connected to the database")
 	return db, nil
+}
+
+func setLogger(env string) {
+	var handler slog.Handler
+	if env == "development" {
+        handler = utils.NewLogHandlerDev()
+    } else {
+        handler = slog.NewJSONHandler(os.Stdout, nil)
+    }
+	logger := slog.New(handler)
+	slog.SetDefault(logger)
 }

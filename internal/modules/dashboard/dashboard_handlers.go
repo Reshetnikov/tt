@@ -11,14 +11,11 @@ type DashboardHandler struct {
 	service *DashboardService
 }
 
-// NewDashboardHandler создает новый обработчик для панели управления
 func NewDashboardHandler(service *DashboardService) *DashboardHandler {
 	return &DashboardHandler{service: service}
 }
 
-// HandleDashboard обрабатывает запросы к панели управления
 func (h *DashboardHandler) HandleDashboard(w http.ResponseWriter, r *http.Request) {
-	// Получаем userID из контекста (например, из сессии)
 	userIDStr := r.Context().Value("userID").(string)
 	userID, err := strconv.Atoi(userIDStr)
 	if err != nil {

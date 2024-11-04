@@ -6,6 +6,22 @@ import (
 	"unicode/utf8"
 )
 
+type ANSIColors struct {
+	Blue   string
+	Yellow string
+	Green  string
+	Red    string
+	Reset  string
+}
+
+var Colors = ANSIColors{
+	Blue:   "\033[1;34m",
+	Yellow: "\033[1;33m",
+	Green:  "\033[1;32m",
+	Red:    "\033[31m",
+	Reset:  "\033[0m",
+}
+
 func Ukfirst(s string) string {
 	if len(s) == 0 {
 		return s
@@ -19,11 +35,6 @@ func Ukfirst(s string) string {
 // Output:
 // Config: *config.Config = &{AppEnv:development DBHost:postgres}
 func Dump(args ...interface{}) {
-    blue := "\033[1;34m"     // for Type
-    yellow := "\033[1;33m"   // for Value
-    green := "\033[1;32m"    // for Name
-    reset := "\033[0m"       // reset color
-
     for i := 0; i < len(args); i += 2 {
 		var label, value interface{}
         if i+1 >= len(args) {
@@ -33,8 +44,8 @@ func Dump(args ...interface{}) {
 		}
 
         fmt.Printf("%s%v:%s %s%T%s = %s%+v%s\n",
-            green, label, reset,     // Name
-            blue, value, reset,      // Type
-            yellow, value, reset)    // Value
+            Colors.Green, label, Colors.Reset,     // Name
+            Colors.Blue, value, Colors.Reset,      // Type
+            Colors.Yellow, value, Colors.Reset)    // Value
     }
 }
