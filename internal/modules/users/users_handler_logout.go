@@ -6,7 +6,7 @@ import (
 	"time-tracker/internal/utils"
 )
 
-func (h *UsersHandler) LogoutHandler(w http.ResponseWriter, r *http.Request) {
+func (h *UsersHandler) HandleLogout(w http.ResponseWriter, r *http.Request) {
     cookie, err := r.Cookie("session_id")
     if err != nil || cookie.Value == "" {
         http.Redirect(w, r, "/", http.StatusSeeOther)

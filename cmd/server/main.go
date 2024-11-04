@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"time"
 	"time-tracker/internal/config"
+	"time-tracker/internal/modules/dashboard"
 	"time-tracker/internal/modules/pages"
 	"time-tracker/internal/modules/users"
 	"time-tracker/internal/utils"
@@ -33,6 +34,10 @@ func main() {
 	usersService := users.NewUsersService(usersRepo, sessionsRepo)
 	usersHandlers := users.NewUsersHandlers(usersService)
 
+	dashboardRepo := dashboard.NewDashboardRepositoryPostgres(db)
+	dashboardService := dashboard.NewDashboardService(dashboardRepo)
+	dashboardHandler := dashboard.NewDashboardHandler(dashboardService)
+
 	mux := http.NewServeMux()
 
 	// static
@@ -42,12 +47,12 @@ func main() {
 	mux.Handle("/favicon.ico", fsPublic)
 
 	mux.HandleFunc("/{$}", pages.IndexHandler)
-	mux.HandleFunc("/signup", usersHandlers.SignupHandler)
-	mux.HandleFunc("/login", usersHandlers.LoginHandler)
-	mux.HandleFunc("/activation", usersHandlers.ActivationHandler)
-	mux.HandleFunc("POST /logout", usersHandlers.LogoutHandler)
+	mux.HandleFunc("/signup", usersHandlers.HandleSignup)
+	mux.HandleFunc("/login", usersHandlers.HandleLogin)
+	mux.HandleFunc("/activation", usersHandlers.HandleActivation)
+	mux.HandleFunc("POST /logout", usersHandlers.HandleLogout)
 
-	mux.HandleFunc("/dashboard", pages.IndexHandler)
+	mux.HandleFunc("/dashboard", dashboardHandler.HandleDashboard)
 	// mux.HandleFunc("/projects", handler)
 	// http.HandleFunc("/projects/{project_id}", handler)
 	// mux.HandleFunc("/tasks", pages.IndexHandler)

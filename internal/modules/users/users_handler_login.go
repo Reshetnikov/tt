@@ -10,7 +10,7 @@ type loginForm struct {
     Password string `form:"password" validate:"required"`
 }
 
-func (h *UsersHandler) LoginHandler(w http.ResponseWriter, r *http.Request) {
+func (h *UsersHandler) HandleLogin(w http.ResponseWriter, r *http.Request) {
     var form loginForm
     formErrors := utils.FormErrors{}
 

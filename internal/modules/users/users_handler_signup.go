@@ -12,7 +12,7 @@ type signupForm struct {
 	PasswordConfirmation string `form:"password_confirmation" validate:"required,eqfield=Password" label:"Confirm Password"`
 }
 
-func (h *UsersHandler) SignupHandler(w http.ResponseWriter, r *http.Request) {
+func (h *UsersHandler) HandleSignup(w http.ResponseWriter, r *http.Request) {
 	var form signupForm
 	formErrors := utils.FormErrors{}
 	if r.Method == http.MethodPost {
