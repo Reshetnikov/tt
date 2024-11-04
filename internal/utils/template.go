@@ -5,19 +5,21 @@ import (
 	"net/http"
 	"path/filepath"
 	"text/template"
-	"time-tracker/internal/middleware"
+	//"time-tracker/internal/middleware"
 )
+
+type TplData map[string]interface{}
 
 // Function for registration in the template engine
 // Used to pass multiple variables from a template to a subtemplate
 // Example:
 // T1: {{ template "T2" dict "Label" "Name" "Type" "text" "Value" .Form.Name }}
 // T2: name="{{ .Name }}" type="{{ .Type }}" value="{{ .Value }}"
-func dict(values ...interface{}) map[string]interface{} {
+func dict(values ...interface{}) TplData {
     if len(values)%2 != 0 {
         panic("odd number of arguments in dict()")
     }
-    m := make(map[string]interface{})
+    m := make(TplData)
     for i := 0; i < len(values); i += 2 {
         key, ok := values[i].(string)
         if !ok {
@@ -29,7 +31,7 @@ func dict(values ...interface{}) map[string]interface{} {
 }
 
 // The method also extracts the user from the context and adds the "User" to the template data.
-func RenderTemplate(w http.ResponseWriter, r *http.Request, tmpl string, data map[string]interface{}) {
+func RenderTemplate(w http.ResponseWriter, tmpl string, data TplData) {
     templates := template.New("").Funcs(template.FuncMap{"dict": dict})
 
 	layout := filepath.Join("web", "templates", "layout.html")
@@ -49,26 +51,10 @@ func RenderTemplate(w http.ResponseWriter, r *http.Request, tmpl string, data ma
 		return
 	}
 
-	// Extracting a user from context
-	// Adding a user to template data
-	user:= r.Context().Value(middleware.ContextUserKey)
-	data["User"] = user
-
 	err = templates.ExecuteTemplate(w, "layout", data)
 	if err != nil {
 		log.Println("Error rendering template " + tmplPath + " | " + err.Error())
 		log.Println(err)
 		http.Error(w, "Error rendering template " + tmpl, http.StatusInternalServerError)
 	}
-}
-
-func RenderTemplateError(w http.ResponseWriter, r *http.Request, title string, message string) {
-	// http.Error(w, message, http.StatusBadRequest)
-	if (title == "") {
-		title = "Error"
-	}
-	RenderTemplate(w, r, "error", map[string]interface{}{
-		"Title":   title,
-		"Message":  message,
-	})
 }

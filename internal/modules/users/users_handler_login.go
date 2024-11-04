@@ -39,7 +39,7 @@ func (h *UsersHandler) HandleLogin(w http.ResponseWriter, r *http.Request) {
 			}
 		}
     }
-    utils.RenderTemplate(w, r, "login", map[string]interface{}{
+    RenderTemplate(w, r, "login", utils.TplData{
         "Title":  "Log In",
         "Errors": formErrors,
         "Form":   form,

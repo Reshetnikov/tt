@@ -3,7 +3,6 @@ package users
 import (
 	"net/http"
 	"time"
-	"time-tracker/internal/utils"
 )
 
 func (h *UsersHandler) HandleLogout(w http.ResponseWriter, r *http.Request) {
@@ -15,7 +14,7 @@ func (h *UsersHandler) HandleLogout(w http.ResponseWriter, r *http.Request) {
 
     err = h.usersService.LogoutUser(cookie.Value)
     if err != nil {
-        utils.RenderTemplateError(w, r, "Logout Failed", "Failed to log out.")
+        RenderTemplateError(w, r, "Logout Failed", "Failed to log out.")
         return
     }
 

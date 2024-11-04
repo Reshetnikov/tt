@@ -18,9 +18,9 @@ import (
 )
 
 func main() {
-	fmt.Println()
 	cfg := config.LoadConfig()
 	setLogger(cfg.AppEnv)
+	fmt.Println()
 	slog.Info("==================== Server start ====================", "Config", cfg)
 
 	db, err := connectToDatabase(cfg)
@@ -64,7 +64,7 @@ func main() {
 	})
 
 
-	muxSession := usersService.SessionMiddleware(mux)
+	muxSession := users.SessionMiddleware(mux, sessionsRepo, usersRepo)
 
 	server := &http.Server{
         Addr:     ":8080",

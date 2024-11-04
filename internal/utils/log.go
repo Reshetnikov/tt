@@ -49,7 +49,7 @@ func (h *LogHandlerDev) Handle(ctx context.Context, r slog.Record) error {
         val := a.Value.Any()
 
         h.log.Printf("%s%v:%s %s%T%s = %s%+v%s\n",
-            Colors.Green, key, Colors.Reset,   // Name
+            Colors.Green, key, Colors.Reset,     // Name
             Colors.Blue, val, Colors.Reset,      // Type
             Colors.Yellow, val, Colors.Reset)    // Value
 
