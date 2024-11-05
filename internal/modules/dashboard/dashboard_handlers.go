@@ -4,6 +4,7 @@ import (
 	"log/slog"
 	"net/http"
 	"time-tracker/internal/modules/users"
+	"time-tracker/internal/utils"
 )
 
 type DashboardHandler struct {
@@ -18,7 +19,7 @@ func (h *DashboardHandler) HandleDashboard(w http.ResponseWriter, r *http.Reques
 	user := users.GetUserFromRequest(r)
 	if user == nil {
 		slog.Debug("dashboard redirect")
-		http.Redirect(w, r, "/login", http.StatusFound)
+		utils.RedirectLogin(w, r)
 		return
 	}
 	slog.Info("dashboard", "user", user)

@@ -20,8 +20,7 @@ import (
 func main() {
 	cfg := config.LoadConfig()
 	setLogger(cfg.AppEnv)
-	fmt.Println()
-	slog.Info("==================== Server start ====================", "Config", cfg)
+	slog.Info("======================================== Server start ========================================", "Config", cfg)
 
 	db, err := connectToDatabase(cfg)
 	if err != nil {

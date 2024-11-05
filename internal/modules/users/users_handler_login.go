@@ -24,7 +24,7 @@ func (h *UsersHandler) HandleLogin(w http.ResponseWriter, r *http.Request) {
 				if err == nil {
 					setSessionCookie(w, session.SessionID, session.Expiry)
 
-					http.Redirect(w, r, "/dashboard", http.StatusSeeOther)
+					utils.RedirectDashboard(w, r)
 					return
 				}
 			}

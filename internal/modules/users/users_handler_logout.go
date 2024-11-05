@@ -3,12 +3,14 @@ package users
 import (
 	"net/http"
 	"time"
+	"time-tracker/internal/utils"
 )
 
+// "POST /logout"
 func (h *UsersHandler) HandleLogout(w http.ResponseWriter, r *http.Request) {
-	cookie, err := r.Cookie("session_id")
+	cookie, err := r.Cookie(sessionCookieName)
 	if err != nil || cookie.Value == "" {
-		http.Redirect(w, r, "/", http.StatusSeeOther)
+		utils.RedirectRoot(w, r)
 		return
 	}
 
@@ -18,14 +20,7 @@ func (h *UsersHandler) HandleLogout(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	http.SetCookie(w, &http.Cookie{
-		Name:     "session_id",
-		Value:    "",
-		Path:     "/",
-		Expires:  time.Unix(0, 0),
-		HttpOnly: true,
-		// Secure:   true, // Используйте Secure, если работаете через HTTPS
-	})
+	setSessionCookie(w, "", time.Unix(0, 0))
 
-	http.Redirect(w, r, "/", http.StatusSeeOther)
+	utils.RedirectRoot(w, r)
 }

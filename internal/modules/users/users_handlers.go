@@ -17,7 +17,7 @@ func NewUsersHandlers(usersService *UsersService) *UsersHandler {
 
 func setSessionCookie(w http.ResponseWriter, sessionID string, expires time.Time) {
 	http.SetCookie(w, &http.Cookie{
-		Name:     "session_id",
+		Name:     sessionCookieName,
 		Value:    sessionID,
 		Expires:  expires,
 		HttpOnly: true,
