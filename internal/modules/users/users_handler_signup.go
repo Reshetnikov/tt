@@ -13,6 +13,12 @@ type signupForm struct {
 }
 
 func (h *UsersHandler) HandleSignup(w http.ResponseWriter, r *http.Request) {
+	user := GetUserFromRequest(r)
+	if user != nil {
+		utils.RedirectDashboard(w, r)
+		return
+	}
+
 	var form signupForm
 	formErrors := utils.FormErrors{}
 	if r.Method == http.MethodPost {

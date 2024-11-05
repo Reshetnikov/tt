@@ -20,7 +20,7 @@ import (
 func main() {
 	cfg := config.LoadConfig()
 	setLogger(cfg.AppEnv)
-	slog.Info("======================================== Server start ========================================", "Config", cfg)
+	slog.Info("======================================== Server start ========================================" /*, "Config", cfg*/)
 
 	db, err := connectToDatabase(cfg)
 	if err != nil {
@@ -34,8 +34,7 @@ func main() {
 	usersHandlers := users.NewUsersHandlers(usersService)
 
 	dashboardRepo := dashboard.NewDashboardRepositoryPostgres(db)
-	dashboardService := dashboard.NewDashboardService(dashboardRepo)
-	dashboardHandler := dashboard.NewDashboardHandler(dashboardService)
+	dashboardHandler := dashboard.NewDashboardHandler(dashboardRepo)
 
 	mux := http.NewServeMux()
 

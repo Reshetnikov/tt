@@ -1,9 +1,12 @@
 package users
 
 import (
+	"log/slog"
 	"net/http"
 	"time"
 )
+
+var d = slog.Debug
 
 type UsersHandler struct {
 	usersService *UsersService

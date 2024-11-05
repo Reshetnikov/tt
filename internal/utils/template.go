@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"path/filepath"
 	"text/template"
+	"time"
 	//"time-tracker/internal/middleware"
 )
 
@@ -30,9 +31,18 @@ func dict(values ...interface{}) TplData {
 	return m
 }
 
+// Example:
+// {{ .SelectedWeek | date "January 2, 2006" }}
+func dateFormat(layout string, t time.Time) string {
+	return t.Format(layout)
+}
+
 // The method also extracts the user from the context and adds the "User" to the template data.
 func RenderTemplate(w http.ResponseWriter, tmpl string, data TplData) {
-	templates := template.New("").Funcs(template.FuncMap{"dict": dict})
+	templates := template.New("").Funcs(template.FuncMap{
+		"dict": dict,
+		"date": dateFormat,
+	})
 
 	layout := filepath.Join("web", "templates", "layout.html")
 	tmplPath := filepath.Join("web", "templates", tmpl+".html")

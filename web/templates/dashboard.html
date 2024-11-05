@@ -49,17 +49,12 @@
           {{ range .Records }}
           <div class="relative rounded-lg bg-white p-2 shadow-sm">
             <!-- Color underline for the task duration -->
-            <div
-              class="absolute bottom-0 h-1"
-              style="background-color: {{ .Task.Color }}; width: {{ .DurationPercentage }}%;"
-            ></div>
+            <div class="absolute bottom-0 h-1" style="background-color: #33aa00; width: 30%"></div>
             <p class="text-sm text-gray-700">{{ .Comment }}</p>
             <div class="mt-2 flex justify-between text-xs">
               <button class="text-blue-500 hover:underline">Edit</button>
               <button class="text-red-500 hover:underline">Delete</button>
-              {{ if not .IsCompleted }}
               <button class="text-yellow-500 hover:underline">Stop</button>
-              {{ end }}
             </div>
           </div>
           {{ end }}

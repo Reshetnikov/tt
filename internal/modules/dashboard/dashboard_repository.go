@@ -11,7 +11,6 @@ type Task struct {
 	IsCompleted bool
 }
 
-// Record представляет запись о времени
 type Record struct {
 	ID        int
 	TaskID    int
@@ -20,15 +19,7 @@ type Record struct {
 	Comment   string
 }
 
-// DailyRecords представляет записи, сгруппированные по дням
 type DailyRecords struct {
 	Day     time.Time
 	Records []Record
-}
-
-// DashboardData содержит данные, необходимые для шаблона dashboard
-type DashboardData struct {
-	Tasks         []Task
-	WeeklyRecords []DailyRecords
-	SelectedWeek  time.Time
 }

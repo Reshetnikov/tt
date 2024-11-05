@@ -11,6 +11,12 @@ type loginForm struct {
 }
 
 func (h *UsersHandler) HandleLogin(w http.ResponseWriter, r *http.Request) {
+	user := GetUserFromRequest(r)
+	if user != nil {
+		utils.RedirectDashboard(w, r)
+		return
+	}
+
 	var form loginForm
 	formErrors := utils.FormErrors{}
 

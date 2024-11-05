@@ -3,38 +3,38 @@ package dashboard
 import (
 	"log/slog"
 	"net/http"
+	"time"
 	"time-tracker/internal/modules/users"
 	"time-tracker/internal/utils"
 )
 
+var d = slog.Debug
+
 type DashboardHandler struct {
-	service *DashboardService
+	repo *DashboardRepositoryPostgres
 }
 
-func NewDashboardHandler(service *DashboardService) *DashboardHandler {
-	return &DashboardHandler{service: service}
+func NewDashboardHandler(repo *DashboardRepositoryPostgres) *DashboardHandler {
+	return &DashboardHandler{repo: repo}
 }
 
 func (h *DashboardHandler) HandleDashboard(w http.ResponseWriter, r *http.Request) {
 	user := users.GetUserFromRequest(r)
 	if user == nil {
-		slog.Debug("dashboard redirect")
 		utils.RedirectLogin(w, r)
 		return
 	}
-	slog.Info("dashboard", "user", user)
+	tasks := h.repo.FetchTasks(user.ID)
+	selectedWeek := time.Now().Truncate(24*time.Hour).AddDate(0, 0, -int(time.Now().Weekday())) // Начало недели
+	weeklyRecords := h.repo.FetchWeeklyRecords(user.ID, selectedWeek)
 
-	// data, err := h.service.GetDashboardData(user.ID)
-	// if err != nil {
-	// 	http.Error(w, err.Error(), http.StatusInternalServerError)
-	// 	return
-	// }
+	// d("HandleDashboard", "tasks", tasks)
+	d("HandleDashboard", "weeklyRecords", weeklyRecords)
 
-	// tmpl, err := template.ParseFiles("./web/templates/dashboard.html")
-	// if err != nil {
-	// 	http.Error(w, err.Error(), http.StatusInternalServerError)
-	// 	return
-	// }
-
-	// tmpl.Execute(w, data)
+	users.RenderTemplate(w, r, "dashboard", utils.TplData{
+		"Title":         "Tasks & Records Dashboard",
+		"Tasks":         tasks,
+		"WeeklyRecords": weeklyRecords,
+		"SelectedWeek":  selectedWeek,
+	})
 }
