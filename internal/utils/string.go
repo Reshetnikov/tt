@@ -35,21 +35,21 @@ func Ukfirst(s string) string {
 // Output:
 // Config: *config.Config = &{AppEnv:development DBHost:postgres}
 func Dump(args ...interface{}) {
-    for i := 0; i < len(args); i += 2 {
+	for i := 0; i < len(args); i += 2 {
 		var label, value interface{}
-        if i+1 >= len(args) {
-            label, value = "Dump", args[i]
-        } else {
+		if i+1 >= len(args) {
+			label, value = "Dump", args[i]
+		} else {
 			label, value = args[i], args[i+1]
 		}
 
-        fmt.Printf("%s%v:%s %s%T%s = %s%+v%s\n",
-            Colors.Green, label, Colors.Reset,     // Name
-            Colors.Blue, value, Colors.Reset,      // Type
-            Colors.Yellow, value, Colors.Reset)    // Value
-    }
+		fmt.Printf("%s%v:%s %s%T%s = %s%+v%s\n",
+			Colors.Green, label, Colors.Reset, // Name
+			Colors.Blue, value, Colors.Reset, // Type
+			Colors.Yellow, value, Colors.Reset) // Value
+	}
 }
 
-func StrColor(str, color string) string{
+func StrColor(str, color string) string {
 	return color + str + Colors.Reset
 }

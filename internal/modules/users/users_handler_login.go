@@ -6,42 +6,42 @@ import (
 )
 
 type loginForm struct {
-    Email    string `form:"email" validate:"required,email"`
-    Password string `form:"password" validate:"required"`
+	Email    string `form:"email" validate:"required,email"`
+	Password string `form:"password" validate:"required"`
 }
 
 func (h *UsersHandler) HandleLogin(w http.ResponseWriter, r *http.Request) {
-    var form loginForm
-    formErrors := utils.FormErrors{}
+	var form loginForm
+	formErrors := utils.FormErrors{}
 
-    if r.Method == http.MethodPost {
-        err := utils.ParseFormToStruct(r, &form)
-        if err == nil {
-            formErrors = utils.NewValidator(&form).Validate()
-            if !formErrors.HasErrors() {
-                var session *Session
-                session, err = h.usersService.LoginUser(form.Email, form.Password)
-                if err == nil {
-                    setSessionCookie(w, session.SessionID, session.Expiry)
+	if r.Method == http.MethodPost {
+		err := utils.ParseFormToStruct(r, &form)
+		if err == nil {
+			formErrors = utils.NewValidator(&form).Validate()
+			if !formErrors.HasErrors() {
+				var session *Session
+				session, err = h.usersService.LoginUser(form.Email, form.Password)
+				if err == nil {
+					setSessionCookie(w, session.SessionID, session.Expiry)
 
-                    http.Redirect(w, r, "/dashboard", http.StatusSeeOther)
-                    return
-                }
-            }
-        }
-        if (err != nil) {
-			if (err == ErrInvalidEmailOrPassword) {
+					http.Redirect(w, r, "/dashboard", http.StatusSeeOther)
+					return
+				}
+			}
+		}
+		if err != nil {
+			if err == ErrInvalidEmailOrPassword {
 				formErrors.Add("Common", "Invalid email or password")
-			} else if (err == ErrAccountNotActivated) {
+			} else if err == ErrAccountNotActivated {
 				formErrors.Add("Common", "Account not activated. Follow the link from the email to activate your account.")
 			} else {
 				formErrors.Add("Common", utils.Ukfirst(err.Error()))
 			}
 		}
-    }
-    RenderTemplate(w, r, "login", utils.TplData{
-        "Title":  "Log In",
-        "Errors": formErrors,
-        "Form":   form,
-    })
+	}
+	RenderTemplate(w, r, "login", utils.TplData{
+		"Title":  "Log In",
+		"Errors": formErrors,
+		"Form":   form,
+	})
 }

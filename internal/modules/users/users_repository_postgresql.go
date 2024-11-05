@@ -20,24 +20,24 @@ func NewUsersRepositoryPostgres(db *pgxpool.Pool) *UsersRepositoryPostgres {
 }
 
 func (r *UsersRepositoryPostgres) getByField(fieldName string, FieldValue interface{}) (*User, error) {
-    validFields := map[string]bool{
-        "id":                true,
-        "email":             true,
-        "activation_hash":   true,
-    }
-    if !validFields[fieldName] {
-        return nil, fmt.Errorf("unsupported field: %s", fieldName)
-    }
-    query := "SELECT id, name, password, email, date_add, activation_hash, activation_hash_date, is_active FROM users WHERE " + fieldName + " = $1"
+	validFields := map[string]bool{
+		"id":              true,
+		"email":           true,
+		"activation_hash": true,
+	}
+	if !validFields[fieldName] {
+		return nil, fmt.Errorf("unsupported field: %s", fieldName)
+	}
+	query := "SELECT id, name, password, email, date_add, activation_hash, activation_hash_date, is_active FROM users WHERE " + fieldName + " = $1"
 	rows, _ := r.db.Query(context.Background(), query, FieldValue)
 	user, err := pgx.CollectOneRow(rows, pgx.RowToStructByName[User])
-    if err != nil {
-        if err == pgx.ErrNoRows {
-            return nil, nil
-        }
-        return nil, fmt.Errorf("failed to get user by %s = %v: %w", fieldName, FieldValue, err)
-    }
-    return &user, nil
+	if err != nil {
+		if err == pgx.ErrNoRows {
+			return nil, nil
+		}
+		return nil, fmt.Errorf("failed to get user by %s = %v: %w", fieldName, FieldValue, err)
+	}
+	return &user, nil
 }
 
 func (r *UsersRepositoryPostgres) GetByID(id int) (*User, error) {
@@ -54,14 +54,14 @@ func (r *UsersRepositoryPostgres) GetByActivationHash(activationHash string) (*U
 
 func (r *UsersRepositoryPostgres) Create(user *User) error {
 	fields, placeholders, params := utils.BuildFieldsFromArr(utils.Arr{
-        {"name",               user.Name},
-        {"password",           user.Password},
-        {"email",              user.Email},
-        {"date_add",           user.DateAdd},
-        {"activation_hash",    user.ActivationHash},
-        {"activation_hash_date", user.ActivationHashDate},
-        {"is_active",          user.IsActive},
-    })
+		{"name", user.Name},
+		{"password", user.Password},
+		{"email", user.Email},
+		{"date_add", user.DateAdd},
+		{"activation_hash", user.ActivationHash},
+		{"activation_hash_date", user.ActivationHashDate},
+		{"is_active", user.IsActive},
+	})
 	query := "INSERT INTO users (" + fields + ") VALUES (" + placeholders + ")"
 	_, err := r.db.Exec(context.Background(), query, params...)
 	if err != nil {
@@ -74,14 +74,14 @@ func (r *UsersRepositoryPostgres) Create(user *User) error {
 func (r *UsersRepositoryPostgres) Update(user *User) error {
 	builder := utils.NewBuilderFieldsValues()
 	set := builder.BuildFromArr(utils.Arr{
-        {"name",               user.Name},
-        {"password",           user.Password},
-        {"email",              user.Email},
-        {"date_add",           user.DateAdd},
-        {"activation_hash",   user.ActivationHash},
-        {"activation_hash_date",user.ActivationHashDate},
-        {"is_active",          user.IsActive},
-    })
+		{"name", user.Name},
+		{"password", user.Password},
+		{"email", user.Email},
+		{"date_add", user.DateAdd},
+		{"activation_hash", user.ActivationHash},
+		{"activation_hash_date", user.ActivationHashDate},
+		{"is_active", user.IsActive},
+	})
 	where := builder.BuildFromArr(utils.Arr{{"id", user.ID}})
 	query := "UPDATE users SET " + set + " WHERE " + where
 	_, err := r.db.Exec(context.Background(), query, builder.Params()...)

@@ -11,16 +11,18 @@ import (
 var validate = validator.New()
 
 type FormErrors map[string][]string
+
 func (fe *FormErrors) Add(field, message string) {
 	(*fe)[field] = append((*fe)[field], message)
 }
 func (fe FormErrors) HasErrorsField(field string) bool {
 	return len(fe[field]) > 0
 }
-// Use "formErrors.HasErrors()" instead of "formErrors == nil" 
+
+// Use "formErrors.HasErrors()" instead of "formErrors == nil"
 // because "formErrors := utils.FormErrors{}" is non-nil.
 func (fe FormErrors) HasErrors() bool {
- 	return len(fe) > 0
+	return len(fe) > 0
 }
 func (fe FormErrors) Error() string {
 	var sb strings.Builder
@@ -36,15 +38,16 @@ func (fe FormErrors) Error() string {
 //	validator := utils.NewValidator(&form)
 //	errors := validator.Validate()
 type Validator struct {
-	formStruct interface{}
+	formStruct    interface{}
 	valFormStruct reflect.Value
-	formErrors FormErrors
+	formErrors    FormErrors
 }
+
 func NewValidator(formStruct interface{}) *Validator {
 	return &Validator{
-		formStruct :formStruct, 
+		formStruct:    formStruct,
 		valFormStruct: reflect.ValueOf(formStruct).Elem(),
-		formErrors: FormErrors{},
+		formErrors:    FormErrors{},
 	}
 }
 func (v Validator) Validate() FormErrors {

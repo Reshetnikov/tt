@@ -10,13 +10,12 @@ func RenderTemplate(w http.ResponseWriter, r *http.Request, tmpl string, data ut
 	utils.RenderTemplate(w, tmpl, data)
 }
 
-
 func RenderTemplateError(w http.ResponseWriter, r *http.Request, title string, message string) {
-	if (title == "") {
+	if title == "" {
 		title = "Error"
 	}
 	RenderTemplate(w, r, "error", utils.TplData{
 		"Title":   title,
-		"Message":  message,
+		"Message": message,
 	})
 }

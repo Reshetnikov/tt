@@ -20,7 +20,7 @@ func (s *DashboardService) GetDashboardData(userID int) (DashboardData, error) {
 		return DashboardData{}, err
 	}
 
-	selectedWeek := time.Now().Truncate(24 * time.Hour).AddDate(0, 0, -int(time.Now().Weekday())) // Начало недели
+	selectedWeek := time.Now().Truncate(24*time.Hour).AddDate(0, 0, -int(time.Now().Weekday())) // Начало недели
 	weeklyRecords, err := s.repo.FetchWeeklyRecords(userID, selectedWeek)
 	if err != nil {
 		return DashboardData{}, err

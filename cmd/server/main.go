@@ -63,13 +63,12 @@ func main() {
 		http.NotFound(w, r)
 	})
 
-
 	muxSession := users.SessionMiddleware(mux, sessionsRepo, usersRepo)
 
 	server := &http.Server{
-        Addr:     ":8080",
-        Handler:  muxSession,
-    }
+		Addr:    ":8080",
+		Handler: muxSession,
+	}
 	log.Fatal(server.ListenAndServe())
 }
 
@@ -101,10 +100,10 @@ func connectToDatabase(cfg *config.Config) (*pgxpool.Pool, error) {
 func setLogger(env string) {
 	var handler slog.Handler
 	if env == "development" {
-        handler = utils.NewLogHandlerDev()
-    } else {
-        handler = slog.NewJSONHandler(os.Stdout, nil)
-    }
+		handler = utils.NewLogHandlerDev()
+	} else {
+		handler = slog.NewJSONHandler(os.Stdout, nil)
+	}
 	logger := slog.New(handler)
 	slog.SetDefault(logger)
 }

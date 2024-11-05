@@ -19,7 +19,7 @@ func (h *DashboardHandler) HandleDashboard(w http.ResponseWriter, r *http.Reques
 	if user == nil {
 		slog.Debug("dashboard redirect")
 		http.Redirect(w, r, "/login", http.StatusFound)
-        return
+		return
 	}
 	slog.Info("dashboard", "user", user)
 

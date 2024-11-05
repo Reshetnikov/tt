@@ -6,18 +6,18 @@ import (
 )
 
 type Config struct {
-	Port        string
-	AppEnv      string
-	DBHost      string
-	DBPort      string
-	DBUser      string
-	DBPassword  string
-	DBName      string
-	RedisAddr   string
+	Port       string
+	AppEnv     string
+	DBHost     string
+	DBPort     string
+	DBUser     string
+	DBPassword string
+	DBName     string
+	RedisAddr  string
 }
 
 // LoadConfig загружает конфигурацию из переменных окружения
-func LoadConfig() (*Config) {
+func LoadConfig() *Config {
 	return &Config{
 		Port:       os.Getenv("PORT"),
 		AppEnv:     os.Getenv("APP_ENV"),
@@ -31,6 +31,6 @@ func LoadConfig() (*Config) {
 }
 
 func (cfg *Config) GetPostgresDSN() string {
-	return fmt.Sprintf("postgres://%s:%s@%s:%s/%s?sslmode=disable", 
+	return fmt.Sprintf("postgres://%s:%s@%s:%s/%s?sslmode=disable",
 		cfg.DBUser, cfg.DBPassword, cfg.DBHost, cfg.DBPort, cfg.DBName)
 }

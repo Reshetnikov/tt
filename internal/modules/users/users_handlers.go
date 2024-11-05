@@ -6,7 +6,7 @@ import (
 )
 
 type UsersHandler struct {
-	usersService *UsersService 
+	usersService *UsersService
 }
 
 func NewUsersHandlers(usersService *UsersService) *UsersHandler {
@@ -22,6 +22,6 @@ func setSessionCookie(w http.ResponseWriter, sessionID string, expires time.Time
 		Expires:  expires,
 		HttpOnly: true,
 		// Secure:   true,  // Используйте Secure, если работаете через HTTPS
-		Path:     "/",
+		Path: "/",
 	})
 }

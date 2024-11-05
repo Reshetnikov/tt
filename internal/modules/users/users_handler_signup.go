@@ -21,20 +21,20 @@ func (h *UsersHandler) HandleSignup(w http.ResponseWriter, r *http.Request) {
 			formErrors = utils.NewValidator(&form).Validate()
 			if !formErrors.HasErrors() {
 				err = h.usersService.RegisterUser(RegisterUserData{
-					Name:                 form.Name,
-					Email:                form.Email,
-					Password:             form.Password,
+					Name:     form.Name,
+					Email:    form.Email,
+					Password: form.Password,
 				})
 				if err == nil {
 					RenderTemplate(w, r, "signup-success", utils.TplData{
-						"Title":  "Sign Up Successful",
+						"Title": "Sign Up Successful",
 					})
 					return
 				}
 			}
 		}
-		if (err != nil) {
-			if (err == ErrEmailExists) {
+		if err != nil {
+			if err == ErrEmailExists {
 				formErrors.Add("Email", "Email is already in use")
 			} else {
 				formErrors.Add("Common", utils.Ukfirst((err.Error())))
