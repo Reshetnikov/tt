@@ -23,9 +23,9 @@ func SessionMiddleware(next http.Handler, sessionsRepo SessionsRepository, users
 			return
 		}
 
-		user, err := usersRepo.GetByID(session.UserID)
+		user := usersRepo.GetByID(session.UserID)
 		// slog.Debug("SessionMiddleware", "user", user)
-		if err == nil && user != nil {
+		if user != nil {
 			ctx := context.WithValue(r.Context(), ContextUserKey, user)
 			r = r.WithContext(ctx)
 		}

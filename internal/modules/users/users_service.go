@@ -37,10 +37,7 @@ var ErrInvalidEmailOrPassword = errors.New("invalid email or password")
 var ErrUserNotFoundOrActivationHashIsInvalid = errors.New("user not found or activation hash is invalid")
 
 func (s *UsersService) RegisterUser(registerUserData RegisterUserData) error {
-	existingUser, err := s.usersRepo.GetByEmail(registerUserData.Email)
-	if err != nil {
-		return err
-	}
+	existingUser := s.usersRepo.GetByEmail(registerUserData.Email)
 	if existingUser != nil {
 		return ErrEmailExists
 	}
@@ -71,15 +68,15 @@ func (s *UsersService) RegisterUser(registerUserData RegisterUserData) error {
 }
 
 func (s *UsersService) ActivateUser(activationHash string) (*Session, error) {
-	user, err := s.usersRepo.GetByActivationHash(activationHash)
-	if err != nil || user == nil {
+	user := s.usersRepo.GetByActivationHash(activationHash)
+	if user == nil {
 		return nil, ErrUserNotFoundOrActivationHashIsInvalid
 	}
 
 	user.IsActive = true
 	user.ActivationHash = ""
 
-	err = s.usersRepo.Update(user)
+	err := s.usersRepo.Update(user)
 	if err != nil {
 		return nil, fmt.Errorf("could not activate user: %w", err)
 	}
@@ -90,8 +87,8 @@ func (s *UsersService) ActivateUser(activationHash string) (*Session, error) {
 
 // Логика входа
 func (s *UsersService) LoginUser(email, password string) (*Session, error) {
-	user, err := s.usersRepo.GetByEmail(email)
-	if err != nil || user == nil || !checkPasswordHash(password, user.Password) {
+	user := s.usersRepo.GetByEmail(email)
+	if user == nil || !checkPasswordHash(password, user.Password) {
 		return nil, ErrInvalidEmailOrPassword
 	}
 	if !user.IsActive {

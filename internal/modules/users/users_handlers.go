@@ -6,7 +6,7 @@ import (
 	"time"
 )
 
-var d = slog.Debug
+var D = slog.Debug
 
 type UsersHandler struct {
 	usersService *UsersService

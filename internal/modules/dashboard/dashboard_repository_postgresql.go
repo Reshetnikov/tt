@@ -5,6 +5,7 @@ import (
 	"log/slog"
 	"time"
 
+	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
@@ -19,22 +20,48 @@ func NewDashboardRepositoryPostgres(db *pgxpool.Pool) *DashboardRepositoryPostgr
 }
 
 // FetchTasks извлекает задачи пользователя
-func (r *DashboardRepositoryPostgres) FetchTasks(userID int) (tasks []Task) {
-	rows, err := r.db.Query(context.Background(), "SELECT id, user_id, title, description, color, is_completed FROM tasks WHERE user_id = $1", userID)
-	// slog.Debug("FetchTasks", "rows", rows, "user_id", userID)
+func (r *DashboardRepositoryPostgres) Tasks(userID int) (tasks []Task) {
+	rows, err := r.db.Query(context.Background(), `
+		SELECT id, user_id, title, description, color, sort_order, is_completed
+		FROM tasks WHERE user_id = $1
+		ORDER BY sort_order ASC
+	`, userID)
 	if err != nil {
-		slog.Error("DashboardRepositoryPostgres FetchTasks Query", "err", err)
+		slog.Error("DashboardRepositoryPostgres Tasks Query", "err", err)
+		return
+	}
+	defer rows.Close()
+
+	tasks, err = pgx.CollectRows(rows, pgx.RowToStructByName[Task])
+	if err != nil {
+		slog.Error("DashboardRepositoryPostgres Tasks CollectRows", "err", err)
+		return
+	}
+	return
+}
+
+func (r *DashboardRepositoryPostgres) Records(userID int) (records []Record) {
+	rows, err := r.db.Query(context.Background(), `
+		SELECT r.id, r.task_id, r.time_start, r.time_end, r.comment
+		FROM records r
+		JOIN tasks t ON r.task_id = t.id
+		WHERE t.user_id = $1
+		ORDER BY r.time_start ASC;
+	`, userID)
+	if err != nil {
+		slog.Error("DashboardRepositoryPostgres Records Query", "err", err)
 		return
 	}
 	defer rows.Close()
 
 	for rows.Next() {
-		var task Task
-		if err := rows.Scan(&task.ID, &task.UserID, &task.Title, &task.Description, &task.Color, &task.IsCompleted); err != nil {
-			slog.Error("DashboardRepositoryPostgres FetchTasks Scan", "err", err)
+		var record Record
+		err := rows.Scan(&record.ID, &record.TaskID, &record.TimeStart, &record.TimeEnd, &record.Comment)
+		if err != nil {
+			slog.Error("DashboardRepositoryPostgres Records Scan", "err", err)
 			return
 		}
-		tasks = append(tasks, task)
+		records = append(records, record)
 	}
 	return
 }

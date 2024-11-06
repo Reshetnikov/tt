@@ -8,6 +8,7 @@ type Task struct {
 	Title       string
 	Description string
 	Color       string
+	SortOrder   int
 	IsCompleted bool
 }
 
@@ -17,6 +18,7 @@ type Record struct {
 	TimeStart time.Time
 	TimeEnd   time.Time
 	Comment   string
+	Task      *Task
 }
 
 type DailyRecords struct {

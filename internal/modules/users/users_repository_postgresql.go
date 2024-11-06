@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"log/slog"
 	"time-tracker/internal/utils"
 
 	"github.com/jackc/pgx/v5"
@@ -19,36 +20,43 @@ func NewUsersRepositoryPostgres(db *pgxpool.Pool) *UsersRepositoryPostgres {
 	return &UsersRepositoryPostgres{db: db}
 }
 
-func (r *UsersRepositoryPostgres) getByField(fieldName string, FieldValue interface{}) (*User, error) {
+func (r *UsersRepositoryPostgres) getByField(fieldName string, fieldValue interface{}) *User {
 	validFields := map[string]bool{
 		"id":              true,
 		"email":           true,
 		"activation_hash": true,
 	}
 	if !validFields[fieldName] {
-		return nil, fmt.Errorf("unsupported field: %s", fieldName)
+		slog.Error("UsersRepositoryPostgres getByField validFields", "fieldName", fieldName)
+		return nil
 	}
 	query := "SELECT id, name, password, email, date_add, activation_hash, activation_hash_date, is_active FROM users WHERE " + fieldName + " = $1"
-	rows, _ := r.db.Query(context.Background(), query, FieldValue)
+	rows, err := r.db.Query(context.Background(), query, fieldValue)
+	if err != nil {
+		slog.Error("UsersRepositoryPostgres getByField Query", "err", err)
+		return nil
+	}
+	defer rows.Close()
 	user, err := pgx.CollectOneRow(rows, pgx.RowToStructByName[User])
 	if err != nil {
 		if err == pgx.ErrNoRows {
-			return nil, nil
+			return nil
 		}
-		return nil, fmt.Errorf("failed to get user by %s = %v: %w", fieldName, FieldValue, err)
+		slog.Error("UsersRepositoryPostgres getByField CollectOneRow", "fieldName", fieldName, "FieldValue", fieldValue, "err", err)
+		return nil
 	}
-	return &user, nil
+	return &user
 }
 
-func (r *UsersRepositoryPostgres) GetByID(id int) (*User, error) {
+func (r *UsersRepositoryPostgres) GetByID(id int) *User {
 	return r.getByField("id", id)
 }
 
-func (r *UsersRepositoryPostgres) GetByEmail(email string) (*User, error) {
+func (r *UsersRepositoryPostgres) GetByEmail(email string) *User {
 	return r.getByField("email", email)
 }
 
-func (r *UsersRepositoryPostgres) GetByActivationHash(activationHash string) (*User, error) {
+func (r *UsersRepositoryPostgres) GetByActivationHash(activationHash string) *User {
 	return r.getByField("activation_hash", activationHash)
 }
 

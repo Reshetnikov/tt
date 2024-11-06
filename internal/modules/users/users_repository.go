@@ -15,9 +15,9 @@ type User struct {
 
 type UsersRepository interface {
 	Create(user *User) error
-	GetByID(id int) (*User, error)
-	GetByEmail(email string) (*User, error)
-	GetByActivationHash(activationHash string) (*User, error)
+	GetByID(id int) *User
+	GetByEmail(email string) *User
+	GetByActivationHash(activationHash string) *User
 	Update(user *User) error
 	Delete(id int) error
 }

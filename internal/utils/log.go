@@ -3,6 +3,7 @@ package utils
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"log"
 	"log/slog"
 	"os"
@@ -40,10 +41,31 @@ func (h *LogHandlerDev) Handle(ctx context.Context, r slog.Record) error {
 		level = Colors.Red + level + Colors.Reset
 	}
 
+	// For single parameter. Without json.MarshalIndent
+	// slog.Debug("tasks", tasks)
+	oneParams := ""
+	if r.NumAttrs() == 1 {
+		r.Attrs(func(a slog.Attr) bool {
+			if a.Key == "!BADKEY" {
+				val := a.Value.Any()
+				oneParams = fmt.Sprintf(" %s%T%s = %s%+v%s\n",
+					Colors.Blue, val, Colors.Reset, // Type
+					Colors.Yellow, val, Colors.Reset) // Value
+			}
+			return false
+		})
+	}
+
 	timeStr := r.Time.Format("[15:05:05.000]")
 	msg := highlightPanicAndApp(r.Message)
-	h.log.Println(timeStr, level, msg)
+	h.log.Println(timeStr, level, StrColor(msg, Colors.Green), oneParams)
 
+	if oneParams != "" {
+		return nil
+	}
+
+	// For pairs of parameters. With json.MarshalIndent
+	// slog.Debug("DashboardHandler", "tasks", tasks)
 	r.Attrs(func(a slog.Attr) bool {
 		key := a.Key
 		val := a.Value.Any()

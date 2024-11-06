@@ -3,12 +3,11 @@ package dashboard
 import (
 	"log/slog"
 	"net/http"
-	"time"
 	"time-tracker/internal/modules/users"
 	"time-tracker/internal/utils"
 )
 
-var d = slog.Debug
+var D = slog.Debug
 
 type DashboardHandler struct {
 	repo *DashboardRepositoryPostgres
@@ -24,17 +23,15 @@ func (h *DashboardHandler) HandleDashboard(w http.ResponseWriter, r *http.Reques
 		utils.RedirectLogin(w, r)
 		return
 	}
-	tasks := h.repo.FetchTasks(user.ID)
-	selectedWeek := time.Now().Truncate(24*time.Hour).AddDate(0, 0, -int(time.Now().Weekday())) // Начало недели
-	weeklyRecords := h.repo.FetchWeeklyRecords(user.ID, selectedWeek)
+	tasks := h.repo.Tasks(user.ID)
+	records := h.repo.Records(user.ID)
 
-	// d("HandleDashboard", "tasks", tasks)
-	d("HandleDashboard", "weeklyRecords", weeklyRecords)
+	D("tasks", tasks)
+	D("HandleDashboard", "records", records)
 
 	users.RenderTemplate(w, r, "dashboard", utils.TplData{
-		"Title":         "Tasks & Records Dashboard",
-		"Tasks":         tasks,
-		"WeeklyRecords": weeklyRecords,
-		"SelectedWeek":  selectedWeek,
+		"Title":   "Tasks & Records Dashboard",
+		"Tasks":   tasks,
+		"Records": records,
 	})
 }
