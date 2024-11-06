@@ -21,6 +21,7 @@ services:
     depends_on:
       - postgres
       - redis
+    command: ["sh", "/app/scripts/start.sh"]
 
   postgres:
     image: postgres:17.0-alpine3.20
