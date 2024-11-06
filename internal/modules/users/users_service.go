@@ -106,7 +106,7 @@ func (s *UsersService) makeSession(userId int) (*Session, error) {
 	sessionID := uuid.New().String()
 	session := &Session{
 		UserID: userId,
-		Expiry: time.Now().Add(time.Hour * 24),
+		Expiry: time.Now().AddDate(1, 0, 0),
 	}
 	session.SessionID = sessionID
 	err := s.sessionsRepo.Create(sessionID, session)

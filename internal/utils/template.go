@@ -1,8 +1,10 @@
 package utils
 
 import (
+	"fmt"
 	"log"
 	"net/http"
+	"os"
 	"path/filepath"
 	"text/template"
 	"time"
@@ -37,11 +39,23 @@ func dateFormat(layout string, t time.Time) string {
 	return t.Format(layout)
 }
 
+// Example:
+// <link href="/css/output.css?v={{fileVersion "/css/output.css"}}" rel="stylesheet" />
+func fileVersion(relPath string) string {
+	absPath := filepath.Join("web/public", relPath)
+	fileInfo, err := os.Stat(absPath)
+	if err != nil {
+		return ""
+	}
+	return fmt.Sprintf("%d", fileInfo.ModTime().Unix())
+}
+
 // The method also extracts the user from the context and adds the "User" to the template data.
 func RenderTemplate(w http.ResponseWriter, tmpl string, data TplData) {
 	templates := template.New("").Funcs(template.FuncMap{
-		"dict": dict,
-		"date": dateFormat,
+		"dict":        dict,
+		"date":        dateFormat,
+		"fileVersion": fileVersion,
 	})
 
 	layout := filepath.Join("web", "templates", "layout.html")
