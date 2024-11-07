@@ -19,4 +19,5 @@ RUN go install -tags 'postgres' github.com/pressly/goose/v3/cmd/goose@latest
 
 EXPOSE 8080
 
-# CMD ["sh", "/app/scripts/start.sh"]
+CMD ["sh", "/app/scripts/start.sh"]
+# CMD ["/bin/sh", "-c", "cd /app/web && npm run watch:css --loglevel=verbose"]
