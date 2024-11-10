@@ -23,10 +23,9 @@ func (h *DashboardHandler) HandleDashboard(w http.ResponseWriter, r *http.Reques
 		utils.RedirectLogin(w, r)
 		return
 	}
-	tasks := h.repo.Tasks(user.ID)
-	records := h.repo.Records(user.ID)
+	records, tasks := h.repo.RecordsWithTasks(user.ID)
 
-	D("tasks", tasks)
+	D("tasks", "tasks", tasks)
 	D("HandleDashboard", "records", records)
 
 	users.RenderTemplate(w, r, "dashboard", utils.TplData{

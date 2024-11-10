@@ -9,18 +9,15 @@ import (
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
-// DashboardRepositoryPostgres отвечает за доступ к данным
 type DashboardRepositoryPostgres struct {
 	db *pgxpool.Pool
 }
 
-// NewDashboardRepositoryPostgres создает новый репозиторий для работы с базой данных
 func NewDashboardRepositoryPostgres(db *pgxpool.Pool) *DashboardRepositoryPostgres {
 	return &DashboardRepositoryPostgres{db: db}
 }
 
-// FetchTasks извлекает задачи пользователя
-func (r *DashboardRepositoryPostgres) Tasks(userID int) (tasks []Task) {
+func (r *DashboardRepositoryPostgres) Tasks(userID int) (tasks []*Task) {
 	rows, err := r.db.Query(context.Background(), `
 		SELECT id, user_id, title, description, color, sort_order, is_completed
 		FROM tasks WHERE user_id = $1
@@ -32,15 +29,21 @@ func (r *DashboardRepositoryPostgres) Tasks(userID int) (tasks []Task) {
 	}
 	defer rows.Close()
 
-	tasks, err = pgx.CollectRows(rows, pgx.RowToStructByName[Task])
+	taskValues, err := pgx.CollectRows(rows, pgx.RowToStructByName[Task])
 	if err != nil {
 		slog.Error("DashboardRepositoryPostgres Tasks CollectRows", "err", err)
 		return
 	}
+
+	// []Task to []*Task
+	for _, t := range taskValues {
+		task := t
+		tasks = append(tasks, &task)
+	}
 	return
 }
 
-func (r *DashboardRepositoryPostgres) Records(userID int) (records []Record) {
+func (r *DashboardRepositoryPostgres) Records(userID int) (records []*Record) {
 	rows, err := r.db.Query(context.Background(), `
 		SELECT r.id, r.task_id, r.time_start, r.time_end, r.comment
 		FROM records r
@@ -61,7 +64,29 @@ func (r *DashboardRepositoryPostgres) Records(userID int) (records []Record) {
 			slog.Error("DashboardRepositoryPostgres Records Scan", "err", err)
 			return
 		}
-		records = append(records, record)
+		records = append(records, &record)
+	}
+	return
+}
+
+func (r *DashboardRepositoryPostgres) RecordsWithTasks(userID int) (records []*Record, tasks []*Task) {
+	tasks = r.Tasks(userID)
+	if len(tasks) == 0 {
+		return
+	}
+
+	tasksMap := make(map[int]*Task, len(tasks))
+	for _, task := range tasks {
+		tasksMap[task.ID] = task
+	}
+
+	records = r.Records(userID)
+	for _, record := range records {
+		if task, exists := tasksMap[record.TaskID]; exists {
+			record.Task = task
+		} else {
+			slog.Error("DashboardRepositoryPostgres RecordsWithTasks Task Not Found", "record", record)
+		}
 	}
 	return
 }
