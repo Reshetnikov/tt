@@ -2,7 +2,7 @@ package utils
 
 import (
 	"fmt"
-	"log"
+	"log/slog"
 	"net/http"
 	"os"
 	"path/filepath"
@@ -50,35 +50,54 @@ func fileVersion(relPath string) string {
 	return fmt.Sprintf("%d", fileInfo.ModTime().Unix())
 }
 
-// The method also extracts the user from the context and adds the "User" to the template data.
-func RenderTemplate(w http.ResponseWriter, tmpl string, data TplData) {
-	templates := template.New("").Funcs(template.FuncMap{
+func createTemplate(w http.ResponseWriter, tplPath string) (templates *template.Template) {
+	templates = template.New("").Funcs(template.FuncMap{
 		"dict":        dict,
 		"date":        dateFormat,
 		"fileVersion": fileVersion,
 	})
 
-	layout := filepath.Join("web", "templates", "layout.html")
-	tmplPath := filepath.Join("web", "templates", tmpl+".html")
-	templates, err := templates.ParseFiles(layout, tmplPath)
-	if err != nil {
-		log.Println("Error loading template " + tmplPath + " | " + err.Error())
-		http.Error(w, "Error loading template "+tmpl, http.StatusInternalServerError)
-		return
-	}
-
 	components := filepath.Join("web", "templates", "components", "*")
-	templates, err = templates.ParseGlob(components)
+	templates, err := templates.ParseGlob(components)
 	if err != nil {
-		log.Println("Error loading template " + tmplPath + " | " + err.Error())
-		http.Error(w, "Error loading template "+tmpl, http.StatusInternalServerError)
+		slog.Error("RenderTemplate ParseGlob", "components", components, "err", err.Error())
+		http.Error(w, "Error loading template", http.StatusInternalServerError)
 		return
 	}
 
-	err = templates.ExecuteTemplate(w, "layout", data)
+	tplPath = filepath.Join("web", "templates", tplPath+".html")
+	templates, err = templates.ParseFiles(tplPath)
 	if err != nil {
-		log.Println("Error rendering template " + tmplPath + " | " + err.Error())
-		log.Println(err)
-		http.Error(w, "Error rendering template "+tmpl, http.StatusInternalServerError)
+		slog.Error("RenderTemplate ParseFiles", "tmplPath", tplPath, "err", err.Error())
+		http.Error(w, "Error loading template", http.StatusInternalServerError)
+		return
 	}
+	return
+}
+
+func executeTemplate(templates *template.Template, w http.ResponseWriter, tplPath string, data TplData) {
+	err := templates.ExecuteTemplate(w, tplPath, data)
+	if err != nil {
+		slog.Error("RenderTemplate ExecuteTemplate", "err", err.Error())
+		http.Error(w, "Error rendering template", http.StatusInternalServerError)
+	}
+}
+
+func RenderTemplate(w http.ResponseWriter, tplPath string, data TplData) {
+	templates := createTemplate(w, tplPath)
+
+	layout := filepath.Join("web", "templates", "layout.html")
+	templates, err := templates.ParseFiles(layout)
+	if err != nil {
+		slog.Error("RenderTemplate ParseFiles", "layout", layout, "err", err.Error())
+		http.Error(w, "Error loading template", http.StatusInternalServerError)
+		return
+	}
+
+	executeTemplate(templates, w, "layout", data)
+}
+
+func RenderTemplateWithoutLayout(w http.ResponseWriter, tplPath string, tplName string, data TplData) {
+	templates := createTemplate(w, tplPath)
+	executeTemplate(templates, w, tplName, data)
 }

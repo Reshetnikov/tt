@@ -50,6 +50,7 @@ func main() {
 	mux.HandleFunc("POST /logout", usersHandlers.HandleLogout)
 
 	mux.HandleFunc("/dashboard", dashboardHandler.HandleDashboard)
+	mux.HandleFunc("/tasks/new", dashboardHandler.HandleTasksNew)
 	// mux.HandleFunc("/projects", handler)
 	// http.HandleFunc("/projects/{project_id}", handler)
 	// mux.HandleFunc("/tasks", pages.IndexHandler)

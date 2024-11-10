@@ -5,7 +5,7 @@
     type="{{ .Type }}"
     id="{{ .ID }}"
     name="{{ .Name }}"
-    class="focus:shadow-outline w-full appearance-none rounded-xl border {{if .Errors}}border-red-500{{end}} px-3 py-2 leading-tight text-gray-700 shadow focus:outline-none"
+    class="{{if .Class }}{{ .Class }}{{else}}focus:shadow-outline w-full appearance-none rounded-xl border px-3 py-2 leading-tight text-gray-700 shadow focus:outline-none{{end}} {{if .Errors}}border-red-500{{end}}"
     value="{{ .Value }}"
   />
 
