@@ -26,7 +26,7 @@ func (h *UsersHandler) HandleActivation(w http.ResponseWriter, r *http.Request) 
 	}
 	setSessionCookie(w, session.SessionID, session.Expiry)
 
-	RenderTemplate(w, r, "activation-success", utils.TplData{
+	RenderTemplate(w, r, []string{"activation-success"}, utils.TplData{
 		"Title": "Activation Successful - Logged In",
 	})
 }

@@ -6,7 +6,7 @@
     "Type" "text"
     "Name" "title"
     "ID" "title"
-    "Value" .Task.Title
+    "Value" .Form.Title
     "Errors" .Errors.Title
   }}
   {{ template "components/inputField" dict
@@ -14,7 +14,7 @@
     "Type" "text"
     "Name" "description"
     "ID" "description"
-    "Value" .Task.Description
+    "Value" .Form.Description
     "Errors" .Errors.Description
   }}
   {{ template "components/inputField" dict
@@ -22,7 +22,7 @@
     "Type" "color"
     "Name" "color"
     "ID" "color"
-    "Value" .Task.Color
+    "Value" .Form.Color
     "Errors" .Errors.Color
     "Class" "w-full rounded border-gray-300"
   }}

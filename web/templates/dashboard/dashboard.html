@@ -10,25 +10,7 @@
     </div>
 
     <!-- Task list -->
-    <div class="space-y-4" id="task-list">
-      {{ range .Tasks }}
-      <div
-        class="flex cursor-move items-center space-x-3 rounded-lg p-3 shadow-md"
-        style="background-color: {{ .Color }};"
-      >
-        <span class="flex-grow">{{ .Title }}</span>
-        <button class="text-green-500 hover:text-green-700">Play</button>
-        <button
-          class="text-gray-500 hover:text-blue-500"
-          hx-get="/tasks/{{ .ID }}/edit"
-          hx-target="#modal-content"
-          hx-trigger="click"
-        >
-          Edit
-        </button>
-      </div>
-      {{ end }}
-    </div>
+    <div class="space-y-4" id="task-list">{{ template "dashboard/task_list" . }}</div>
 
     <!-- Create new task button -->
     <div class="mt-6">

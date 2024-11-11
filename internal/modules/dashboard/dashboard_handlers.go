@@ -28,7 +28,7 @@ func (h *DashboardHandler) HandleDashboard(w http.ResponseWriter, r *http.Reques
 	D("tasks", "tasks", tasks)
 	D("HandleDashboard", "records", records)
 
-	users.RenderTemplate(w, r, "dashboard/dashboard", utils.TplData{
+	users.RenderTemplate(w, r, []string{"dashboard/dashboard", "dashboard/task_list"}, utils.TplData{
 		"Title":   "Tasks & Records Dashboard",
 		"Tasks":   tasks,
 		"Records": records,
@@ -42,14 +42,19 @@ func (h *DashboardHandler) HandleDashboard(w http.ResponseWriter, r *http.Reques
 }
 
 type taskForm struct {
-	Title       string `form:"title" validate:"required"`
-	Description string `form:"description" validate:"required"`
-	Color       string `form:"color" validate:"required"`
+	Title       string `form:"title" validate:"required,min=1,max=255"`
+	Description string `form:"description" validate:"required,max=10000"`
+	Color       string `form:"color" validate:"required,hexcolor"`
 }
 
 func (h *DashboardHandler) HandleTasksNew(w http.ResponseWriter, r *http.Request) {
-	utils.RenderTemplateWithoutLayout(w, "dashboard/form_task", "dashboard/form_task", utils.TplData{
+	user := users.GetUserFromRequest(r)
+	if user == nil {
+		utils.RenderBlockNeedLogin(w)
+		return
+	}
+	utils.RenderTemplateWithoutLayout(w, []string{"dashboard/form_task"}, "dashboard/form_task", utils.TplData{
 		"Errors": utils.FormErrors{},
-		"Form":   taskForm{},
+		"Form":   taskForm{Color: "#FFFFFF"},
 	})
 }

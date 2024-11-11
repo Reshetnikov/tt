@@ -50,7 +50,7 @@ func fileVersion(relPath string) string {
 	return fmt.Sprintf("%d", fileInfo.ModTime().Unix())
 }
 
-func createTemplate(w http.ResponseWriter, tplPath string) (templates *template.Template) {
+func createTemplate(w http.ResponseWriter, tplPaths []string) (templates *template.Template) {
 	templates = template.New("").Funcs(template.FuncMap{
 		"dict":        dict,
 		"date":        dateFormat,
@@ -64,13 +64,14 @@ func createTemplate(w http.ResponseWriter, tplPath string) (templates *template.
 		http.Error(w, "Error loading template", http.StatusInternalServerError)
 		return
 	}
-
-	tplPath = filepath.Join("web", "templates", tplPath+".html")
-	templates, err = templates.ParseFiles(tplPath)
-	if err != nil {
-		slog.Error("RenderTemplate ParseFiles", "tmplPath", tplPath, "err", err.Error())
-		http.Error(w, "Error loading template", http.StatusInternalServerError)
-		return
+	for _, tplPath := range tplPaths {
+		tplPath = filepath.Join("web", "templates", tplPath+".html")
+		templates, err = templates.ParseFiles(tplPath)
+		if err != nil {
+			slog.Error("RenderTemplate ParseFiles", "tplPath", tplPath, "err", err.Error())
+			http.Error(w, "Error loading template", http.StatusInternalServerError)
+			return
+		}
 	}
 	return
 }
@@ -83,8 +84,8 @@ func executeTemplate(templates *template.Template, w http.ResponseWriter, tplPat
 	}
 }
 
-func RenderTemplate(w http.ResponseWriter, tplPath string, data TplData) {
-	templates := createTemplate(w, tplPath)
+func RenderTemplate(w http.ResponseWriter, tplPaths []string, data TplData) {
+	templates := createTemplate(w, tplPaths)
 
 	layout := filepath.Join("web", "templates", "layout.html")
 	templates, err := templates.ParseFiles(layout)
@@ -97,7 +98,18 @@ func RenderTemplate(w http.ResponseWriter, tplPath string, data TplData) {
 	executeTemplate(templates, w, "layout", data)
 }
 
-func RenderTemplateWithoutLayout(w http.ResponseWriter, tplPath string, tplName string, data TplData) {
-	templates := createTemplate(w, tplPath)
+func RenderTemplateWithoutLayout(w http.ResponseWriter, tplPaths []string, tplName string, data TplData) {
+	templates := createTemplate(w, tplPaths)
 	executeTemplate(templates, w, tplName, data)
+}
+
+func RenderBlockNeedLogin(w http.ResponseWriter) {
+	// w.WriteHeader(http.StatusUnauthorized) // status 401
+	w.Write([]byte(`
+		<div class="p-4 text-center">
+			<p class="text-gray-700">You need to be logged in to access this feature. Please 
+				<a href="/login" class="text-blue-500 hover:text-blue-700 underline font-semibold">log in</a>.
+			</p>
+		</div>
+	`))
 }
