@@ -23,38 +23,35 @@ func (h *DashboardHandler) HandleDashboard(w http.ResponseWriter, r *http.Reques
 		utils.RedirectLogin(w, r)
 		return
 	}
-	records, tasks := h.repo.RecordsWithTasks(user.ID)
+	records, tasks := h.repo.RecordsAndTasks(user.ID)
 
 	D("tasks", "tasks", tasks)
 	D("HandleDashboard", "records", records)
 
-	users.RenderTemplate(w, r, []string{"dashboard/dashboard", "dashboard/task_list"}, utils.TplData{
-		"Title":   "Tasks & Records Dashboard",
-		"Tasks":   tasks,
-		"Records": records,
-	})
+	if r.Header.Get("HX-Request") == "" {
+		users.RenderTemplate(w, r, []string{"dashboard/dashboard", "dashboard/task_list", "dashboard/record_list"}, utils.TplData{
+			"Title":   "Tasks & Records Dashboard",
+			"Tasks":   tasks,
+			"Records": records,
+		})
+	} else {
+		utils.RenderTemplateWithoutLayout(w, []string{"dashboard/dashboard"}, "content", utils.TplData{
+			"Title":   "Tasks & Records Dashboard",
+			"Tasks":   tasks,
+			"Records": records,
+		})
+	}
 
-	// utils.RenderTemplateWithoutLayout(w, "dashboard/dashboard", "content", utils.TplData{
-	// 	"Title":   "Tasks & Records Dashboard",
-	// 	"Tasks":   tasks,
-	// 	"Records": records,
-	// })
 }
 
-type taskForm struct {
-	Title       string `form:"title" validate:"required,min=1,max=255"`
-	Description string `form:"description" validate:"required,max=10000"`
-	Color       string `form:"color" validate:"required,hexcolor"`
-}
-
-func (h *DashboardHandler) HandleTasksNew(w http.ResponseWriter, r *http.Request) {
+func (h *DashboardHandler) HandleRecordList(w http.ResponseWriter, r *http.Request) {
 	user := users.GetUserFromRequest(r)
 	if user == nil {
 		utils.RenderBlockNeedLogin(w)
 		return
 	}
-	utils.RenderTemplateWithoutLayout(w, []string{"dashboard/form_task"}, "dashboard/form_task", utils.TplData{
-		"Errors": utils.FormErrors{},
-		"Form":   taskForm{Color: "#FFFFFF"},
+	records, _ := h.repo.RecordsAndTasks(user.ID)
+	utils.RenderTemplateWithoutLayout(w, []string{"dashboard/record_list"}, "dashboard/record_list", utils.TplData{
+		"Records": records,
 	})
 }

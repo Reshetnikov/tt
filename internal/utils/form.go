@@ -1,6 +1,7 @@
 package utils
 
 import (
+	"log/slog"
 	"net/http"
 	"reflect"
 )
@@ -8,6 +9,7 @@ import (
 // Fills the structure with data from the form
 func ParseFormToStruct(r *http.Request, formStruct interface{}) error {
 	if err := r.ParseForm(); err != nil {
+		slog.Error("ParseFormToStruct ParseForm", "err", err)
 		return err
 	}
 

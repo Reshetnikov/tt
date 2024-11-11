@@ -1,7 +1,7 @@
 {{ define "dashboard/form_task" }}
-<form id="form-task" hx-post="/tasks/save" hx-target="#modal-content" hx-swap="innerHTML" hx-trigger="submit">
+<form id="form-task" hx-post="{{ .URL }}" hx-target="#modal-content" hx-swap="innerHTML" hx-trigger="submit">
   <!-- prettier-ignore -->
-  {{ template "components/inputField" dict 
+  {{ template "components/input_field" dict 
     "Label" "Title"
     "Type" "text"
     "Name" "title"
@@ -9,7 +9,7 @@
     "Value" .Form.Title
     "Errors" .Errors.Title
   }}
-  {{ template "components/inputField" dict
+  {{ template "components/input_field" dict
     "Label" "Description"
     "Type" "text"
     "Name" "description"
@@ -17,7 +17,7 @@
     "Value" .Form.Description
     "Errors" .Errors.Description
   }}
-  {{ template "components/inputField" dict
+  {{ template "components/input_field" dict
     "Label" "Color"
     "Type" "color"
     "Name" "color"

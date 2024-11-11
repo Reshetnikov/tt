@@ -6,9 +6,10 @@
   <button class="text-green-500 hover:text-green-700">Play</button>
   <button
     class="text-gray-500 hover:text-blue-500"
-    hx-get="/tasks/{{ .ID }}/edit"
+    hx-get="/tasks/{{ .ID }}"
     hx-target="#modal-content"
     hx-trigger="click"
+    onclick="openModal()"
   >
     Edit
   </button>

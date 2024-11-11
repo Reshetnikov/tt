@@ -50,7 +50,14 @@ func main() {
 	mux.HandleFunc("POST /logout", usersHandlers.HandleLogout)
 
 	mux.HandleFunc("/dashboard", dashboardHandler.HandleDashboard)
-	mux.HandleFunc("/tasks/new", dashboardHandler.HandleTasksNew)
+	mux.HandleFunc("GET /tasks/new", dashboardHandler.HandleTasksNew)
+	mux.HandleFunc("POST /tasks", dashboardHandler.HandleTasksCreate)
+	mux.HandleFunc("GET /tasks/{id}", dashboardHandler.HandleTasksEdit)
+	mux.HandleFunc("POST /tasks/{id}", dashboardHandler.HandleTasksUpdate)
+	mux.HandleFunc("DELETE /tasks/{id}", dashboardHandler.HandleTasksDelete)
+	mux.HandleFunc("GET /tasks", dashboardHandler.HandleTaskList)
+
+	mux.HandleFunc("/records", dashboardHandler.HandleRecordList)
 	// mux.HandleFunc("/projects", handler)
 	// http.HandleFunc("/projects/{project_id}", handler)
 	// mux.HandleFunc("/tasks", pages.IndexHandler)

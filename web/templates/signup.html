@@ -3,7 +3,7 @@
 
 <form action="/signup" method="POST" class="mx-auto max-w-md rounded-xl bg-white p-6 shadow">
   <!-- prettier-ignore -->
-  {{ template "components/inputField" dict
+  {{ template "components/input_field" dict
     "Label" "Name"
     "Type" "text"
     "Name" "name"
@@ -11,7 +11,7 @@
     "Value" .Form.Name
     "Errors" .Errors.Name
   }}
-  {{ template "components/inputField" dict
+  {{ template "components/input_field" dict
     "Label" "Email"
     "Type" "email"
     "Name" "email"
@@ -19,7 +19,7 @@
     "Value" .Form.Email
     "Errors" .Errors.Email
   }}
-  {{ template "components/inputField" dict 
+  {{ template "components/input_field" dict 
     "Label" "Password"
     "Type" "password"
     "Name" "password"
@@ -27,7 +27,7 @@
     "Value" .Form.Password
     "Errors" .Errors.Password
   }}
-  {{ template "components/inputField" dict
+  {{ template "components/input_field" dict
     "Label" "Confirm Password"
     "Type" "password"
     "Name" "password_confirmation"
