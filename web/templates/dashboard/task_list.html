@@ -3,15 +3,25 @@
 {{ range .Tasks }}
 <div class="flex cursor-move items-center space-x-3 rounded-lg p-3 shadow-md" style="background-color: {{ .Color }};">
   <span class="flex-grow">{{ .Title }}</span>
+  <!-- Play -->
   <button class="text-green-500 hover:text-green-700">Play</button>
+  <!-- Edit -->
   <button
     class="text-gray-500 hover:text-blue-500"
     hx-get="/tasks/{{ .ID }}"
     hx-target="#modal-content"
     hx-trigger="click"
-    onclick="openModal()"
   >
     Edit
+  </button>
+  <!-- Delete -->
+  <button
+    hx-delete="/tasks/{{ .ID }}"
+    hx-swap="none"
+    hx-confirm="Are you sure you wish to delete your task?"
+    class="text-red-500 hover:text-red-700"
+  >
+    Delete
   </button>
 </div>
 {{ end }}

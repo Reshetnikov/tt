@@ -41,6 +41,7 @@ func main() {
 	fsPublic := http.FileServer(http.Dir("./web/public"))
 	mux.Handle("/img/", fsPublic)
 	mux.Handle("/css/", fsPublic)
+	mux.Handle("/js/", fsPublic)
 	mux.Handle("/favicon.ico", fsPublic)
 
 	mux.HandleFunc("/{$}", pages.IndexHandler)

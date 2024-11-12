@@ -1,5 +1,5 @@
 {{ define "dashboard/form_task" }}
-<form id="form-task" hx-post="{{ .URL }}" hx-target="#modal-content" hx-swap="innerHTML" hx-trigger="submit">
+<form hx-post="{{ .URL }}" hx-swap="outerHTML" hx-trigger="submit">
   <!-- prettier-ignore -->
   {{ template "components/input_field" dict 
     "Label" "Title"

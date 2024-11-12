@@ -35,7 +35,7 @@ func (h *DashboardHandler) HandleDashboard(w http.ResponseWriter, r *http.Reques
 			"Records": records,
 		})
 	} else {
-		utils.RenderTemplateWithoutLayout(w, []string{"dashboard/dashboard"}, "content", utils.TplData{
+		utils.RenderTemplateWithoutLayout(w, []string{"dashboard/dashboard", "dashboard/task_list", "dashboard/record_list"}, "content", utils.TplData{
 			"Title":   "Tasks & Records Dashboard",
 			"Tasks":   tasks,
 			"Records": records,

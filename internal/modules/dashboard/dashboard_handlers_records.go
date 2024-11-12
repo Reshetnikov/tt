@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"net/http"
 	"strconv"
+	"time"
 	"time-tracker/internal/modules/users"
 	"time-tracker/internal/utils"
 )
@@ -30,7 +31,6 @@ func (h *DashboardHandler) getUserAndTask(w http.ResponseWriter, r *http.Request
 		return
 	}
 
-	// taskIDStr := r.URL.Query().Get("id")
 	taskIDStr := r.PathValue("id")
 	taskID, err := strconv.Atoi(taskIDStr)
 	if err != nil {
@@ -52,7 +52,7 @@ func (h *DashboardHandler) getUserAndTask(w http.ResponseWriter, r *http.Request
 }
 
 func (h *DashboardHandler) HandleTasksNew(w http.ResponseWriter, r *http.Request) {
-	// time.Sleep(2 * time.Second)
+	time.Sleep(1 * time.Second)
 	user := users.GetUserFromRequest(r)
 	if user == nil {
 		utils.RenderBlockNeedLogin(w)
@@ -80,7 +80,7 @@ func (h *DashboardHandler) HandleTasksCreate(w http.ResponseWriter, r *http.Requ
 			IsCompleted: form.IsCompleted,
 		})
 
-		w.Header().Set("HX-Trigger", `{"refresh-task": "#task-list"}`)
+		w.Header().Set("HX-Trigger", "load-tasks, close-modal")
 		w.Write([]byte("ok"))
 		return
 	}
@@ -120,7 +120,7 @@ func (h *DashboardHandler) HandleTasksUpdate(w http.ResponseWriter, r *http.Requ
 			IsCompleted: form.IsCompleted,
 		})
 		if err == nil {
-			w.Header().Set("HX-Trigger", "refresh-dashboard")
+			w.Header().Set("HX-Trigger", "load-tasks, load-records, close-modal")
 			w.Write([]byte(`ok`))
 			return
 		}
@@ -135,7 +135,7 @@ func (h *DashboardHandler) HandleTasksDelete(w http.ResponseWriter, r *http.Requ
 		return
 	}
 	h.repo.DeleteTask(task.ID)
-	w.Header().Set("HX-Trigger", "refresh-dashboard")
+	w.Header().Set("HX-Trigger", "load-tasks, load-records")
 	w.Write([]byte(`ok`))
 }
 
