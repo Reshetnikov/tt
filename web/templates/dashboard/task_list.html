@@ -1,29 +1,85 @@
 <!-- prettier-ignore -->
 {{ define "dashboard/task_list" }}
-{{ range .Tasks }}
-<div class="flex cursor-move items-center space-x-3 rounded-lg p-3 shadow-md" style="background-color: {{ .Color }};">
-  <span class="flex-grow">{{ .Title }}</span>
-  <!-- Play -->
-  <button class="text-green-500 hover:text-green-700">Play</button>
-  <!-- Edit -->
-  <button
-    class="text-gray-500 hover:text-blue-500"
-    hx-get="/tasks/{{ .ID }}"
-    hx-target="#modal-content"
-    hx-trigger="click"
-  >
-    Edit
-  </button>
-  <!-- Delete -->
-  <button
-    hx-delete="/tasks/{{ .ID }}"
-    hx-swap="none"
-    hx-confirm="Are you sure you wish to delete your task?"
-    class="text-red-500 hover:text-red-700"
-  >
-    Delete
-  </button>
+
+<div
+  id="task-list"
+  hx-get="/tasks{{ if .taskCompleted }}?taskCompleted={{ .taskCompleted }}{{ end }}"
+  hx-trigger="load-tasks from:body"
+  hx-swap="outerHTML"
+>
+  <!-- Task filter -->
+  <div class="m-1 mb-4 flex items-center space-x-2 text-white">
+    <button
+      hx-get="/tasks"
+      hx-target="#task-list"
+      class="{{ if not .taskCompleted }}bg-indigo-600{{ else }}bg-indigo-400{{ end }} hover:bg-indigo-700 rounded-lg p-2 flex-1"
+    >
+      Active
+    </button>
+    <button
+      hx-get="/tasks?taskCompleted=completed"
+      hx-target="#task-list"
+      class='{{ if eq .taskCompleted "completed" }}bg-indigo-600{{ else }}bg-indigo-400{{ end }} hover:bg-indigo-700 rounded-lg p-2 flex-1'
+    >
+      Completed
+    </button>
+    <button
+      hx-get="/tasks?taskCompleted=all"
+      hx-target="#task-list"
+      class='{{ if eq .taskCompleted "all" }}bg-indigo-600{{ else }}bg-indigo-400{{ end }} hover:bg-indigo-700 rounded-lg p-2 flex-1'
+    >
+      All
+    </button>
+  </div>
+
+  <!-- Task list -->
+  {{ range .Tasks }}
+  <div class="m-1 flex cursor-grab items-center space-x-3 rounded-lg border border-gray-200 bg-white p-2 shadow-md">
+    <!-- Иконка перетаскивания -->
+    <div class="rounded-full p-4" style="background-color: {{ .Color }};"></div>
+
+    <!-- Заголовок задачи -->
+    <span class="hidden truncate lg:inline">{{ .Title }}</span>
+    <span class="flex-grow"></span>
+
+    <!-- Иконка Play -->
+    <button class="rounded-full bg-green-100 p-2 hover:bg-green-200">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="size-4 text-green-600">
+        <path
+          d="M6.3 2.84A1.5 1.5 0 0 0 4 4.11v11.78a1.5 1.5 0 0 0 2.3 1.27l9.344-5.891a1.5 1.5 0 0 0 0-2.538L6.3 2.841Z"
+        />
+      </svg>
+    </button>
+
+    <!-- Иконка Edit -->
+    <button
+      class="rounded-full bg-blue-100 p-2 hover:bg-blue-200"
+      hx-get="/tasks/{{ .ID }}"
+      hx-target="#modal-content"
+      hx-trigger="click"
+    >
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="size-4 text-blue-600">
+        <path
+          d="m2.695 14.762-1.262 3.155a.5.5 0 0 0 .65.65l3.155-1.262a4 4 0 0 0 1.343-.886L17.5 5.501a2.121 2.121 0 0 0-3-3L3.58 13.419a4 4 0 0 0-.885 1.343Z"
+        />
+      </svg>
+    </button>
+
+    <!-- Иконка Delete -->
+    <button
+      hx-delete="/tasks/{{ .ID }}"
+      hx-swap="none"
+      hx-confirm="Are you sure you wish to delete your task?"
+      class="rounded-full bg-red-100 p-2 hover:bg-red-200"
+    >
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="size-4 text-red-600">
+        <path
+          d="M6.28 5.22a.75.75 0 0 0-1.06 1.06L8.94 10l-3.72 3.72a.75.75 0 1 0 1.06 1.06L10 11.06l3.72 3.72a.75.75 0 1 0 1.06-1.06L11.06 10l3.72-3.72a.75.75 0 0 0-1.06-1.06L10 8.94 6.28 5.22Z"
+        />
+      </svg>
+    </button>
+  </div>
+  {{ end }}
 </div>
-{{ end }}
 <!-- prettier-ignore -->
 {{ end }}

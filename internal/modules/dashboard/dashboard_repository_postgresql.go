@@ -17,12 +17,21 @@ func NewDashboardRepositoryPostgres(db *pgxpool.Pool) *DashboardRepositoryPostgr
 	return &DashboardRepositoryPostgres{db: db}
 }
 
-func (r *DashboardRepositoryPostgres) Tasks(userID int) (tasks []*Task) {
-	rows, err := r.db.Query(context.Background(), `
+func (r *DashboardRepositoryPostgres) Tasks(userID int, taskCompleted string) (tasks []*Task) {
+	query := `
 		SELECT id, user_id, title, description, color, sort_order, is_completed
 		FROM tasks WHERE user_id = $1
-		ORDER BY sort_order ASC
-	`, userID)
+	`
+	switch taskCompleted {
+	case "completed":
+		query += " AND is_completed = true"
+	case "all":
+		// We do not add any conditions for "all"
+	default:
+		query += " AND is_completed = false"
+	}
+	query += " ORDER BY is_completed ASC, sort_order ASC"
+	rows, err := r.db.Query(context.Background(), query, userID)
 	if err != nil {
 		slog.Error("DashboardRepositoryPostgres Tasks Query", "err", err)
 		return
@@ -111,8 +120,8 @@ func (r *DashboardRepositoryPostgres) RecordsWithTasks(userID int) (records []*R
 	return
 }
 
-func (r *DashboardRepositoryPostgres) RecordsAndTasks(userID int) (records []*Record, tasks []*Task) {
-	tasks = r.Tasks(userID)
+/*func (r *DashboardRepositoryPostgres) RecordsAndTasks(userID int) (records []*Record, tasks []*Task) {
+	tasks = r.Tasks(userID, "all")
 	if len(tasks) == 0 {
 		return
 	}
@@ -131,7 +140,7 @@ func (r *DashboardRepositoryPostgres) RecordsAndTasks(userID int) (records []*Re
 		}
 	}
 	return
-}
+}*/
 
 func (r *DashboardRepositoryPostgres) CreateTask(task *Task) (int, error) {
 	ctx := context.Background()

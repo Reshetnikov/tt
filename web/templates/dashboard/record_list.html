@@ -1,7 +1,7 @@
 <!-- prettier-ignore -->
 {{ define "dashboard/record_list" }}
 {{ range .Records }}
-<div class="relative flex items-center space-x-3 rounded-lg border border-gray-200 p-3 shadow-md">
+<div class="relative flex items-center space-x-3 rounded-lg border border-gray-200 bg-white p-3 shadow-md">
   <div class="absolute top-0 h-1 rounded-full" style="background-color: {{ .Task.Color }}; width: 50%"></div>
   <span class="flex-grow">{{ .Comment }}</span>
   <button class="text-gray-500 hover:text-blue-500">Edit</button>

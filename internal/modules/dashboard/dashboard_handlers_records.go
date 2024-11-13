@@ -145,8 +145,10 @@ func (h *DashboardHandler) HandleTaskList(w http.ResponseWriter, r *http.Request
 		utils.RenderBlockNeedLogin(w)
 		return
 	}
-	tasks := h.repo.Tasks(user.ID)
+	taskCompleted := r.URL.Query().Get("taskCompleted")
+	tasks := h.repo.Tasks(user.ID, taskCompleted)
 	utils.RenderTemplateWithoutLayout(w, []string{"dashboard/task_list"}, "dashboard/task_list", utils.TplData{
-		"Tasks": tasks,
+		"Tasks":         tasks,
+		"taskCompleted": taskCompleted,
 	})
 }

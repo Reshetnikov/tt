@@ -80,7 +80,7 @@
 
     <!-- Main content -->
     <main class="flex-grow">
-      <div class="mx-auto max-w-7xl py-6 sm:px-6 lg:px-8">{{ block "content" . }}{{ end }}</div>
+      <div class="mx-auto py-6 sm:px-6 lg:px-8">{{ block "content" . }}{{ end }}</div>
     </main>
 
     <!-- Footer -->
@@ -128,12 +128,12 @@
       });
 
       // Modal window
+      function openModal() {
+        document.getElementById("modal").classList.remove("hidden");
+      }
       function closeModal() {
         document.getElementById("modal").classList.add("hidden");
         document.getElementById("modal-content").innerHTML = "";
-      }
-      function openModal() {
-        document.getElementById("modal").classList.remove("hidden");
       }
       document.addEventListener("htmx:afterOnLoad", function (event) {
         if (event.detail.target.id === "modal-content") {
