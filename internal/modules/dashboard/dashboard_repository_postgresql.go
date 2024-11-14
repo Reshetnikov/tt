@@ -142,23 +142,24 @@ func (r *DashboardRepositoryPostgres) RecordsWithTasks(userID int) (records []*R
 	return
 }*/
 
-func (r *DashboardRepositoryPostgres) CreateTask(task *Task) (int, error) {
-	ctx := context.Background()
-
-	// Get the maximum sort_order value for the given user_id and is_completed
-	var maxSortOrder int
-	err := r.db.QueryRow(ctx, `
+func (r *DashboardRepositoryPostgres) GetMaxSortOrder(userId int, isCompleted bool) (maxSortOrder int) {
+	err := r.db.QueryRow(context.Background(), `
         SELECT COALESCE(MAX(sort_order), 0) 
         FROM tasks 
         WHERE user_id = $1 AND is_completed = $2
-    `, task.UserID, task.IsCompleted).Scan(&maxSortOrder)
+    `, userId, isCompleted).Scan(&maxSortOrder)
 	if err != nil {
 		slog.Error("DashboardRepositoryPostgres CreateTask QueryRow", "err", err)
 	}
+	return
+}
+
+func (r *DashboardRepositoryPostgres) CreateTask(task *Task) (int, error) {
+	maxSortOrder := r.GetMaxSortOrder(task.UserID, task.IsCompleted)
 	task.SortOrder = maxSortOrder + 1
 
 	var newTaskID int
-	err = r.db.QueryRow(ctx, `
+	err := r.db.QueryRow(context.Background(), `
 		INSERT INTO tasks (user_id, title, description, color, sort_order, is_completed)
 		VALUES ($1, $2, $3, $4, $5, $6)
 		RETURNING id
@@ -186,9 +187,9 @@ func (r *DashboardRepositoryPostgres) GetTaskByID(id int) (*Task, error) {
 func (r *DashboardRepositoryPostgres) UpdateTask(task *Task) error {
 	_, err := r.db.Exec(context.Background(), `
 		UPDATE tasks
-		SET title = $1, description = $2, color = $3, is_completed = $4
-		WHERE id = $5
-	`, task.Title, task.Description, task.Color, task.IsCompleted, task.ID)
+		SET title = $1, description = $2, color = $3, is_completed = $4, sort_order = $5
+		WHERE id = $6
+	`, task.Title, task.Description, task.Color, task.IsCompleted, task.SortOrder, task.ID)
 	if err != nil {
 		slog.Error("DashboardRepositoryPostgres UpdateTask Query", "err", err)
 		return err

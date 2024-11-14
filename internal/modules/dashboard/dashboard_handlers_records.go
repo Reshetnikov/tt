@@ -113,12 +113,16 @@ func (h *DashboardHandler) HandleTasksUpdate(w http.ResponseWriter, r *http.Requ
 	utils.ParseFormToStruct(r, &form)
 	formErrors := utils.NewValidator(&form).Validate()
 	if !formErrors.HasErrors() {
+		if form.IsCompleted != task.IsCompleted {
+			task.SortOrder = h.repo.GetMaxSortOrder(user.ID, form.IsCompleted) + 1
+		}
 		err := h.repo.UpdateTask(&Task{
 			ID:          task.ID,
 			Title:       form.Title,
 			Description: form.Description,
 			Color:       form.Color,
 			IsCompleted: form.IsCompleted,
+			SortOrder:   task.SortOrder,
 		})
 		if err == nil {
 			w.Header().Set("HX-Trigger", "load-tasks, load-records, close-modal")

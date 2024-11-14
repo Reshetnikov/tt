@@ -39,7 +39,7 @@
     <div class="rounded-full p-4" style="background-color: {{ .Color }};"></div>
 
     <!-- Заголовок задачи -->
-    <span class="hidden truncate lg:inline">{{ .Title }}</span>
+    <span class="hidden truncate lg:inline {{ if .IsCompleted }}line-through{{ end }}">{{ .Title }}</span>
     <span class="flex-grow"></span>
 
     <!-- Иконка Play -->
