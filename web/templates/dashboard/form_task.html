@@ -1,5 +1,5 @@
 {{ define "dashboard/form_task" }}
-<form hx-post="{{ .URL }}" hx-swap="outerHTML" hx-trigger="submit">
+<form hx-post="{{ .URL }}" hx-swap="innerHTML" hx-trigger="submit">
   <!-- prettier-ignore -->
   {{ template "components/input_field" dict 
     "Label" "Title"
@@ -25,6 +25,14 @@
     "Value" .Form.Color
     "Errors" .Errors.Color
     "Class" "w-full rounded border-gray-300"
+  }}
+  {{ template "components/input_field" dict
+    "Label" "Completed"
+    "Type" "checkbox"
+    "Name" "is_completed"
+    "ID" "isCompleted"
+    "Value" .Form.IsCompleted
+    "Errors" .Errors.IsCompleted
   }}
 
   <div class="mt-4 text-right">

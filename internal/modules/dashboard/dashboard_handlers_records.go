@@ -13,7 +13,7 @@ type taskForm struct {
 	Title       string `form:"title" validate:"required,min=1,max=255"`
 	Description string `form:"description" validate:"max=10000"`
 	Color       string `form:"color" validate:"required,hexcolor"`
-	IsCompleted bool   `form:"isCompleted"`
+	IsCompleted bool   `form:"is_completed" label:"Completed"`
 }
 
 func (h *DashboardHandler) renderTaskForm(w http.ResponseWriter, form taskForm, formErrors utils.FormErrors, url string) {
@@ -98,6 +98,7 @@ func (h *DashboardHandler) HandleTasksEdit(w http.ResponseWriter, r *http.Reques
 		Title:       task.Title,
 		Description: task.Description,
 		Color:       task.Color,
+		IsCompleted: task.IsCompleted,
 	}
 	h.renderTaskForm(w, form, utils.FormErrors{}, fmt.Sprintf("/tasks/%d", task.ID))
 }

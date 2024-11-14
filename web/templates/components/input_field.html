@@ -1,6 +1,16 @@
 {{ define "components/input_field" }}
 <div class="mb-4">
   <label class="mb-2 block font-bold text-gray-700" for="{{ .ID }}">{{ .Label }}</label>
+  {{ if eq .Type "checkbox" }}
+  <!-- prettier-ignore -->
+  <input
+    type="checkbox"
+    id="{{ .ID }}"
+    name="{{ .Name }}"
+    class="{{if .Class }}{{ .Class }}{{else}}focus:shadow-outline rounded-lg text-blue-500{{end}}"
+    {{ if .Value }}checked{{ end }}
+  />
+  {{ else }}
   <input
     type="{{ .Type }}"
     id="{{ .ID }}"
@@ -8,7 +18,8 @@
     class="{{if .Class }}{{ .Class }}{{else}}focus:shadow-outline w-full appearance-none rounded-xl border px-3 py-2 leading-tight text-gray-700 shadow focus:outline-none{{end}} {{if .Errors}}border-red-500{{end}}"
     value="{{ .Value }}"
   />
-
+  {{ end }}
+  <!-- prettier-ignore -->
   {{ template "components/errors" .Errors}}
 </div>
 {{ end }}

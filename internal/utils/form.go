@@ -4,6 +4,7 @@ import (
 	"log/slog"
 	"net/http"
 	"reflect"
+	"strconv"
 )
 
 // Fills the structure with data from the form
@@ -21,7 +22,18 @@ func ParseFormToStruct(r *http.Request, formStruct interface{}) error {
 
 		if values, ok := r.Form[fieldForm]; ok {
 			if valFormStruct.Field(i).CanSet() {
-				valFormStruct.Field(i).SetString(values[0])
+				switch valFormStruct.Field(i).Kind() {
+				case reflect.String:
+					valFormStruct.Field(i).SetString(values[0])
+				case reflect.Bool:
+					valFormStruct.Field(i).SetBool(values[0] == "on" || values[0] == "true")
+				case reflect.Int, reflect.Int64:
+					if intValue, err := strconv.Atoi(values[0]); err == nil {
+						valFormStruct.Field(i).SetInt(int64(intValue))
+					}
+				default:
+					//
+				}
 			}
 		}
 	}

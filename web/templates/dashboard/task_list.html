@@ -56,6 +56,7 @@
       class="rounded-full bg-blue-100 p-2 hover:bg-blue-200"
       hx-get="/tasks/{{ .ID }}"
       hx-target="#modal-content"
+      hx-swap="innerHTML"
       hx-trigger="click"
     >
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="size-4 text-blue-600">
