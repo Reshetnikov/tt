@@ -38,6 +38,12 @@
         </symbol>
       </defs>
     </svg>
+    <!-- Global preloader -->
+    <div
+      id="global-preloader"
+      class="fixed left-0 top-0 z-50 hidden h-1 w-0 animate-bounce bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 transition-[width] duration-200 ease-out"
+    ></div>
+
     <!-- Header -->
     <header class="bg-white shadow">
       <div class="mx-auto flex max-w-7xl items-center justify-between px-4 py-6 sm:px-6 lg:px-8">
@@ -90,15 +96,15 @@
       </div>
     </footer>
 
-    <!-- Spinner -->
-    <div
+    <!-- Global preloader: Spinner -->
+    <!-- <div
       id="global-preloader"
       class="fixed inset-0 z-50 flex hidden items-center justify-center bg-gray-800 bg-opacity-50"
     >
       <svg class="h-8 w-8 animate-spin fill-blue-600 text-gray-200 dark:text-gray-600">
         <use xlink:href="#spinner-icon"></use>
       </svg>
-    </div>
+    </div> -->
 
     <!-- Modal window -->
     <div id="modal" class="fixed inset-0 z-50 flex hidden items-center justify-center bg-gray-800 bg-opacity-50">
@@ -119,12 +125,22 @@
     </div>
 
     <script>
-      // Spinner
+      // Global preloader
       document.addEventListener("htmx:beforeRequest", function () {
-        document.getElementById("global-preloader").classList.remove("hidden");
+        const preloader = document.getElementById("global-preloader");
+        preloader.classList.remove("hidden");
+        setTimeout(() => {
+          preloader.classList.remove("w-0");
+          preloader.classList.add("w-full");
+        }, 1);
       });
       document.addEventListener("htmx:afterRequest", function () {
-        document.getElementById("global-preloader").classList.add("hidden");
+        // setTimeout(() => {
+        const preloader = document.getElementById("global-preloader");
+        preloader.classList.add("hidden");
+        preloader.classList.add("w-0");
+        preloader.classList.remove("w-full");
+        // }, 100);
       });
 
       // Modal window
