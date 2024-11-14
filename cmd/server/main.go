@@ -57,6 +57,7 @@ func main() {
 	mux.HandleFunc("POST /tasks/{id}", dashboardHandler.HandleTasksUpdate)
 	mux.HandleFunc("DELETE /tasks/{id}", dashboardHandler.HandleTasksDelete)
 	mux.HandleFunc("GET /tasks", dashboardHandler.HandleTaskList)
+	mux.HandleFunc("POST /tasks/update-sort-order", dashboardHandler.HandleUpdateSortOrder)
 
 	mux.HandleFunc("/records", dashboardHandler.HandleRecordList)
 	// mux.HandleFunc("/projects", handler)

@@ -208,6 +208,13 @@ func (r *DashboardRepositoryPostgres) DeleteTask(id int) error {
 	return nil
 }
 
+// userID is needed for access control instead of validation
+func (repo *DashboardRepositoryPostgres) UpdateTaskSortOrder(taskID, userID, sortOrder int) error {
+	query := `UPDATE tasks SET sort_order = $1 WHERE id = $2 AND user_id = $3`
+	_, err := repo.db.Exec(context.Background(), query, sortOrder, taskID, userID)
+	return err
+}
+
 // FetchWeeklyRecords извлекает записи за неделю
 func (r *DashboardRepositoryPostgres) FetchWeeklyRecords(userID int, startOfWeek time.Time) (weeklyRecords []DailyRecords) {
 	for i := 0; i < 7; i++ {

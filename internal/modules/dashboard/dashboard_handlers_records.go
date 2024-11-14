@@ -1,6 +1,7 @@
 package dashboard
 
 import (
+	"encoding/json"
 	"fmt"
 	"net/http"
 	"strconv"
@@ -156,4 +157,39 @@ func (h *DashboardHandler) HandleTaskList(w http.ResponseWriter, r *http.Request
 		"Tasks":         tasks,
 		"taskCompleted": taskCompleted,
 	})
+}
+
+func (h *DashboardHandler) HandleUpdateSortOrder(w http.ResponseWriter, r *http.Request) {
+	// bytedata, err := io.ReadAll(r.Body)
+	// reqBodyString := string(bytedata)
+	// D("Decode", "reqBodyString", reqBodyString)
+
+	user := users.GetUserFromRequest(r)
+	if user == nil {
+		http.Error(w, "Access denied", http.StatusForbidden)
+		return
+	}
+	var order []struct {
+		ID        int `json:"id"`
+		SortOrder int `json:"sortOrder"`
+	}
+
+	err := json.NewDecoder(r.Body).Decode(&order)
+	if err != nil {
+		http.Error(w, "Invalid request", http.StatusBadRequest)
+		return
+	}
+
+	for _, task := range order {
+		err := h.repo.UpdateTaskSortOrder(task.ID, user.ID, task.SortOrder)
+		if err != nil {
+			http.Error(w, "Error updating task order", http.StatusInternalServerError)
+			return
+		}
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	// The request is sent via fetch, not html, so tiger must be called in js: htmx.trigger(document.body, "load-tasks");
+	// w.Header().Set("HX-Trigger", "load-tasks")
+	w.Write([]byte(`{"status": "success"}`))
 }

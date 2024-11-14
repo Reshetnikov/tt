@@ -9,6 +9,7 @@ import (
 
 func SessionMiddleware(next http.Handler, sessionsRepo SessionsRepository, usersRepo UsersRepository) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		// D("SessionMiddleware", r.URL)
 		cookie, err := r.Cookie(sessionCookieName)
 		// slog.Debug("SessionMiddleware", "cookie", cookie)
 		if err != nil || cookie.Value == "" {

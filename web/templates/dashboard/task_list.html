@@ -34,22 +34,31 @@
 
   <!-- Task list -->
   {{ range .Tasks }}
-  <div class="m-1 flex cursor-grab items-center space-x-3 rounded-lg border border-gray-200 bg-white p-2 shadow-md">
-    <!-- Иконка перетаскивания -->
+  <div
+    id="task-{{ .ID }}"
+    class="task-item m-1 flex cursor-grab items-center space-x-3 rounded-lg border border-gray-200 bg-white p-2 shadow-md transition-all duration-200"
+    data-task-id="{{ .ID }}"
+    draggable="true"
+    ondragstart="dragStart(event)"
+    ondragover="dragOver(event)"
+    ondrop="drop(event)"
+    ondragend="dragEnd(event)"
+  >
+    <!-- Color -->
     <div class="rounded-full p-4" style="background-color: {{ .Color }};"></div>
 
-    <!-- Заголовок задачи -->
+    <!-- Title -->
     <span class="hidden truncate lg:inline {{ if .IsCompleted }}line-through{{ end }}">{{ .Title }}</span>
     <span class="flex-grow"></span>
 
-    <!-- Иконка Play -->
+    <!-- Play -->
     <button class="rounded-full bg-green-100 p-2 hover:bg-green-200">
       <svg class="size-4 text-green-600">
         <use xlink:href="#icon-play"></use>
       </svg>
     </button>
 
-    <!-- Иконка Edit -->
+    <!-- Edit -->
     <button
       class="rounded-full bg-blue-100 p-2 hover:bg-blue-200"
       hx-get="/tasks/{{ .ID }}"
@@ -62,7 +71,7 @@
       </svg>
     </button>
 
-    <!-- Иконка Delete -->
+    <!-- Delete -->
     <button
       hx-delete="/tasks/{{ .ID }}"
       hx-swap="none"
@@ -75,6 +84,81 @@
     </button>
   </div>
   {{ end }}
+
+  <script>
+    {
+      let draggedElement = null;
+
+      function dragStart(event) {
+        draggedElement = event.target;
+        event.dataTransfer.effectAllowed = "move";
+      }
+
+      function dragOver(event) {
+        event.preventDefault();
+        event.dataTransfer.dropEffect = "move";
+
+        const droppedElement = event.target.closest(".task-item");
+
+        if (draggedElement !== droppedElement && droppedElement) {
+          const draggedIndex = Array.from(droppedElement.parentNode.children).indexOf(draggedElement);
+          const droppedIndex = Array.from(droppedElement.parentNode.children).indexOf(droppedElement);
+
+          if (draggedIndex < droppedIndex) {
+            droppedElement.parentNode.insertBefore(draggedElement, droppedElement.nextSibling);
+            draggedElement.classList.add("-translate-y-full");
+            setTimeout(() => {
+              draggedElement.classList.remove("-translate-y-full");
+            }, 1);
+          } else {
+            droppedElement.parentNode.insertBefore(draggedElement, droppedElement);
+            draggedElement.classList.add("translate-y-full");
+            setTimeout(() => {
+              draggedElement.classList.remove("translate-y-full");
+            }, 1);
+          }
+        }
+      }
+
+
+      function drop(event) {
+        event.preventDefault();
+        updateTaskOrder();
+      }
+
+      function dragEnd(event) {
+        draggedElement = null;
+      }
+
+      function updateTaskOrder() {
+        const sortOrders = [];
+        const taskItems = document.querySelectorAll(".task-item");
+
+        taskItems.forEach((task, index) => {
+          sortOrders.push({
+            id: Number(task.dataset.taskId),
+            sortOrder: index + 1,
+          });
+        });
+
+        fetch("/tasks/update-sort-order", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(sortOrders),
+        })
+          .then((response) => response.json())
+          .then((data) => {
+            console.log("Order updated:", data);
+            htmx.trigger(document.body, "load-tasks");
+          })
+          .catch((error) => {
+            console.error("Error updating order:", error);
+          });
+      }
+    }
+  </script>
 </div>
 <!-- prettier-ignore -->
 {{ end }}
