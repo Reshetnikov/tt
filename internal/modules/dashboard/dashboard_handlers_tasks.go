@@ -5,19 +5,18 @@ import (
 	"fmt"
 	"net/http"
 	"strconv"
-	"time"
 	"time-tracker/internal/modules/users"
 	"time-tracker/internal/utils"
 )
 
-type taskForm struct {
-	Title       string `form:"title" validate:"required,min=1,max=255"`
-	Description string `form:"description" validate:"max=10000"`
-	Color       string `form:"color" validate:"required,hexcolor"`
-	IsCompleted bool   `form:"is_completed" label:"Completed"`
+type formTask struct {
+	title       string `form:"title" validate:"required,min=1,max=255"`
+	description string `form:"description" validate:"max=10000"`
+	color       string `form:"color" validate:"required,hexcolor"`
+	isCompleted bool   `form:"is_completed" label:"Completed"`
 }
 
-func (h *DashboardHandler) renderTaskForm(w http.ResponseWriter, form taskForm, formErrors utils.FormErrors, url string) {
+func (h *DashboardHandlers) renderTaskForm(w http.ResponseWriter, form formTask, formErrors utils.FormErrors, url string) {
 	utils.RenderTemplateWithoutLayout(w, []string{"dashboard/form_task"}, "dashboard/form_task", utils.TplData{
 		"Errors": formErrors,
 		"Form":   form,
@@ -25,7 +24,7 @@ func (h *DashboardHandler) renderTaskForm(w http.ResponseWriter, form taskForm, 
 	})
 }
 
-func (h *DashboardHandler) getUserAndTask(w http.ResponseWriter, r *http.Request) (user *users.User, task *Task) {
+func (h *DashboardHandlers) getUserAndTask(w http.ResponseWriter, r *http.Request) (user *users.User, task *Task) {
 	user = users.GetUserFromRequest(r)
 	if user == nil {
 		utils.RenderBlockNeedLogin(w)
@@ -52,34 +51,33 @@ func (h *DashboardHandler) getUserAndTask(w http.ResponseWriter, r *http.Request
 	return
 }
 
-// Render template
-func (h *DashboardHandler) HandleTasksNew(w http.ResponseWriter, r *http.Request) {
-	time.Sleep(1 * time.Second)
+func (h *DashboardHandlers) HandleTasksNew(w http.ResponseWriter, r *http.Request) {
+	// time.Sleep(1 * time.Second)
 	user := users.GetUserFromRequest(r)
 	if user == nil {
 		utils.RenderBlockNeedLogin(w)
 		return
 	}
-	h.renderTaskForm(w, taskForm{Color: "#FFFFFF"}, utils.FormErrors{}, "/tasks")
+	h.renderTaskForm(w, formTask{color: "#FFFFFF"}, utils.FormErrors{}, "/tasks")
 }
 
-func (h *DashboardHandler) HandleTasksCreate(w http.ResponseWriter, r *http.Request) {
+func (h *DashboardHandlers) HandleTasksCreate(w http.ResponseWriter, r *http.Request) {
 	user := users.GetUserFromRequest(r)
 	if user == nil {
 		utils.RenderBlockNeedLogin(w)
 		return
 	}
 
-	var form taskForm
+	var form formTask
 	utils.ParseFormToStruct(r, &form)
 	formErrors := utils.NewValidator(&form).Validate()
 	if !formErrors.HasErrors() {
 		h.repo.CreateTask(&Task{
 			UserID:      user.ID,
-			Title:       form.Title,
-			Description: form.Description,
-			Color:       form.Color,
-			IsCompleted: form.IsCompleted,
+			Title:       form.title,
+			Description: form.description,
+			Color:       form.color,
+			IsCompleted: form.isCompleted,
 		})
 
 		w.Header().Set("HX-Trigger", "load-tasks, close-modal")
@@ -90,40 +88,40 @@ func (h *DashboardHandler) HandleTasksCreate(w http.ResponseWriter, r *http.Requ
 	h.renderTaskForm(w, form, formErrors, "/tasks")
 }
 
-func (h *DashboardHandler) HandleTasksEdit(w http.ResponseWriter, r *http.Request) {
+func (h *DashboardHandlers) HandleTasksEdit(w http.ResponseWriter, r *http.Request) {
 	user, task := h.getUserAndTask(w, r)
 	if user == nil || task == nil {
 		return
 	}
 
-	form := taskForm{
-		Title:       task.Title,
-		Description: task.Description,
-		Color:       task.Color,
-		IsCompleted: task.IsCompleted,
+	form := formTask{
+		title:       task.Title,
+		description: task.Description,
+		color:       task.Color,
+		isCompleted: task.IsCompleted,
 	}
 	h.renderTaskForm(w, form, utils.FormErrors{}, fmt.Sprintf("/tasks/%d", task.ID))
 }
 
-func (h *DashboardHandler) HandleTasksUpdate(w http.ResponseWriter, r *http.Request) {
+func (h *DashboardHandlers) HandleTasksUpdate(w http.ResponseWriter, r *http.Request) {
 	user, task := h.getUserAndTask(w, r)
 	if user == nil || task == nil {
 		return
 	}
 
-	var form taskForm
+	var form formTask
 	utils.ParseFormToStruct(r, &form)
 	formErrors := utils.NewValidator(&form).Validate()
 	if !formErrors.HasErrors() {
-		if form.IsCompleted != task.IsCompleted {
-			task.SortOrder = h.repo.GetMaxSortOrder(user.ID, form.IsCompleted) + 1
+		if form.isCompleted != task.IsCompleted {
+			task.SortOrder = h.repo.GetMaxSortOrder(user.ID, form.isCompleted) + 1
 		}
 		err := h.repo.UpdateTask(&Task{
 			ID:          task.ID,
-			Title:       form.Title,
-			Description: form.Description,
-			Color:       form.Color,
-			IsCompleted: form.IsCompleted,
+			Title:       form.title,
+			Description: form.description,
+			Color:       form.color,
+			IsCompleted: form.isCompleted,
 			SortOrder:   task.SortOrder,
 		})
 		if err == nil {
@@ -136,7 +134,7 @@ func (h *DashboardHandler) HandleTasksUpdate(w http.ResponseWriter, r *http.Requ
 	h.renderTaskForm(w, form, formErrors, fmt.Sprintf("/tasks/%d", task.ID))
 }
 
-func (h *DashboardHandler) HandleTasksDelete(w http.ResponseWriter, r *http.Request) {
+func (h *DashboardHandlers) HandleTasksDelete(w http.ResponseWriter, r *http.Request) {
 	user, task := h.getUserAndTask(w, r)
 	if user == nil || task == nil {
 		return
@@ -146,7 +144,7 @@ func (h *DashboardHandler) HandleTasksDelete(w http.ResponseWriter, r *http.Requ
 	w.Write([]byte(`ok`))
 }
 
-func (h *DashboardHandler) HandleTaskList(w http.ResponseWriter, r *http.Request) {
+func (h *DashboardHandlers) HandleTaskList(w http.ResponseWriter, r *http.Request) {
 	user := users.GetUserFromRequest(r)
 	if user == nil {
 		utils.RenderBlockNeedLogin(w)
@@ -160,7 +158,7 @@ func (h *DashboardHandler) HandleTaskList(w http.ResponseWriter, r *http.Request
 	})
 }
 
-func (h *DashboardHandler) HandleUpdateSortOrder(w http.ResponseWriter, r *http.Request) {
+func (h *DashboardHandlers) HandleUpdateSortOrder(w http.ResponseWriter, r *http.Request) {
 	// bytedata, err := io.ReadAll(r.Body)
 	// reqBodyString := string(bytedata)
 	// D("Decode", "reqBodyString", reqBodyString)

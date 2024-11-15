@@ -59,7 +59,12 @@ func main() {
 	mux.HandleFunc("GET /tasks", dashboardHandler.HandleTaskList)
 	mux.HandleFunc("POST /tasks/update-sort-order", dashboardHandler.HandleUpdateSortOrder)
 
-	mux.HandleFunc("/records", dashboardHandler.HandleRecordList)
+	mux.HandleFunc("GET /records/new", dashboardHandler.HandleRecordsNew)
+	mux.HandleFunc("POST /records", dashboardHandler.HandleRecordsCreate)
+	mux.HandleFunc("GET /records/{id}", dashboardHandler.HandleRecordsEdit)
+	mux.HandleFunc("POST /records/{id}", dashboardHandler.HandleRecordsUpdate)
+	mux.HandleFunc("DELETE /records/{id}", dashboardHandler.HandleRecordsDelete)
+	mux.HandleFunc("GET /records", dashboardHandler.HandleRecordsList)
 	// mux.HandleFunc("/projects", handler)
 	// http.HandleFunc("/projects/{project_id}", handler)
 	// mux.HandleFunc("/tasks", pages.IndexHandler)

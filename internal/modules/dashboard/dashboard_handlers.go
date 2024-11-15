@@ -9,15 +9,15 @@ import (
 
 var D = slog.Debug
 
-type DashboardHandler struct {
+type DashboardHandlers struct {
 	repo *DashboardRepositoryPostgres
 }
 
-func NewDashboardHandler(repo *DashboardRepositoryPostgres) *DashboardHandler {
-	return &DashboardHandler{repo: repo}
+func NewDashboardHandler(repo *DashboardRepositoryPostgres) *DashboardHandlers {
+	return &DashboardHandlers{repo: repo}
 }
 
-func (h *DashboardHandler) HandleDashboard(w http.ResponseWriter, r *http.Request) {
+func (h *DashboardHandlers) HandleDashboard(w http.ResponseWriter, r *http.Request) {
 	user := users.GetUserFromRequest(r)
 	if user == nil {
 		utils.RedirectLogin(w, r)
@@ -45,21 +45,4 @@ func (h *DashboardHandler) HandleDashboard(w http.ResponseWriter, r *http.Reques
 		})
 	}
 
-}
-
-func (h *DashboardHandler) HandleRecordList(w http.ResponseWriter, r *http.Request) {
-	user := users.GetUserFromRequest(r)
-	if user == nil {
-		utils.RenderBlockNeedLogin(w)
-		return
-	}
-	records := h.repo.RecordsWithTasks(FilterRecords{
-		UserID: user.ID,
-		// RecordID: 0,
-		// Start:    time.Now().Add(-7 * 24 * time.Hour),
-		// End:      time.Now(),
-	})
-	utils.RenderTemplateWithoutLayout(w, []string{"dashboard/record_list"}, "dashboard/record_list", utils.TplData{
-		"Records": records,
-	})
 }
