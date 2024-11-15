@@ -39,8 +39,8 @@ func (h *DashboardHandler) getUserAndTask(w http.ResponseWriter, r *http.Request
 		return
 	}
 
-	task, err = h.repo.GetTaskByID(taskID)
-	if err != nil {
+	task = h.repo.TaskByID(taskID)
+	if task == nil {
 		http.Error(w, "Task not found", http.StatusNotFound)
 		return
 	}
@@ -52,6 +52,7 @@ func (h *DashboardHandler) getUserAndTask(w http.ResponseWriter, r *http.Request
 	return
 }
 
+// Render template
 func (h *DashboardHandler) HandleTasksNew(w http.ResponseWriter, r *http.Request) {
 	time.Sleep(1 * time.Second)
 	user := users.GetUserFromRequest(r)
