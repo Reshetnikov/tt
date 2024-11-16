@@ -17,6 +17,8 @@ import (
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
+var D = slog.Debug
+
 func main() {
 	cfg := config.LoadConfig()
 	setLogger(cfg.AppEnv)
@@ -67,12 +69,12 @@ func main() {
 	mux.HandleFunc("GET /records", dashboardHandler.HandleRecordsList)
 	// mux.HandleFunc("/projects", handler)
 	// http.HandleFunc("/projects/{project_id}", handler)
-	// mux.HandleFunc("/tasks", pages.IndexHandler)
 	// mux.HandleFunc("/reports", pages.IndexHandler)
 	// mux.HandleFunc("/profile", pages.IndexHandler)
 	// mux.HandleFunc("/settings", pages.IndexHandler)
 
 	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+		D("main() HandleFunc(\"/\")", fmt.Sprintf("%s: %s", r.Method, r.URL.String()))
 		http.NotFound(w, r)
 	})
 

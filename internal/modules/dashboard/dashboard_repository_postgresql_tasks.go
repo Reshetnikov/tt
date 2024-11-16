@@ -49,7 +49,7 @@ func (r *DashboardRepositoryPostgres) TaskByID(id int) *Task {
 		FROM tasks WHERE id = $1
 	`, id).Scan(&task.ID, &task.UserID, &task.Title, &task.Description, &task.Color, &task.SortOrder, &task.IsCompleted)
 	if err != nil {
-		slog.Error("DashboardRepositoryPostgres TaskByID Query", "err", err)
+		slog.Warn("DashboardRepositoryPostgres TaskByID Query", "err", err)
 		return nil
 	}
 	return &task

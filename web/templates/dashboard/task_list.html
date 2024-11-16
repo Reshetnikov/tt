@@ -52,7 +52,13 @@
     <span class="flex-grow"></span>
 
     <!-- Play -->
-    <button class="rounded-full bg-green-100 p-2 hover:bg-green-200">
+    <button
+      class="rounded-full bg-green-100 p-2 hover:bg-green-200"
+      hx-get="/records/new?taskId={{ .ID }}"
+      hx-target="#modal-content"
+      hx-trigger="click"
+      hx-swap="innerHTML"
+    >
       <svg class="size-4 text-green-600">
         <use xlink:href="#icon-play"></use>
       </svg>

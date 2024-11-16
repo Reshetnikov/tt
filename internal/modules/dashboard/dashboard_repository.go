@@ -16,7 +16,7 @@ type Record struct {
 	ID        int
 	TaskID    int
 	TimeStart time.Time
-	TimeEnd   time.Time
+	TimeEnd   *time.Time // nullable
 	Comment   string
 	Task      *Task
 }

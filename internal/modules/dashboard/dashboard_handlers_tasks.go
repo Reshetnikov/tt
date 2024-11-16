@@ -10,14 +10,14 @@ import (
 )
 
 type formTask struct {
-	title       string `form:"title" validate:"required,min=1,max=255"`
-	description string `form:"description" validate:"max=10000"`
-	color       string `form:"color" validate:"required,hexcolor"`
-	isCompleted bool   `form:"is_completed" label:"Completed"`
+	Title       string `form:"title" validate:"required,min=1,max=255"`
+	Description string `form:"description" validate:"max=10000"`
+	Color       string `form:"color" validate:"required,hexcolor"`
+	IsCompleted bool   `form:"is_completed" label:"Completed"`
 }
 
 func (h *DashboardHandlers) renderTaskForm(w http.ResponseWriter, form formTask, formErrors utils.FormErrors, url string) {
-	utils.RenderTemplateWithoutLayout(w, []string{"dashboard/form_task"}, "dashboard/form_task", utils.TplData{
+	utils.RenderTemplateWithoutLayout(w, []string{"dashboard/task_form"}, "dashboard/task_form", utils.TplData{
 		"Errors": formErrors,
 		"Form":   form,
 		"URL":    url,
@@ -58,7 +58,7 @@ func (h *DashboardHandlers) HandleTasksNew(w http.ResponseWriter, r *http.Reques
 		utils.RenderBlockNeedLogin(w)
 		return
 	}
-	h.renderTaskForm(w, formTask{color: "#FFFFFF"}, utils.FormErrors{}, "/tasks")
+	h.renderTaskForm(w, formTask{Color: "#FFFFFF"}, utils.FormErrors{}, "/tasks")
 }
 
 func (h *DashboardHandlers) HandleTasksCreate(w http.ResponseWriter, r *http.Request) {
@@ -74,10 +74,10 @@ func (h *DashboardHandlers) HandleTasksCreate(w http.ResponseWriter, r *http.Req
 	if !formErrors.HasErrors() {
 		h.repo.CreateTask(&Task{
 			UserID:      user.ID,
-			Title:       form.title,
-			Description: form.description,
-			Color:       form.color,
-			IsCompleted: form.isCompleted,
+			Title:       form.Title,
+			Description: form.Description,
+			Color:       form.Color,
+			IsCompleted: form.IsCompleted,
 		})
 
 		w.Header().Set("HX-Trigger", "load-tasks, close-modal")
@@ -95,10 +95,10 @@ func (h *DashboardHandlers) HandleTasksEdit(w http.ResponseWriter, r *http.Reque
 	}
 
 	form := formTask{
-		title:       task.Title,
-		description: task.Description,
-		color:       task.Color,
-		isCompleted: task.IsCompleted,
+		Title:       task.Title,
+		Description: task.Description,
+		Color:       task.Color,
+		IsCompleted: task.IsCompleted,
 	}
 	h.renderTaskForm(w, form, utils.FormErrors{}, fmt.Sprintf("/tasks/%d", task.ID))
 }
@@ -113,15 +113,15 @@ func (h *DashboardHandlers) HandleTasksUpdate(w http.ResponseWriter, r *http.Req
 	utils.ParseFormToStruct(r, &form)
 	formErrors := utils.NewValidator(&form).Validate()
 	if !formErrors.HasErrors() {
-		if form.isCompleted != task.IsCompleted {
-			task.SortOrder = h.repo.GetMaxSortOrder(user.ID, form.isCompleted) + 1
+		if form.IsCompleted != task.IsCompleted {
+			task.SortOrder = h.repo.GetMaxSortOrder(user.ID, form.IsCompleted) + 1
 		}
 		err := h.repo.UpdateTask(&Task{
 			ID:          task.ID,
-			Title:       form.title,
-			Description: form.description,
-			Color:       form.color,
-			IsCompleted: form.isCompleted,
+			Title:       form.Title,
+			Description: form.Description,
+			Color:       form.Color,
+			IsCompleted: form.IsCompleted,
 			SortOrder:   task.SortOrder,
 		})
 		if err == nil {

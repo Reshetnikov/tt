@@ -1,4 +1,4 @@
-{{ define "dashboard/form_task" }}
+{{ define "dashboard/task_form" }}
 <form hx-post="{{ .URL }}" hx-swap="innerHTML" hx-trigger="submit">
   <!-- prettier-ignore -->
   {{ template "components/input_field" dict 

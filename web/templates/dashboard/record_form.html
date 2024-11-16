@@ -1,0 +1,45 @@
+{{ define "dashboard/record_form" }}
+<form hx-post="{{ .URL }}" hx-swap="innerHTML" hx-trigger="submit">
+  <!-- prettier-ignore -->
+  {{ template "components/input_field" dict 
+    "Label" "Task ID"
+    "Type" "number"
+    "Name" "task_id"
+    "ID" "taskID"
+    "Value" .Form.TaskID
+    "Errors" .Errors.TaskID
+  }}
+  {{ template "components/input_field" dict
+    "Label" "Time Start"
+    "Type" "datetime-local"
+    "Name" "time_start"
+    "ID" "timeStart"
+    "Value" .Form.TimeStart
+    "Errors" .Errors.TimeStart
+  }}
+  {{ template "components/input_field" dict
+    "Label" "Time End"
+    "Type" "datetime-local"
+    "Name" "time_end"
+    "ID" "timeEnd"
+    "Value" .Form.TimeEnd
+    "Errors" .Errors.TimeEnd
+  }}
+  {{ template "components/input_field" dict
+    "Label" "Comment"
+    "Type" "textarea"
+    "Name" "comment"
+    "ID" "comment"
+    "Value" .Form.Comment
+    "Errors" .Errors.Comment
+    "Class" "w-full rounded border-gray-300"
+  }}
+
+  <div class="mt-4 text-right">
+    <button type="submit" class="rounded bg-blue-500 px-4 py-2 text-white hover:bg-blue-700">Save</button>
+    <button type="button" class="rounded px-4 py-2 text-gray-700 hover:bg-gray-200" onclick="closeModal()">
+      Cancel
+    </button>
+  </div>
+</form>
+{{ end }}

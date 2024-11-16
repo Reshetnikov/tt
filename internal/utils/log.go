@@ -15,6 +15,8 @@ type LogHandlerDev struct {
 	log *log.Logger
 }
 
+var D = slog.Debug
+
 func NewLogHandlerDev() *LogHandlerDev {
 	opts := &slog.HandlerOptions{
 		Level: slog.LevelDebug,
