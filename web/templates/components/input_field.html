@@ -1,25 +1,99 @@
 {{ define "components/input_field" }}
-<div class="mb-4">
+<div class="mb-4 transition-all duration-1000">
   <label class="mb-2 block font-bold text-gray-700" for="{{ .ID }}">{{ .Label }}</label>
-  {{ if eq .Type "checkbox" }}
+
+  <!-- Reset Checkbox -->
+  {{ if .ResetLabel }}
+  <div class="mb-2">
+    <!-- prettier-ignore -->
+    <input
+      type="checkbox"
+      id="reset-{{ .ID }}"
+      name="reset-{{ .ID }}"
+      class=" focus:outline-none rounded-lg text-blue-500"
+      onchange="toggleVisibility(this.checked, document.getElementById('{{ .ID }}'));"
+      {{ if not .Value }}checked{{ end }}
+    />
+    <label for="reset-{{ .ID }}" class="text-sm text-gray-600">{{ .ResetLabel }}</label>
+  </div>
+  <script>
+    function toggleVisibility(isChecked, inputElement) {
+      if (isChecked) {
+        inputElement.dataset.savedValue = inputElement.value;
+        inputElement.value = "";
+        inputElement.classList.add("opacity-0", "translate-y-2", "pointer-events-none");
+        inputElement.classList.remove("opacity-100", "translate-y-0");
+      } else {
+        inputElement.value = inputElement.dataset.savedValue || "";
+        inputElement.classList.add("opacity-100", "translate-y-0");
+        inputElement.classList.remove("opacity-0", "translate-y-2", "pointer-events-none");
+      }
+    }
+  </script>
+  {{ if not .Value }}
+  <script>
+    {
+      let inputElement = document.getElementById("{{ .ID }}");
+      inputElement.classList.add("opacity-0", "translate-y-2", "pointer-events-none");
+    }
+  </script>
+  {{ end }} {{ end }}
+
+  <!-- Textarea -->
+  {{ if eq .Type "textarea" }}
+  <!-- prettier-ignore -->
+  <textarea
+    id="{{ .ID }}"
+    name="{{ .Name }}"
+    class="{{if .Class }}{{ .Class }}{{else}}focus:shadow-outline w-full appearance-none rounded-xl border px-3 py-2 leading-tight text-gray-700 shadow focus:outline-none focus:ring-1 focus:ring-gray-500{{end}} {{if .Errors}}border-red-500{{end}}"
+  >{{ .Value }}</textarea>
+
+  <!-- Checkbox -->
+  {{ else if eq .Type "checkbox" }}
   <!-- prettier-ignore -->
   <input
     type="checkbox"
     id="{{ .ID }}"
     name="{{ .Name }}"
-    class="{{if .Class }}{{ .Class }}{{else}}focus:shadow-outline rounded-lg text-blue-500{{end}}"
+    class="{{if .Class }}{{ .Class }}{{else}}focus:shadow-outline rounded-lg text-blue-500 {{end}}"
     {{ if .Value }}checked{{ end }}
   />
+
+  <!-- Select -->
+  {{ else if eq .Type "select" }}
+  <select
+    id="{{ .ID }}"
+    name="{{ .Name }}"
+    class="{{if .Class }}{{ .Class }}{{else}}focus:shadow-outline w-full appearance-none rounded-xl border border-gray-300 bg-white px-3 py-2 leading-tight text-gray-700 shadow focus:outline-none focus:ring-1 focus:ring-gray-500{{end}} {{if .Errors}}border-red-500{{end}}"
+  >
+    {{ range .Options }}
+    <option value="{{ .ID }}" {{ if eq .ID $.Value }}selected{{ end }}>{{ .Title }}</option>
+    {{ end }}
+  </select>
+
+  <!-- Color -->
+  {{ else if eq .Type "color" }}
+  <!-- prettier-ignore -->
+  <input
+      type="color"
+      id="{{ .ID }}"
+      name="{{ .Name }}"
+      class="{{if .Class }}{{ .Class }}{{else}}focus:shadow-outline w-full h-9 appearance-none rounded-xl border leading-tight bg-white text-gray-700 shadow focus:outline-none focus:ring-1 focus:ring-gray-500{{end}} {{if .Errors}}border-red-500{{end}}"
+      value="{{ .Value }}"
+    />
+
+  <!-- Input -->
   {{ else }}
   <input
     type="{{ .Type }}"
     id="{{ .ID }}"
     name="{{ .Name }}"
-    class="{{if .Class }}{{ .Class }}{{else}}focus:shadow-outline w-full appearance-none rounded-xl border px-3 py-2 leading-tight text-gray-700 shadow focus:outline-none{{end}} {{if .Errors}}border-red-500{{end}}"
+    class="{{if .Class }}{{ .Class }}{{else}}transition-all duration-200 focus:shadow-outline w-full appearance-none rounded-xl border px-3 py-2 leading-tight text-gray-700 shadow focus:outline-none focus:ring-1 focus:ring-gray-500{{end}} {{if .Errors}}border-red-500{{end}}"
     value="{{ .Value }}"
   />
   {{ end }}
-  <!-- prettier-ignore -->
+
+  <!-- Errors -->
   {{ template "components/errors" .Errors}}
 </div>
 {{ end }}

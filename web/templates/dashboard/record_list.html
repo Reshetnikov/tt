@@ -3,10 +3,50 @@
 {{ range .Records }}
 <div class="relative flex items-center space-x-3 rounded-lg border border-gray-200 bg-white p-3 shadow-md">
   <div class="absolute top-0 h-1 rounded-full" style="background-color: {{ .Task.Color }}; width: 50%"></div>
-  <span class="flex-grow">{{ .Comment }}</span>
-  <button class="text-gray-500 hover:text-blue-500">Edit</button>
-  <button class="text-red-500 hover:text-red-700">Delete</button>
-  <button class="text-gray-500 hover:text-blue-500">Stop</button>
+
+  <!-- Task.Title, Time, Comment -->
+  <div class="flex-grow">
+    <div class="text-lg font-bold text-gray-800">
+      {{ .Task.Title }}
+      <span class="text-sm font-normal text-gray-600"> {{ formatTimeRange .TimeStart .TimeEnd }} </span>
+    </div>
+    <div class="mt-2 whitespace-pre-wrap text-gray-700">{{ .Comment }}</div>
+  </div>
+
+  <!-- Stop -->
+  <button
+    class="rounded-full bg-green-100 p-2 hover:bg-green-200"
+    hx-get="/records/stop?taskId={{ .ID }}"
+    hx-swap="none"
+  >
+    <svg class="size-4 text-green-600">
+      <use xlink:href="#icon-stop"></use>
+    </svg>
+  </button>
+
+  <!-- Edit -->
+  <button
+    class="rounded-full bg-blue-100 p-2 hover:bg-blue-200"
+    hx-get="/records/{{ .ID }}"
+    hx-target="#modal-content"
+    hx-swap="innerHTML"
+  >
+    <svg class="size-4 text-blue-600">
+      <use xlink:href="#icon-edit"></use>
+    </svg>
+  </button>
+
+  <!-- Delete -->
+  <button
+    hx-delete="/records/{{ .ID }}"
+    hx-swap="none"
+    hx-confirm="Are you sure you wish to delete your record?"
+    class="rounded-full bg-red-100 p-2 hover:bg-red-200"
+  >
+    <svg class="size-4 text-red-600">
+      <use xlink:href="#icon-delete"></use>
+    </svg>
+  </button>
 </div>
 {{ end }}
 <!-- prettier-ignore -->

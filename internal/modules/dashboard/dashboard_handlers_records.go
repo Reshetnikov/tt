@@ -61,7 +61,6 @@ func (h *DashboardHandlers) HandleRecordsCreate(w http.ResponseWriter, r *http.R
 
 	var form recordForm
 	utils.ParseFormToStruct(r, &form)
-	D("1111", "2222", form)
 	formErrors := utils.NewValidator(&form).Validate()
 	if !formErrors.HasErrors() {
 		task := h.repo.TaskByID(form.TaskID)
@@ -90,6 +89,7 @@ func (h *DashboardHandlers) HandleRecordsCreate(w http.ResponseWriter, r *http.R
 		Form:   form,
 		Errors: formErrors,
 		URL:    "/records",
+		Tasks:  h.repo.Tasks(user.ID, ""),
 	}
 	h.renderRecordForm(w, data)
 }
@@ -160,7 +160,7 @@ func (h *DashboardHandlers) HandleRecordsDelete(w http.ResponseWriter, r *http.R
 	if user == nil || record == nil {
 		return
 	}
-	h.repo.DeleteTask(record.ID)
+	h.repo.DeleteRecord(record.ID)
 	w.Header().Set("HX-Trigger", "load-records")
 	w.Write([]byte(`ok`))
 }

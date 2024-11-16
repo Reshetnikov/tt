@@ -2,11 +2,12 @@
 <form hx-post="{{ .URL }}" hx-swap="innerHTML" hx-trigger="submit">
   <!-- prettier-ignore -->
   {{ template "components/input_field" dict 
-    "Label" "Task ID"
-    "Type" "number"
+    "Label" "Task"
+    "Type" "select"
     "Name" "task_id"
     "ID" "taskID"
     "Value" .Form.TaskID
+    "Options" .Tasks
     "Errors" .Errors.TaskID
   }}
   {{ template "components/input_field" dict
@@ -24,6 +25,7 @@
     "ID" "timeEnd"
     "Value" .Form.TimeEnd
     "Errors" .Errors.TimeEnd
+    "ResetLabel" "In Progress"
   }}
   {{ template "components/input_field" dict
     "Label" "Comment"
@@ -32,7 +34,6 @@
     "ID" "comment"
     "Value" .Form.Comment
     "Errors" .Errors.Comment
-    "Class" "w-full rounded border-gray-300"
   }}
 
   <div class="mt-4 text-right">
