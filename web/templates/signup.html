@@ -2,6 +2,7 @@
 <h2 class="mb-6 text-center text-2xl font-bold">Sign Up</h2>
 
 <form action="/signup" method="POST" class="mx-auto max-w-md rounded-xl bg-white p-6 shadow">
+  <input type="hidden" name="timezone" id="timezone" value="" />
   <!-- prettier-ignore -->
   {{ template "components/input_field" dict
     "Label" "Name"
@@ -18,6 +19,7 @@
     "ID" "email"
     "Value" .Form.Email
     "Errors" .Errors.Email
+    "Autocomplete" "email"
   }}
   {{ template "components/input_field" dict 
     "Label" "Password"
@@ -26,6 +28,7 @@
     "ID" "password"
     "Value" .Form.Password
     "Errors" .Errors.Password
+    "Autocomplete" "new-password"
   }}
   {{ template "components/input_field" dict
     "Label" "Confirm Password"
@@ -34,6 +37,7 @@
     "ID" "password_confirmation"
     "Value" .Form.PasswordConfirmation
     "Errors" .Errors.PasswordConfirmation
+    "Autocomplete" "new-password"
   }}
 
   {{ template "components/errors" .Errors.Common}}
@@ -45,4 +49,7 @@
     Sign Up
   </button>
 </form>
+<script>
+  document.getElementById("timezone").value = Intl.DateTimeFormat().resolvedOptions().timeZone;
+</script>
 {{ end }}

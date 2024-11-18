@@ -7,6 +7,7 @@ import (
 	"log/slog"
 	"net/http"
 	"os"
+	"runtime/debug"
 	"time"
 	"time-tracker/internal/config"
 	"time-tracker/internal/modules/dashboard"
@@ -16,8 +17,6 @@ import (
 
 	"github.com/jackc/pgx/v5/pgxpool"
 )
-
-var D = slog.Debug
 
 func main() {
 	cfg := config.LoadConfig()
@@ -79,10 +78,11 @@ func main() {
 	})
 
 	muxSession := users.SessionMiddleware(mux, sessionsRepo, usersRepo)
+	muxRecovery := recoveryMiddleware(muxSession)
 
 	server := &http.Server{
 		Addr:    ":8080",
-		Handler: muxSession,
+		Handler: muxRecovery,
 	}
 	log.Fatal(server.ListenAndServe())
 }
@@ -122,3 +122,17 @@ func setLogger(env string) {
 	logger := slog.New(handler)
 	slog.SetDefault(logger)
 }
+
+func recoveryMiddleware(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		defer func() {
+			if err := recover(); err != nil {
+				slog.Error("Panic occurred", "error", err, "stack", string(debug.Stack()))
+				http.Error(w, http.StatusText(http.StatusBadGateway), http.StatusBadGateway)
+			}
+		}()
+		next.ServeHTTP(w, r)
+	})
+}
+
+var D = slog.Debug

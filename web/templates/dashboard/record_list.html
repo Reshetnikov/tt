@@ -8,7 +8,7 @@
   <div class="flex-grow">
     <div class="text-lg font-bold text-gray-800">
       {{ .Task.Title }}
-      <span class="text-sm font-normal text-gray-600"> {{ formatTimeRange .TimeStart .TimeEnd }} </span>
+      <span class="text-sm font-normal text-gray-600"> {{ formatTimeRange .TimeStart .TimeEnd $.User.TimeZone}} </span>
     </div>
     <div class="mt-2 whitespace-pre-wrap text-gray-700">{{ .Comment }}</div>
   </div>

@@ -16,41 +16,6 @@ type formTask struct {
 	IsCompleted bool   `form:"is_completed" label:"Completed"`
 }
 
-func (h *DashboardHandlers) renderTaskForm(w http.ResponseWriter, form formTask, formErrors utils.FormErrors, url string) {
-	utils.RenderTemplateWithoutLayout(w, []string{"dashboard/task_form"}, "dashboard/task_form", utils.TplData{
-		"Errors": formErrors,
-		"Form":   form,
-		"URL":    url,
-	})
-}
-
-func (h *DashboardHandlers) getUserAndTask(w http.ResponseWriter, r *http.Request) (user *users.User, task *Task) {
-	user = users.GetUserFromRequest(r)
-	if user == nil {
-		utils.RenderBlockNeedLogin(w)
-		return
-	}
-
-	taskIDStr := r.PathValue("id")
-	taskID, err := strconv.Atoi(taskIDStr)
-	if err != nil {
-		http.Error(w, "Invalid task ID", http.StatusBadRequest)
-		return
-	}
-
-	task = h.repo.TaskByID(taskID)
-	if task == nil {
-		http.Error(w, "Task not found", http.StatusNotFound)
-		return
-	}
-
-	if task.UserID != user.ID {
-		http.Error(w, "Access denied", http.StatusForbidden)
-		return
-	}
-	return
-}
-
 func (h *DashboardHandlers) HandleTasksNew(w http.ResponseWriter, r *http.Request) {
 	// time.Sleep(1 * time.Second)
 	user := users.GetUserFromRequest(r)
@@ -191,4 +156,39 @@ func (h *DashboardHandlers) HandleUpdateSortOrder(w http.ResponseWriter, r *http
 	// The request is sent via fetch, not html, so tiger must be called in js: htmx.trigger(document.body, "load-tasks");
 	// w.Header().Set("HX-Trigger", "load-tasks")
 	w.Write([]byte(`{"status": "success"}`))
+}
+
+func (h *DashboardHandlers) renderTaskForm(w http.ResponseWriter, form formTask, formErrors utils.FormErrors, url string) {
+	utils.RenderTemplateWithoutLayout(w, []string{"dashboard/task_form"}, "dashboard/task_form", utils.TplData{
+		"Errors": formErrors,
+		"Form":   form,
+		"URL":    url,
+	})
+}
+
+func (h *DashboardHandlers) getUserAndTask(w http.ResponseWriter, r *http.Request) (user *users.User, task *Task) {
+	user = users.GetUserFromRequest(r)
+	if user == nil {
+		utils.RenderBlockNeedLogin(w)
+		return
+	}
+
+	taskIDStr := r.PathValue("id")
+	taskID, err := strconv.Atoi(taskIDStr)
+	if err != nil {
+		http.Error(w, "Invalid task ID", http.StatusBadRequest)
+		return
+	}
+
+	task = h.repo.TaskByID(taskID)
+	if task == nil {
+		http.Error(w, "Task not found", http.StatusNotFound)
+		return
+	}
+
+	if task.UserID != user.ID {
+		http.Error(w, "Access denied", http.StatusForbidden)
+		return
+	}
+	return
 }

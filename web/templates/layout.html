@@ -160,12 +160,10 @@
         }, 1);
       });
       document.addEventListener("htmx:afterRequest", function () {
-        // setTimeout(() => {
         const preloader = document.getElementById("global-preloader");
         preloader.classList.add("hidden");
         preloader.classList.add("w-0");
         preloader.classList.remove("w-full");
-        // }, 100);
       });
 
       // Modal window

@@ -5,12 +5,13 @@ import "time"
 type User struct {
 	ID                 int       `json:"id" db:"id"`
 	Name               string    `json:"name" db:"name"`
-	Password           string    `json:"-"`
 	Email              string    `json:"email" db:"email"`
+	Password           string    `json:"-" db:"password"`
+	TimeZone           string    `json:"timezone" db:"timezone"`
+	IsActive           bool      `json:"is_active" db:"is_active"`
 	DateAdd            time.Time `json:"date_add" db:"date_add"`
 	ActivationHash     string    `json:"activation_hash" db:"activation_hash"`
 	ActivationHashDate time.Time `json:"activation_hash_date" db:"activation_hash_date"`
-	IsActive           bool      `json:"is_active" db:"is_active"`
 }
 
 type UsersRepository interface {

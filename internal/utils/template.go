@@ -52,13 +52,13 @@ func fileVersion(relPath string) string {
 
 // Example:
 // {{ formatTimeRange .TimeStart .TimeEnd }}
-func formatTimeRange(timeStart time.Time, timeEnd *time.Time) string {
+func formatTimeRange(timeStart time.Time, timeEnd *time.Time, timezone string) string {
 	const timeFormat = "15:04"
 	const dateTimeFormat = "02 Jan 2006 15:04"
 
 	effectiveEnd := timeEnd
 	if effectiveEnd == nil {
-		now := time.Now()
+		now, _ := NowWithTimezone(timezone)
 		effectiveEnd = &now
 	}
 

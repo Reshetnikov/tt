@@ -37,7 +37,7 @@ func (h *DashboardHandlers) HandleRecordsNew(w http.ResponseWriter, r *http.Requ
 		taskId, _ = strconv.Atoi(taskIdStr)
 	}
 
-	now := time.Now()
+	now, _ := utils.NowWithTimezone(user.TimeZone)
 	form := recordForm{
 		TaskID:    taskId,
 		TimeStart: formatTimeForInput(&now),

@@ -7,8 +7,6 @@ import (
 	"time-tracker/internal/utils"
 )
 
-var D = slog.Debug
-
 type DashboardHandlers struct {
 	repo *DashboardRepositoryPostgres
 }
@@ -46,3 +44,5 @@ func (h *DashboardHandlers) HandleDashboard(w http.ResponseWriter, r *http.Reque
 	}
 
 }
+
+var D = slog.Debug

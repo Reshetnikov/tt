@@ -65,11 +65,11 @@
 
     function drop(event) {
       event.preventDefault();
-      updateTaskOrder();
     }
 
     function dragEnd(event) {
       draggedElement = null;
+      updateTaskOrder();
     }
 
     function updateTaskOrder() {

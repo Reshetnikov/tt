@@ -30,7 +30,7 @@ func (r *UsersRepositoryPostgres) getByField(fieldName string, fieldValue interf
 		slog.Error("UsersRepositoryPostgres getByField validFields", "fieldName", fieldName)
 		return nil
 	}
-	query := "SELECT id, name, password, email, date_add, activation_hash, activation_hash_date, is_active FROM users WHERE " + fieldName + " = $1"
+	query := "SELECT id, name, password, timezone, email, date_add, activation_hash, activation_hash_date, is_active FROM users WHERE " + fieldName + " = $1"
 	rows, err := r.db.Query(context.Background(), query, fieldValue)
 	if err != nil {
 		slog.Error("UsersRepositoryPostgres getByField Query", "err", err)
@@ -43,7 +43,8 @@ func (r *UsersRepositoryPostgres) getByField(fieldName string, fieldValue interf
 			return nil
 		}
 		slog.Error("UsersRepositoryPostgres getByField CollectOneRow", "fieldName", fieldName, "FieldValue", fieldValue, "err", err)
-		return nil
+		// It is not possible to return nil if an error occurs, since nil must ensure that the user does not exist.
+		panic(err)
 	}
 	return &user
 }
@@ -69,6 +70,7 @@ func (r *UsersRepositoryPostgres) Create(user *User) error {
 		{"activation_hash", user.ActivationHash},
 		{"activation_hash_date", user.ActivationHashDate},
 		{"is_active", user.IsActive},
+		{"timezone", user.TimeZone},
 	})
 	query := "INSERT INTO users (" + fields + ") VALUES (" + placeholders + ")"
 	_, err := r.db.Exec(context.Background(), query, params...)

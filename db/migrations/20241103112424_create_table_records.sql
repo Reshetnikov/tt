@@ -5,7 +5,7 @@ CREATE TABLE records (
     task_id INT NOT NULL REFERENCES tasks(id) ON DELETE CASCADE,
     time_start TIMESTAMP NOT NULL,
     time_end TIMESTAMP,
-    duration INTERVAL GENERATED ALWAYS AS (time_end - time_start) STORED,
+    -- duration INTERVAL GENERATED ALWAYS AS (time_end - time_start) STORED,
     comment TEXT
 );
 CREATE INDEX idx_records_task_id ON records (task_id);

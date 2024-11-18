@@ -29,6 +29,7 @@ type RegisterUserData struct {
 	Name     string
 	Email    string
 	Password string
+	TimeZone string
 }
 
 var ErrEmailExists = errors.New("email is already in use")
@@ -55,8 +56,9 @@ func (s *UsersService) RegisterUser(registerUserData RegisterUserData) error {
 		Name:     registerUserData.Name,
 		Email:    registerUserData.Email,
 		Password: hashedPassword,
-		DateAdd:  date,
+		TimeZone: registerUserData.TimeZone,
 		IsActive: false,
+		DateAdd:  date,
 		// @TODO: move to sendActivationMassage()
 		ActivationHash:     activationHash,
 		ActivationHashDate: date,

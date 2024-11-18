@@ -84,12 +84,14 @@
 
   <!-- Input -->
   {{ else }}
+  <!-- prettier-ignore -->
   <input
     type="{{ .Type }}"
     id="{{ .ID }}"
     name="{{ .Name }}"
     class="{{if .Class }}{{ .Class }}{{else}}transition-all duration-200 focus:shadow-outline w-full appearance-none rounded-xl border px-3 py-2 leading-tight text-gray-700 shadow focus:outline-none focus:ring-1 focus:ring-gray-500{{end}} {{if .Errors}}border-red-500{{end}}"
     value="{{ .Value }}"
+    {{ if .Autocomplete }}autocomplete="{{ .Autocomplete }}"{{ end }}
   />
   {{ end }}
 

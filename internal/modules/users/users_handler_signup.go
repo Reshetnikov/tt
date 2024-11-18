@@ -10,6 +10,7 @@ type signupForm struct {
 	Email                string `form:"email" validate:"required,email"`
 	Password             string `form:"password" validate:"required,min=8"`
 	PasswordConfirmation string `form:"password_confirmation" validate:"required,eqfield=Password" label:"Confirm Password"`
+	TimeZone             string `form:"timezone"`
 }
 
 func (h *UsersHandler) HandleSignup(w http.ResponseWriter, r *http.Request) {
@@ -30,6 +31,7 @@ func (h *UsersHandler) HandleSignup(w http.ResponseWriter, r *http.Request) {
 					Name:     form.Name,
 					Email:    form.Email,
 					Password: form.Password,
+					TimeZone: form.TimeZone,
 				})
 				if err == nil {
 					RenderTemplate(w, r, []string{"signup-success"}, utils.TplData{
