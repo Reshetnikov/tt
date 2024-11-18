@@ -16,7 +16,11 @@ func (h *UsersHandler) HandleLogout(w http.ResponseWriter, r *http.Request) {
 
 	err = h.usersService.LogoutUser(cookie.Value)
 	if err != nil {
-		RenderTemplateError(w, r, "Logout Failed", "Failed to log out.")
+		utils.RenderTemplate(w, []string{"error"}, utils.TplData{
+			"Title":   "Logout Failed",
+			"Message": "Failed to log out.",
+			"User":    GetUserFromRequest(r),
+		})
 		return
 	}
 

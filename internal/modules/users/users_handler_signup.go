@@ -34,7 +34,7 @@ func (h *UsersHandler) HandleSignup(w http.ResponseWriter, r *http.Request) {
 					TimeZone: form.TimeZone,
 				})
 				if err == nil {
-					RenderTemplate(w, r, []string{"signup-success"}, utils.TplData{
+					utils.RenderTemplate(w, []string{"signup-success"}, utils.TplData{
 						"Title": "Sign Up Successful",
 					})
 					return
@@ -49,7 +49,7 @@ func (h *UsersHandler) HandleSignup(w http.ResponseWriter, r *http.Request) {
 			}
 		}
 	}
-	RenderTemplate(w, r, []string{"signup"}, utils.TplData{
+	utils.RenderTemplate(w, []string{"signup"}, utils.TplData{
 		"Title":  "Sign Up",
 		"Errors": formErrors,
 		"Form":   form,

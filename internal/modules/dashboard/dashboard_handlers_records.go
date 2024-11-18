@@ -179,6 +179,7 @@ func (h *DashboardHandlers) HandleRecordsList(w http.ResponseWriter, r *http.Req
 	})
 	utils.RenderTemplateWithoutLayout(w, []string{"dashboard/record_list"}, "dashboard/record_list", utils.TplData{
 		"Records": records,
+		"User":    user,
 	})
 }
 

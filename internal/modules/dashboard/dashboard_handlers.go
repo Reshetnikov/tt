@@ -29,19 +29,20 @@ func (h *DashboardHandlers) HandleDashboard(w http.ResponseWriter, r *http.Reque
 		// End:      time.Now(),
 	})
 
-	if r.Header.Get("HX-Request") == "" {
-		users.RenderTemplate(w, r, []string{"dashboard/dashboard", "dashboard/task_list", "dashboard/record_list"}, utils.TplData{
-			"Title":   "Tasks & Records Dashboard",
-			"Tasks":   tasks,
-			"Records": records,
-		})
-	} else {
-		utils.RenderTemplateWithoutLayout(w, []string{"dashboard/dashboard", "dashboard/task_list", "dashboard/record_list"}, "content", utils.TplData{
-			"Title":   "Tasks & Records Dashboard",
-			"Tasks":   tasks,
-			"Records": records,
-		})
-	}
+	// if r.Header.Get("HX-Request") == "" {
+	utils.RenderTemplate(w, []string{"dashboard/dashboard", "dashboard/task_list", "dashboard/record_list"}, utils.TplData{
+		"Title":   "Tasks & Records Dashboard",
+		"Tasks":   tasks,
+		"Records": records,
+		"User":    user,
+	})
+	// } else {
+	// 	utils.RenderTemplateWithoutLayout(w, []string{"dashboard/dashboard", "dashboard/task_list", "dashboard/record_list"}, "content", utils.TplData{
+	// 		"Title":   "Tasks & Records Dashboard",
+	// 		"Tasks":   tasks,
+	// 		"Records": records,
+	// 	})
+	// }
 
 }
 

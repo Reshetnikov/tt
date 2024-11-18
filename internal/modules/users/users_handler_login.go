@@ -45,7 +45,7 @@ func (h *UsersHandler) HandleLogin(w http.ResponseWriter, r *http.Request) {
 			}
 		}
 	}
-	RenderTemplate(w, r, []string{"login"}, utils.TplData{
+	utils.RenderTemplate(w, []string{"login"}, utils.TplData{
 		"Title":  "Log In",
 		"Errors": formErrors,
 		"Form":   form,

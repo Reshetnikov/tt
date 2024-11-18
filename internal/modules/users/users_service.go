@@ -63,7 +63,6 @@ func (s *UsersService) RegisterUser(registerUserData RegisterUserData) error {
 		ActivationHash:     activationHash,
 		ActivationHashDate: date,
 	}
-	fmt.Printf("-----USER:%+v\n", user)
 	err = s.usersRepo.Create(user)
 
 	return err

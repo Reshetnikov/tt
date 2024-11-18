@@ -7,7 +7,8 @@ import (
 )
 
 func IndexHandler(w http.ResponseWriter, r *http.Request) {
-	users.RenderTemplate(w, r, []string{"index"}, utils.TplData{
+	utils.RenderTemplate(w, []string{"index"}, utils.TplData{
 		"Title": "Dashboard",
+		"User":  users.GetUserFromRequest(r),
 	})
 }

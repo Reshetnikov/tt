@@ -15,18 +15,27 @@ func (h *UsersHandler) HandleActivation(w http.ResponseWriter, r *http.Request) 
 
 	activationHash := r.URL.Query().Get("hash")
 	if activationHash == "" {
-		RenderTemplateError(w, r, "", "Invalid activation link")
+		utils.RenderTemplate(w, []string{"error"}, utils.TplData{
+			"Title":   "Error",
+			"Message": "Invalid activation link",
+			"User":    user,
+		})
 		return
 	}
 
 	session, err := h.usersService.ActivateUser(activationHash)
 	if err != nil {
-		RenderTemplateError(w, r, "Activation Failed", "Failed to activate the account. The activation link might be expired or invalid.")
+		utils.RenderTemplate(w, []string{"error"}, utils.TplData{
+			"Title":   "Activation Failed",
+			"Message": "Failed to activate the account. The activation link might be expired or invalid.",
+			"User":    user,
+		})
 		return
 	}
 	setSessionCookie(w, session.SessionID, session.Expiry)
 
-	RenderTemplate(w, r, []string{"activation-success"}, utils.TplData{
+	utils.RenderTemplate(w, []string{"activation-success"}, utils.TplData{
 		"Title": "Activation Successful - Logged In",
+		"User":  user,
 	})
 }
