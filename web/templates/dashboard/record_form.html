@@ -36,6 +36,8 @@
     "Errors" .Errors.Comment
   }}
 
+  {{ template "components/errors" .Errors.Common}}
+
   <div class="mt-4 text-right">
     <button type="submit" class="rounded bg-blue-500 px-4 py-2 text-white hover:bg-blue-700">Save</button>
     <button type="button" class="rounded px-4 py-2 text-gray-700 hover:bg-gray-200" onclick="closeModal()">

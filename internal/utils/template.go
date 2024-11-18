@@ -50,57 +50,12 @@ func fileVersion(relPath string) string {
 	return fmt.Sprintf("%d", fileInfo.ModTime().Unix())
 }
 
-// Example:
-// {{ formatTimeRange .TimeStart .TimeEnd }}
-func formatTimeRange(timeStart time.Time, timeEnd *time.Time, timezone string) string {
-	const timeFormat = "15:04"
-	const dateTimeFormat = "02 Jan 2006 15:04"
-
-	effectiveEnd := timeEnd
-	if effectiveEnd == nil {
-		now, _ := NowWithTimezone(timezone)
-		effectiveEnd = &now
-	}
-
-	duration := effectiveEnd.Sub(timeStart)
-	hours := int(duration.Hours())
-	minutes := int(duration.Minutes()) % 60
-
-	var timeRange string
-
-	if timeEnd == nil {
-		now := time.Now()
-		isToday := timeStart.Year() == now.Year() && timeStart.YearDay() == now.YearDay()
-		if isToday {
-			timeRange = fmt.Sprintf("%s - in progress", timeStart.Format(timeFormat))
-		} else {
-			timeRange = fmt.Sprintf("%s - in progress", timeStart.Format(dateTimeFormat))
-		}
-	} else {
-		if timeStart.Truncate(24 * time.Hour).Equal(timeEnd.Truncate(24 * time.Hour)) {
-			// Same date, only time shown
-			timeRange = fmt.Sprintf("%s - %s", timeStart.Format(timeFormat), timeEnd.Format(timeFormat))
-		} else {
-			// Different dates, show date and time
-			timeRange = fmt.Sprintf("%s - %s", timeStart.Format(dateTimeFormat), timeEnd.Format(dateTimeFormat))
-		}
-	}
-
-	if hours > 0 || minutes > 0 {
-		timeRange += fmt.Sprintf(" (%dh %dm)", hours, minutes)
-	} else {
-		timeRange += " (<1m)"
-	}
-
-	return timeRange
-}
-
 func createTemplate(w http.ResponseWriter, tplPaths []string) (templates *template.Template) {
 	templates = template.New("").Funcs(template.FuncMap{
 		"dict":            dict,
 		"date":            dateFormat,
 		"fileVersion":     fileVersion,
-		"formatTimeRange": formatTimeRange,
+		"formatTimeRange": FormatTimeRange,
 	})
 
 	components := filepath.Join("web", "templates", "components", "*")

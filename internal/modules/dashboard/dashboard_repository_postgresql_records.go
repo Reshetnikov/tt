@@ -11,11 +11,13 @@ import (
 type FilterRecords struct {
 	UserID        int
 	RecordID      int
+	NotRecordID   int
 	StartInterval time.Time
 	EndInterval   time.Time
+	InProgress    bool
 }
 
-func (r *DashboardRepositoryPostgres) RecordsWithTasks(filterRecords FilterRecords) (records []*Record) {
+func (r *DashboardRepositoryPostgres) RecordsWithTasks(filterRecords FilterRecords, nowWithTimezone *time.Time) (records []*Record) {
 	query := `
         SELECT 
             r.id, r.task_id, r.time_start, r.time_end, r.comment,
@@ -41,11 +43,23 @@ func (r *DashboardRepositoryPostgres) RecordsWithTasks(filterRecords FilterRecor
 		argIndex++
 	}
 
+	// NotRecordID
+	if filterRecords.NotRecordID > 0 {
+		filters = append(filters, fmt.Sprintf("r.id != $%d", argIndex))
+		args = append(args, filterRecords.NotRecordID)
+		argIndex++
+	}
+
 	// Recording must end after interval starts or does not end
 	if !filterRecords.StartInterval.IsZero() {
-		filters = append(filters, fmt.Sprintf("(r.time_end >= $%d OR r.time_end IS NULL)", argIndex))
-		args = append(args, filterRecords.StartInterval)
-		argIndex++
+		// If StartInterval is in the future, then time_end IS NULL records should be excluded
+		includeInProcess := true
+		if nowWithTimezone != nil && nowWithTimezone.Before(filterRecords.StartInterval) {
+			includeInProcess = false
+		}
+		filters = append(filters, fmt.Sprintf("(r.time_end >= $%d OR (r.time_end IS NULL AND $%d ))", argIndex, argIndex+1))
+		args = append(args, filterRecords.StartInterval, includeInProcess)
+		argIndex += 2
 	}
 
 	// Recording must start before the end of the interval
@@ -53,6 +67,11 @@ func (r *DashboardRepositoryPostgres) RecordsWithTasks(filterRecords FilterRecor
 		filters = append(filters, fmt.Sprintf("r.time_start < $%d", argIndex))
 		args = append(args, filterRecords.EndInterval)
 		argIndex++
+	}
+
+	// InProgress
+	if filterRecords.InProgress {
+		filters = append(filters, "r.time_end IS NULL")
 	}
 
 	if len(filters) > 0 {
@@ -99,14 +118,14 @@ func (r *DashboardRepositoryPostgres) RecordsWithTasks(filterRecords FilterRecor
 func (r *DashboardRepositoryPostgres) RecordByIDWithTask(recordID int) *Record {
 	records := r.RecordsWithTasks(FilterRecords{
 		RecordID: recordID,
-	})
+	}, nil)
 	if len(records) == 0 {
 		return nil
 	}
 	return records[0]
 }
 
-func (r *DashboardRepositoryPostgres) CreateRecord(record *Record) int {
+func (r *DashboardRepositoryPostgres) CreateRecord(record *Record) (int, error) {
 	var newRecordID int
 	err := r.db.QueryRow(context.Background(), `
         INSERT INTO records (task_id, time_start, time_end, comment)
@@ -115,9 +134,9 @@ func (r *DashboardRepositoryPostgres) CreateRecord(record *Record) int {
     `, record.TaskID, record.TimeStart, record.TimeEnd, record.Comment).Scan(&newRecordID)
 	if err != nil {
 		slog.Error("DashboardRepositoryPostgres CreateRecord QueryRow", "err", err)
-		return 0
+		return 0, err
 	}
-	return newRecordID
+	return newRecordID, nil
 }
 
 func (r *DashboardRepositoryPostgres) UpdateRecord(record *Record) error {

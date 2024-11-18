@@ -1,7 +1,7 @@
 <!-- prettier-ignore -->
 {{ define "components/errors" }}
 {{ if . }}
-<ul class="mb-4 text-sm text-red-500">
+<ul class="mb-4 text-sm text-red-500 [&_a:hover]:text-red-700 [&_a]:underline">
   {{ range . }}
   <li>{{ . }}</li>
   {{ end }}

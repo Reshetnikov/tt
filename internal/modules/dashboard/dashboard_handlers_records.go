@@ -2,6 +2,7 @@ package dashboard
 
 import (
 	"fmt"
+	"html"
 	"net/http"
 	"strconv"
 	"time"
@@ -73,16 +74,24 @@ func (h *DashboardHandlers) HandleRecordsCreate(w http.ResponseWriter, r *http.R
 			http.Error(w, "Access denied", http.StatusForbidden)
 			return
 		}
-		h.repo.CreateRecord(&Record{
-			TaskID:    form.TaskID,
-			TimeStart: *parseTimeFromInput(form.TimeStart),
-			TimeEnd:   parseTimeFromInput(form.TimeEnd),
-			Comment:   form.Comment,
-		})
 
-		w.Header().Set("HX-Trigger", "load-records, close-modal")
-		w.Write([]byte("ok"))
-		return
+		h.validateIntersectingRecords(form, user, 0, formErrors)
+		if !formErrors.HasErrors() {
+			_, err := h.repo.CreateRecord(&Record{
+				TaskID:    form.TaskID,
+				TimeStart: *parseTimeFromInput(form.TimeStart),
+				TimeEnd:   parseTimeFromInput(form.TimeEnd),
+				Comment:   form.Comment,
+			})
+
+			if err == nil {
+				w.Header().Set("HX-Trigger", "load-records, close-modal")
+				w.Write([]byte("ok"))
+				return
+			} else {
+				formErrors.Add("Common", "Error. Please try again later.")
+			}
+		}
 	}
 
 	data := recordFormData{
@@ -129,17 +138,22 @@ func (h *DashboardHandlers) HandleRecordsUpdate(w http.ResponseWriter, r *http.R
 	utils.ParseFormToStruct(r, &form)
 	formErrors := utils.NewValidator(&form).Validate()
 	if !formErrors.HasErrors() {
-		err := h.repo.UpdateRecord(&Record{
-			ID:        record.ID,
-			TaskID:    form.TaskID,
-			TimeStart: *parseTimeFromInput(form.TimeStart),
-			TimeEnd:   parseTimeFromInput(form.TimeEnd),
-			Comment:   form.Comment,
-		})
-		if err == nil {
-			w.Header().Set("HX-Trigger", "load-records, close-modal")
-			w.Write([]byte(`ok`))
-			return
+		h.validateIntersectingRecords(form, user, record.ID, formErrors)
+		if !formErrors.HasErrors() {
+			err := h.repo.UpdateRecord(&Record{
+				ID:        record.ID,
+				TaskID:    form.TaskID,
+				TimeStart: *parseTimeFromInput(form.TimeStart),
+				TimeEnd:   parseTimeFromInput(form.TimeEnd),
+				Comment:   form.Comment,
+			})
+			if err == nil {
+				w.Header().Set("HX-Trigger", "load-records, close-modal")
+				w.Write([]byte(`ok`))
+				return
+			} else {
+				formErrors.Add("Common", "Error. Please try again later.")
+			}
 		}
 	}
 	tasks := h.repo.Tasks(user.ID, "") // Active tasks
@@ -176,7 +190,7 @@ func (h *DashboardHandlers) HandleRecordsList(w http.ResponseWriter, r *http.Req
 		// RecordID: 0,
 		// Start:    time.Now().Add(-7 * 24 * time.Hour),
 		// End:      time.Now(),
-	})
+	}, nil)
 	utils.RenderTemplateWithoutLayout(w, []string{"dashboard/record_list"}, "dashboard/record_list", utils.TplData{
 		"Records": records,
 		"User":    user,
@@ -219,12 +233,63 @@ func (h *DashboardHandlers) getUserAndRecord(w http.ResponseWriter, r *http.Requ
 	return
 }
 
+func (h *DashboardHandlers) validateIntersectingRecords(form recordForm, user *users.User, currentRecordId int, formErrors utils.FormErrors) {
+	nowWithTimezone, _ := utils.NowWithTimezone(user.TimeZone)
+	timeStart := parseTimeFromInput(form.TimeStart)
+	timeEnd := parseTimeFromInput(form.TimeEnd)
+	effectiveEnd := utils.EffectiveTime(timeEnd, user.TimeZone)
+
+	if timeEnd != nil && timeEnd.Before(*timeStart) {
+		formErrors.Add("TimeEnd", "Time End must be greater than Time Start")
+	}
+
+	if timeEnd == nil {
+		intersectingRecords := h.repo.RecordsWithTasks(FilterRecords{
+			UserID:      user.ID,
+			NotRecordID: currentRecordId,
+			InProgress:  true,
+		}, &nowWithTimezone)
+		if len(intersectingRecords) > 0 {
+			message := "You are already doing task: " + recortToString(intersectingRecords[0], user)
+			formErrors.Add("TimeEnd", message)
+			return
+		}
+	}
+
+	intersectingRecords := h.repo.RecordsWithTasks(FilterRecords{
+		UserID:        user.ID,
+		StartInterval: *timeStart,
+		EndInterval:   *effectiveEnd,
+		NotRecordID:   currentRecordId,
+	}, &nowWithTimezone)
+	if len(intersectingRecords) > 0 {
+		message := "The selected time overlaps with other entries: "
+		for _, record := range intersectingRecords {
+			message += "<br> " + recortToString(record, user)
+		}
+
+		formErrors.Add("TimeEnd", message)
+	}
+}
+
+func recortToString(record *Record, user *users.User) string {
+	return fmt.Sprintf(
+		"<a href=\"/dashboard?record=%d\" target=\"_blank\">%s %s %s</a>",
+		record.ID,
+		html.EscapeString(record.Task.Title),
+		utils.FormatTimeRange(record.TimeStart, record.TimeEnd, user.TimeZone),
+		html.EscapeString(record.Comment),
+	)
+}
+
 func formatTimeForInput(t *time.Time) string {
 	if t == nil {
 		return "" // Пустое значение для nil
 	}
 	return t.Format("2006-01-02T15:04")
 }
+
+// Time can be nil, so *time.Time
 func parseTimeFromInput(input string) *time.Time {
 	if input == "" {
 		return nil

@@ -20,24 +20,24 @@
     function toggleVisibility(isChecked, inputElement) {
       if (isChecked) {
         inputElement.dataset.savedValue = inputElement.value;
-        inputElement.value = "";
+        setTimeout(() => (inputElement.value = ""), 200);
         inputElement.classList.add("opacity-0", "translate-y-2", "pointer-events-none");
         inputElement.classList.remove("opacity-100", "translate-y-0");
       } else {
-        inputElement.value = inputElement.dataset.savedValue || "";
+        if (inputElement.dataset.savedValue) {
+          inputElement.value = inputElement.dataset.savedValue;
+        } else if (inputElement.type == "datetime-local") {
+          let date = new Date();
+          inputElement.value = new Date(date.getTime() - date.getTimezoneOffset() * 60000).toISOString().slice(0, 16);
+        } else {
+          inputElement.value = "";
+        }
         inputElement.classList.add("opacity-100", "translate-y-0");
         inputElement.classList.remove("opacity-0", "translate-y-2", "pointer-events-none");
       }
     }
   </script>
-  {{ if not .Value }}
-  <script>
-    {
-      let inputElement = document.getElementById("{{ .ID }}");
-      inputElement.classList.add("opacity-0", "translate-y-2", "pointer-events-none");
-    }
-  </script>
-  {{ end }} {{ end }}
+  {{ end }}
 
   <!-- Textarea -->
   {{ if eq .Type "textarea" }}
@@ -89,7 +89,7 @@
     type="{{ .Type }}"
     id="{{ .ID }}"
     name="{{ .Name }}"
-    class="{{if .Class }}{{ .Class }}{{else}}transition-all duration-200 focus:shadow-outline w-full appearance-none rounded-xl border px-3 py-2 leading-tight text-gray-700 shadow focus:outline-none focus:ring-1 focus:ring-gray-500{{end}} {{if .Errors}}border-red-500{{end}}"
+    class="{{if .Class }}{{ .Class }}{{else}}{{ if and .ResetLabel (not .Value)}}opacity-0 translate-y-2 pointer-events-none {{ end }}transition-all duration-200 focus:shadow-outline w-full appearance-none rounded-xl border px-3 py-2 leading-tight text-gray-700 shadow focus:outline-none focus:ring-1 focus:ring-gray-500{{end}} {{if .Errors}}border-red-500{{end}}"
     value="{{ .Value }}"
     {{ if .Autocomplete }}autocomplete="{{ .Autocomplete }}"{{ end }}
   />
