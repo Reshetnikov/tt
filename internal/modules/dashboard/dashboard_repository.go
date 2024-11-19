@@ -18,7 +18,11 @@ type Record struct {
 	TimeStart time.Time
 	TimeEnd   *time.Time // nullable
 	Comment   string
-	Task      *Task
+
+	Task            *Task
+	StartPercent    int
+	DurationPercent int
+	Duration        time.Duration
 }
 
 type DailyRecords struct {

@@ -2,7 +2,7 @@
 {{ define "dashboard/record_list" }}
 {{ range .Records }}
 <div class="relative flex items-center space-x-3 rounded-lg border border-gray-200 bg-white p-3 shadow-md">
-  <div class="absolute top-0 h-1 rounded-full" style="background-color: {{ .Task.Color }}; width: 50%"></div>
+  <div class="absolute top-0 h-1 rounded-full" style="background-color: {{ .Task.Color }}; left: 20%; width: 20%"></div>
 
   <!-- Task.Title, Time, Comment -->
   <div class="flex-grow">

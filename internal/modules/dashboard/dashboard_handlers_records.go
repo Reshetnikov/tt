@@ -190,7 +190,7 @@ func (h *DashboardHandlers) HandleRecordsList(w http.ResponseWriter, r *http.Req
 		// RecordID: 0,
 		// Start:    time.Now().Add(-7 * 24 * time.Hour),
 		// End:      time.Now(),
-	}, nil)
+	})
 	utils.RenderTemplateWithoutLayout(w, []string{"dashboard/record_list"}, "dashboard/record_list", utils.TplData{
 		"Records": records,
 		"User":    user,
@@ -234,7 +234,6 @@ func (h *DashboardHandlers) getUserAndRecord(w http.ResponseWriter, r *http.Requ
 }
 
 func (h *DashboardHandlers) validateIntersectingRecords(form recordForm, user *users.User, currentRecordId int, formErrors utils.FormErrors) {
-	nowWithTimezone, _ := utils.NowWithTimezone(user.TimeZone)
 	timeStart := parseTimeFromInput(form.TimeStart)
 	timeEnd := parseTimeFromInput(form.TimeEnd)
 	effectiveEnd := utils.EffectiveTime(timeEnd, user.TimeZone)
@@ -248,7 +247,7 @@ func (h *DashboardHandlers) validateIntersectingRecords(form recordForm, user *u
 			UserID:      user.ID,
 			NotRecordID: currentRecordId,
 			InProgress:  true,
-		}, &nowWithTimezone)
+		})
 		if len(intersectingRecords) > 0 {
 			message := "You are already doing task: " + recortToString(intersectingRecords[0], user)
 			formErrors.Add("TimeEnd", message)
@@ -256,12 +255,15 @@ func (h *DashboardHandlers) validateIntersectingRecords(form recordForm, user *u
 		}
 	}
 
+	nowWithTimezone, _ := utils.NowWithTimezone(user.TimeZone)
+	excludeInProgress := nowWithTimezone.Before(*timeStart)
 	intersectingRecords := h.repo.RecordsWithTasks(FilterRecords{
-		UserID:        user.ID,
-		StartInterval: *timeStart,
-		EndInterval:   *effectiveEnd,
-		NotRecordID:   currentRecordId,
-	}, &nowWithTimezone)
+		UserID:            user.ID,
+		StartInterval:     *timeStart,
+		EndInterval:       *effectiveEnd,
+		NotRecordID:       currentRecordId,
+		ExcludeInProgress: excludeInProgress,
+	})
 	if len(intersectingRecords) > 0 {
 		message := "The selected time overlaps with other entries: "
 		for _, record := range intersectingRecords {

@@ -27,7 +27,7 @@ func (h *DashboardHandlers) HandleDashboard(w http.ResponseWriter, r *http.Reque
 		// RecordID: 0,
 		// Start:    time.Now().Add(-7 * 24 * time.Hour),
 		// End:      time.Now(),
-	}, nil)
+	})
 
 	// if r.Header.Get("HX-Request") == "" {
 	utils.RenderTemplate(w, []string{"dashboard/dashboard", "dashboard/task_list", "dashboard/record_list"}, utils.TplData{

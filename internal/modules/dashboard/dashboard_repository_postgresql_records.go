@@ -15,9 +15,12 @@ type FilterRecords struct {
 	StartInterval time.Time
 	EndInterval   time.Time
 	InProgress    bool
+	// If StartInterval is in the future, then time_end IS NULL entries should be excluded.
+	// Because we can consider time_end = now() and now() < StartInterval, i.e. time_end < StartInterval.
+	ExcludeInProgress bool
 }
 
-func (r *DashboardRepositoryPostgres) RecordsWithTasks(filterRecords FilterRecords, nowWithTimezone *time.Time) (records []*Record) {
+func (r *DashboardRepositoryPostgres) RecordsWithTasks(filterRecords FilterRecords) (records []*Record) {
 	query := `
         SELECT 
             r.id, r.task_id, r.time_start, r.time_end, r.comment,
@@ -52,14 +55,9 @@ func (r *DashboardRepositoryPostgres) RecordsWithTasks(filterRecords FilterRecor
 
 	// Recording must end after interval starts or does not end
 	if !filterRecords.StartInterval.IsZero() {
-		// If StartInterval is in the future, then time_end IS NULL records should be excluded
-		includeInProcess := true
-		if nowWithTimezone != nil && nowWithTimezone.Before(filterRecords.StartInterval) {
-			includeInProcess = false
-		}
-		filters = append(filters, fmt.Sprintf("(r.time_end >= $%d OR (r.time_end IS NULL AND $%d ))", argIndex, argIndex+1))
-		args = append(args, filterRecords.StartInterval, includeInProcess)
-		argIndex += 2
+		filters = append(filters, fmt.Sprintf("(r.time_end >= $%d OR r.time_end IS NULL)", argIndex))
+		args = append(args, filterRecords.StartInterval)
+		argIndex++
 	}
 
 	// Recording must start before the end of the interval
@@ -72,6 +70,11 @@ func (r *DashboardRepositoryPostgres) RecordsWithTasks(filterRecords FilterRecor
 	// InProgress
 	if filterRecords.InProgress {
 		filters = append(filters, "r.time_end IS NULL")
+	}
+
+	// ExcludeInProgress
+	if filterRecords.InProgress {
+		filters = append(filters, "r.time_end IS NOT NULL")
 	}
 
 	if len(filters) > 0 {
@@ -118,7 +121,7 @@ func (r *DashboardRepositoryPostgres) RecordsWithTasks(filterRecords FilterRecor
 func (r *DashboardRepositoryPostgres) RecordByIDWithTask(recordID int) *Record {
 	records := r.RecordsWithTasks(FilterRecords{
 		RecordID: recordID,
-	}, nil)
+	})
 	if len(records) == 0 {
 		return nil
 	}
@@ -163,58 +166,79 @@ func (r *DashboardRepositoryPostgres) DeleteRecord(recordID int) error {
 	return nil
 }
 
-// FetchWeeklyRecords retrieves records for a week
-/*func (r *DashboardRepositoryPostgres) FetchWeeklyRecords(userID int, startOfWeek time.Time) (weeklyRecords []DailyRecords) {
-	for i := 0; i < 7; i++ {
-		day := startOfWeek.AddDate(0, 0, i)
-		rows, err := r.db.Query(context.Background(), "SELECT id, task_id, time_start, time_end, comment FROM records WHERE time_start >= $1 AND time_start < $2", day, day.Add(24*time.Hour))
-		if err != nil {
-			slog.Error("DashboardRepositoryPostgres FetchWeeklyRecords Query", "err", err)
-			return
-		}
-		defer rows.Close()
+func (r *DashboardRepositoryPostgres) DailyRecords(filterRecords FilterRecords, nowWithTimezone *time.Time) (dailyRecords []DailyRecords) {
+	if filterRecords.StartInterval.IsZero() || filterRecords.EndInterval.IsZero() {
+		return
+	}
+	if filterRecords.StartInterval.After(filterRecords.EndInterval) {
+		return
+	}
 
-		var records []Record
-		for rows.Next() {
-			var record Record
-			if err := rows.Scan(&record.ID, &record.TaskID, &record.TimeStart, &record.TimeEnd, &record.Comment); err != nil {
-				slog.Error("DashboardRepositoryPostgres FetchWeeklyRecords Scan", "err", err)
-				return
+	// Приведение интервала к началу суток
+	startInterval := filterRecords.StartInterval.Truncate(24 * time.Hour)
+	endInterval := filterRecords.EndInterval.Truncate(24 * time.Hour)
+
+	// Мапа для распределения записей по дням
+	dayMap := make(map[time.Time][]Record)
+	for d := startInterval; !d.After(endInterval); d = d.Add(24 * time.Hour) {
+		dayMap[d] = []Record{}
+	}
+
+	records := r.RecordsWithTasks(filterRecords)
+
+	// Обработка записей
+	for _, record := range records {
+		start := record.TimeStart
+		end := record.TimeEnd
+
+		// Если TimeEnd == nil, запись распространяется до конца интервала
+		if end == nil {
+			temp := endInterval.Add(24 * time.Hour)
+			end = &temp
+		}
+
+		// Распределение записи по дням
+		for d := start.Truncate(24 * time.Hour); !d.After(end.Truncate(24 * time.Hour)); d = d.Add(24 * time.Hour) {
+			// Проверяем, входит ли день в указанный интервал
+			if d.Before(startInterval) || d.After(endInterval) {
+				continue
 			}
-			records = append(records, record)
-		}
 
-		weeklyRecords = append(weeklyRecords, DailyRecords{
-			Day:     day,
-			Records: records,
+			// Копия записи для конкретного дня
+			dailyRecord := *record
+			startOfDay := d
+			endOfDay := d.Add(24 * time.Hour)
+
+			// Начало записи для текущего дня
+			dailyStart := start
+			if dailyStart.Before(startOfDay) {
+				dailyStart = startOfDay
+			}
+
+			// Конец записи для текущего дня
+			dailyEnd := *end
+			if dailyEnd.After(endOfDay) {
+				dailyEnd = endOfDay
+			}
+
+			// Вычисление процентов и продолжительности
+			totalDaySeconds := float64(24 * time.Hour / time.Second)
+			dailyRecord.StartPercent = int(float64(dailyStart.Sub(startOfDay)) / totalDaySeconds * 100)
+			dailyRecord.DurationPercent = int(float64(dailyEnd.Sub(dailyStart)) / totalDaySeconds * 100)
+			dailyRecord.Duration = dailyEnd.Sub(dailyStart)
+
+			// Добавление записи в день
+			dayMap[d] = append(dayMap[d], dailyRecord)
+		}
+	}
+
+	// Преобразование мапы в массив
+	for d := startInterval; !d.After(endInterval); d = d.Add(24 * time.Hour) {
+		dailyRecords = append(dailyRecords, DailyRecords{
+			Day:     d,
+			Records: dayMap[d],
 		})
 	}
 
-	return
-}*/
-
-/*func (r *DashboardRepositoryPostgres) Records(userID int) (records []*Record) {
-	rows, err := r.db.Query(context.Background(), `
-		SELECT r.id, r.task_id, r.time_start, r.time_end, r.comment
-		FROM records r
-		JOIN tasks t ON r.task_id = t.id
-		WHERE t.user_id = $1
-		ORDER BY r.time_start ASC;
-	`, userID)
-	if err != nil {
-		slog.Error("DashboardRepositoryPostgres Records Query", "err", err)
-		return
-	}
-	defer rows.Close()
-
-	for rows.Next() {
-		var record Record
-		err := rows.Scan(&record.ID, &record.TaskID, &record.TimeStart, &record.TimeEnd, &record.Comment)
-		if err != nil {
-			slog.Error("DashboardRepositoryPostgres Records Scan", "err", err)
-			return
-		}
-		records = append(records, &record)
-	}
-	return
-}*/
+	return dailyRecords
+}
