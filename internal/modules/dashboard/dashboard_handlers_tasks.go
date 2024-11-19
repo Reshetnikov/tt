@@ -119,7 +119,7 @@ func (h *DashboardHandlers) HandleTaskList(w http.ResponseWriter, r *http.Reques
 	tasks := h.repo.Tasks(user.ID, taskCompleted)
 	utils.RenderTemplateWithoutLayout(w, []string{"dashboard/task_list"}, "dashboard/task_list", utils.TplData{
 		"Tasks":         tasks,
-		"taskCompleted": taskCompleted,
+		"TaskCompleted": taskCompleted,
 	})
 }
 

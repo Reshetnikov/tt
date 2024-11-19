@@ -22,9 +22,7 @@
   <!-- Right column (Records) -->
   <div class="w-3/4 pl-4">
     <!-- List of records -->
-    <div hx-get="/records" hx-trigger="load-records from:body" hx-swap="innerHTML" class="space-y-4">
-      {{ template "dashboard/record_list" . }}
-    </div>
+    {{ template "dashboard/record_list" . }}
   </div>
 </div>
 

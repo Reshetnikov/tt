@@ -3,6 +3,7 @@ package dashboard
 import (
 	"log/slog"
 	"net/http"
+	"time"
 	"time-tracker/internal/modules/users"
 	"time-tracker/internal/utils"
 )
@@ -21,29 +22,40 @@ func (h *DashboardHandlers) HandleDashboard(w http.ResponseWriter, r *http.Reque
 		utils.RedirectLogin(w, r)
 		return
 	}
+
+	week := r.URL.Query().Get("week")
+	nowWithTimezone, _ := utils.NowWithTimezone(user.TimeZone)
+	startInterval, endInterval := GetDateInterval(week, nowWithTimezone)
+	filterRecords := FilterRecords{
+		UserID:        user.ID,
+		StartInterval: startInterval,
+		EndInterval:   endInterval,
+	}
+
+	dailyRecords := h.repo.DailyRecords(filterRecords, nowWithTimezone)
+
 	tasks := h.repo.Tasks(user.ID, "")
-	records := h.repo.RecordsWithTasks(FilterRecords{
-		UserID: user.ID,
-		// RecordID: 0,
-		// Start:    time.Now().Add(-7 * 24 * time.Hour),
-		// End:      time.Now(),
-	})
 
-	// if r.Header.Get("HX-Request") == "" {
 	utils.RenderTemplate(w, []string{"dashboard/dashboard", "dashboard/task_list", "dashboard/record_list"}, utils.TplData{
-		"Title":   "Tasks & Records Dashboard",
-		"Tasks":   tasks,
-		"Records": records,
-		"User":    user,
+		"Title":        "Tasks & Records Dashboard",
+		"Tasks":        tasks,
+		"DailyRecords": dailyRecords,
+		"User":         user,
+		"Week":         week,
 	})
-	// } else {
-	// 	utils.RenderTemplateWithoutLayout(w, []string{"dashboard/dashboard", "dashboard/task_list", "dashboard/record_list"}, "content", utils.TplData{
-	// 		"Title":   "Tasks & Records Dashboard",
-	// 		"Tasks":   tasks,
-	// 		"Records": records,
-	// 	})
-	// }
 
+}
+
+func GetDateInterval(week string, nowWithTimezone time.Time) (startInterval time.Time, endInterval time.Time) {
+	if week != "" {
+		var err error
+		startInterval, endInterval, err = utils.GetWeekInterval(week)
+		if err == nil {
+			return
+		}
+	}
+	startInterval, endInterval = utils.GetDateInterval(nowWithTimezone)
+	return
 }
 
 var D = slog.Debug

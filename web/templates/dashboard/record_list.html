@@ -1,53 +1,69 @@
 <!-- prettier-ignore -->
 {{ define "dashboard/record_list" }}
-{{ range .Records }}
-<div class="relative flex items-center space-x-3 rounded-lg border border-gray-200 bg-white p-3 shadow-md">
-  <div class="absolute top-0 h-1 rounded-full" style="background-color: {{ .Task.Color }}; left: 20%; width: 20%"></div>
+<div
+  hx-get="/records{{ if .Week }}?week={{ .Week }}{{ end }}"
+  hx-trigger="load-records from:body"
+  hx-swap="outerHTML"
+  class="space-y-4"
+>
+  {{ range .DailyRecords}}
+  <hr />
+  {{ .Day }}
+  <hr />
+  {{ range .Records }}
+  <div class="relative flex items-center space-x-3 rounded-lg border border-gray-200 bg-white p-3 shadow-md">
+    <div
+      class="absolute top-0 h-1 rounded-full"
+      style="background-color: {{ .Task.Color }}; left: {{ .StartPercent }}%; width: {{ .DurationPercent }}%"
+    ></div>
 
-  <!-- Task.Title, Time, Comment -->
-  <div class="flex-grow">
-    <div class="text-lg font-bold text-gray-800">
-      {{ .Task.Title }}
-      <span class="text-sm font-normal text-gray-600"> {{ formatTimeRange .TimeStart .TimeEnd $.User.TimeZone}} </span>
+    <!-- Task.Title, Time, Comment -->
+    <div class="flex-grow">
+      <div class="text-lg font-bold text-gray-800">
+        {{ .Task.Title }}
+        <span class="text-sm font-normal text-gray-600">
+          {{ formatTimeRange .TimeStart .TimeEnd $.User.TimeZone}}
+        </span>
+      </div>
+      <div class="mt-2 whitespace-pre-wrap text-gray-700">{{ .Comment }}</div>
     </div>
-    <div class="mt-2 whitespace-pre-wrap text-gray-700">{{ .Comment }}</div>
+
+    <!-- Stop -->
+    <button
+      class="rounded-full bg-green-100 p-2 hover:bg-green-200"
+      hx-get="/records/stop?taskId={{ .ID }}"
+      hx-swap="none"
+    >
+      <svg class="size-4 text-green-600">
+        <use xlink:href="#icon-stop"></use>
+      </svg>
+    </button>
+
+    <!-- Edit -->
+    <button
+      class="rounded-full bg-blue-100 p-2 hover:bg-blue-200"
+      hx-get="/records/{{ .ID }}"
+      hx-target="#modal-content"
+      hx-swap="innerHTML"
+    >
+      <svg class="size-4 text-blue-600">
+        <use xlink:href="#icon-edit"></use>
+      </svg>
+    </button>
+
+    <!-- Delete -->
+    <button
+      hx-delete="/records/{{ .ID }}"
+      hx-swap="none"
+      hx-confirm="Are you sure you wish to delete your record?"
+      class="rounded-full bg-red-100 p-2 hover:bg-red-200"
+    >
+      <svg class="size-4 text-red-600">
+        <use xlink:href="#icon-delete"></use>
+      </svg>
+    </button>
   </div>
-
-  <!-- Stop -->
-  <button
-    class="rounded-full bg-green-100 p-2 hover:bg-green-200"
-    hx-get="/records/stop?taskId={{ .ID }}"
-    hx-swap="none"
-  >
-    <svg class="size-4 text-green-600">
-      <use xlink:href="#icon-stop"></use>
-    </svg>
-  </button>
-
-  <!-- Edit -->
-  <button
-    class="rounded-full bg-blue-100 p-2 hover:bg-blue-200"
-    hx-get="/records/{{ .ID }}"
-    hx-target="#modal-content"
-    hx-swap="innerHTML"
-  >
-    <svg class="size-4 text-blue-600">
-      <use xlink:href="#icon-edit"></use>
-    </svg>
-  </button>
-
-  <!-- Delete -->
-  <button
-    hx-delete="/records/{{ .ID }}"
-    hx-swap="none"
-    hx-confirm="Are you sure you wish to delete your record?"
-    class="rounded-full bg-red-100 p-2 hover:bg-red-200"
-  >
-    <svg class="size-4 text-red-600">
-      <use xlink:href="#icon-delete"></use>
-    </svg>
-  </button>
+  {{ end }} {{ end }}
 </div>
-{{ end }}
 <!-- prettier-ignore -->
 {{ end }}

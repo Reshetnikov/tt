@@ -1,8 +1,10 @@
 package utils
 
 import (
+	"errors"
 	"fmt"
 	"log/slog"
+	"strings"
 	"time"
 )
 
@@ -71,4 +73,59 @@ func FormatTimeRange(timeStart time.Time, timeEnd *time.Time, timezone string) s
 	}
 
 	return timeRange
+}
+
+// "2024-W03"
+func GetWeekInterval(isoWeek string) (time.Time, time.Time, error) {
+	parts := strings.Split(isoWeek, "-W")
+	if len(parts) != 2 {
+		return time.Time{}, time.Time{}, errors.New("invalid ISO week format: " + isoWeek)
+	}
+	var year, week int
+	_, err := fmt.Sscanf(parts[0], "%d", &year)
+	if err != nil {
+		return time.Time{}, time.Time{}, errors.New("invalid year in ISO week format: " + isoWeek)
+	}
+	_, err = fmt.Sscanf(parts[1], "%d", &week)
+	if err != nil {
+		return time.Time{}, time.Time{}, errors.New("invalid week number in ISO week format: " + isoWeek)
+	}
+	if week < 1 || week > 53 {
+		return time.Time{}, time.Time{}, fmt.Errorf("invalid week number: %d", week)
+	}
+
+	// Set the date to January 1 of the specified year
+	firstJan := time.Date(year, 1, 1, 0, 0, 0, 0, time.UTC)
+
+	// Calculate the day of the week (ISO 8601 considers Monday as the first day of the week)
+	// In Go, the week starts with Sunday (0), so we translate.
+	isoWeekday := int(firstJan.Weekday())
+	if isoWeekday == 0 {
+		isoWeekday = 7
+	}
+
+	// Shift the first day of the year to the nearest Monday (ISO 8601)
+	startOfWeek := firstJan.AddDate(0, 0, -isoWeekday+1)
+
+	// Adding weeks
+	startInterval := startOfWeek.AddDate(0, 0, (week-1)*7)
+	endInterval := startInterval.AddDate(0, 0, 7).Add(-time.Nanosecond)
+
+	return startInterval, endInterval, nil
+}
+
+func GetDateInterval(date time.Time) (time.Time, time.Time) {
+	// Calculate the day of the week (ISO 8601: Monday = 1)
+	weekday := int(date.Weekday())
+	if weekday == 0 {
+		weekday = 7 // Sunday -> 7
+	}
+
+	// Calculate the beginning of the week (Monday)
+	startInterval := date.AddDate(0, 0, -weekday+1).Truncate(24 * time.Hour)
+
+	// End of the week (Sunday 23:59:59.999999999)
+	endInterval := startInterval.AddDate(0, 0, 7).Add(-time.Nanosecond)
+
+	return startInterval, endInterval
 }

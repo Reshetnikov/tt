@@ -3,7 +3,7 @@
 
 <div
   id="task-list"
-  hx-get="/tasks{{ if .taskCompleted }}?taskCompleted={{ .taskCompleted }}{{ end }}"
+  hx-get="/tasks{{ if .TaskCompleted }}?taskCompleted={{ .TaskCompleted }}{{ end }}"
   hx-trigger="load-tasks from:body"
   hx-swap="outerHTML"
 >

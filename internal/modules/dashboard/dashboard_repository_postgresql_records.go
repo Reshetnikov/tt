@@ -73,7 +73,7 @@ func (r *DashboardRepositoryPostgres) RecordsWithTasks(filterRecords FilterRecor
 	}
 
 	// ExcludeInProgress
-	if filterRecords.InProgress {
+	if filterRecords.ExcludeInProgress {
 		filters = append(filters, "r.time_end IS NOT NULL")
 	}
 
@@ -166,74 +166,51 @@ func (r *DashboardRepositoryPostgres) DeleteRecord(recordID int) error {
 	return nil
 }
 
-func (r *DashboardRepositoryPostgres) DailyRecords(filterRecords FilterRecords, nowWithTimezone *time.Time) (dailyRecords []DailyRecords) {
-	if filterRecords.StartInterval.IsZero() || filterRecords.EndInterval.IsZero() {
-		return
-	}
-	if filterRecords.StartInterval.After(filterRecords.EndInterval) {
-		return
-	}
+func (r *DashboardRepositoryPostgres) DailyRecords(filterRecords FilterRecords, nowWithTimezone time.Time) (dailyRecords []DailyRecords) {
+	dateFirstDay := filterRecords.StartInterval.Truncate(24 * time.Hour)
+	dateLastDay := filterRecords.EndInterval.Truncate(24 * time.Hour)
 
-	// Приведение интервала к началу суток
-	startInterval := filterRecords.StartInterval.Truncate(24 * time.Hour)
-	endInterval := filterRecords.EndInterval.Truncate(24 * time.Hour)
-
-	// Мапа для распределения записей по дням
 	dayMap := make(map[time.Time][]Record)
-	for d := startInterval; !d.After(endInterval); d = d.Add(24 * time.Hour) {
+	for d := dateFirstDay; !d.After(dateLastDay); d = d.Add(24 * time.Hour) {
 		dayMap[d] = []Record{}
 	}
 
 	records := r.RecordsWithTasks(filterRecords)
 
-	// Обработка записей
 	for _, record := range records {
-		start := record.TimeStart
-		end := record.TimeEnd
-
-		// Если TimeEnd == nil, запись распространяется до конца интервала
-		if end == nil {
-			temp := endInterval.Add(24 * time.Hour)
-			end = &temp
+		timeEnd := record.TimeEnd
+		if timeEnd == nil {
+			timeEnd = &nowWithTimezone
 		}
+		lastDayRecord := timeEnd.Truncate(24 * time.Hour)
 
-		// Распределение записи по дням
-		for d := start.Truncate(24 * time.Hour); !d.After(end.Truncate(24 * time.Hour)); d = d.Add(24 * time.Hour) {
-			// Проверяем, входит ли день в указанный интервал
-			if d.Before(startInterval) || d.After(endInterval) {
-				continue
+		dayRecord := record.TimeStart.Truncate(24 * time.Hour)
+		for ; !dayRecord.After(lastDayRecord); dayRecord = dayRecord.Add(24 * time.Hour) {
+			// Because there will be different StartPercent, DurationPercent, Duration if the recording lasts several days
+			recordCopy := *record
+			dayEndRecord := dayRecord.Add(24 * time.Hour)
+
+			timeStartIntraday := recordCopy.TimeStart
+			if timeStartIntraday.Before(dayRecord) {
+				timeStartIntraday = dayRecord
 			}
 
-			// Копия записи для конкретного дня
-			dailyRecord := *record
-			startOfDay := d
-			endOfDay := d.Add(24 * time.Hour)
-
-			// Начало записи для текущего дня
-			dailyStart := start
-			if dailyStart.Before(startOfDay) {
-				dailyStart = startOfDay
+			timeEndIntraday := *timeEnd
+			// D("t", "timeEndIntraday", timeEndIntraday, "dayEndRecord", dayEndRecord, "1", timeEndIntraday.After(dayEndRecord))
+			if timeEndIntraday.After(dayEndRecord) {
+				timeEndIntraday = dayEndRecord
 			}
 
-			// Конец записи для текущего дня
-			dailyEnd := *end
-			if dailyEnd.After(endOfDay) {
-				dailyEnd = endOfDay
-			}
+			totalDaySeconds := float32(86400)
+			recordCopy.StartPercent = float32(timeStartIntraday.Sub(dayRecord)/time.Second) / totalDaySeconds * 100
+			recordCopy.DurationPercent = float32(timeEndIntraday.Sub(timeStartIntraday)/time.Second) / totalDaySeconds * 100
+			recordCopy.Duration = timeEndIntraday.Sub(timeStartIntraday)
 
-			// Вычисление процентов и продолжительности
-			totalDaySeconds := float64(24 * time.Hour / time.Second)
-			dailyRecord.StartPercent = int(float64(dailyStart.Sub(startOfDay)) / totalDaySeconds * 100)
-			dailyRecord.DurationPercent = int(float64(dailyEnd.Sub(dailyStart)) / totalDaySeconds * 100)
-			dailyRecord.Duration = dailyEnd.Sub(dailyStart)
-
-			// Добавление записи в день
-			dayMap[d] = append(dayMap[d], dailyRecord)
+			dayMap[dayRecord] = append(dayMap[dayRecord], recordCopy)
 		}
 	}
 
-	// Преобразование мапы в массив
-	for d := startInterval; !d.After(endInterval); d = d.Add(24 * time.Hour) {
+	for d := dateFirstDay; !d.After(dateLastDay); d = d.Add(24 * time.Hour) {
 		dailyRecords = append(dailyRecords, DailyRecords{
 			Day:     d,
 			Records: dayMap[d],

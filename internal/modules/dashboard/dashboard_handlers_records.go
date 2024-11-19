@@ -185,15 +185,20 @@ func (h *DashboardHandlers) HandleRecordsList(w http.ResponseWriter, r *http.Req
 		utils.RenderBlockNeedLogin(w)
 		return
 	}
-	records := h.repo.RecordsWithTasks(FilterRecords{
-		UserID: user.ID,
-		// RecordID: 0,
-		// Start:    time.Now().Add(-7 * 24 * time.Hour),
-		// End:      time.Now(),
-	})
+	week := r.URL.Query().Get("week")
+	nowWithTimezone, _ := utils.NowWithTimezone(user.TimeZone)
+	startInterval, endInterval := GetDateInterval(week, nowWithTimezone)
+	filterRecords := FilterRecords{
+		UserID:        user.ID,
+		StartInterval: startInterval,
+		EndInterval:   endInterval,
+	}
+
+	dailyRecords := h.repo.DailyRecords(filterRecords, nowWithTimezone)
+
 	utils.RenderTemplateWithoutLayout(w, []string{"dashboard/record_list"}, "dashboard/record_list", utils.TplData{
-		"Records": records,
-		"User":    user,
+		"DailyRecords": dailyRecords,
+		"User":         user,
 	})
 }
 

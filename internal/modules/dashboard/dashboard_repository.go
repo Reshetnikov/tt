@@ -20,8 +20,8 @@ type Record struct {
 	Comment   string
 
 	Task            *Task
-	StartPercent    int
-	DurationPercent int
+	StartPercent    float32
+	DurationPercent float32
 	Duration        time.Duration
 }
 
