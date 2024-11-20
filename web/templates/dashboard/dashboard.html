@@ -90,7 +90,6 @@
       })
         .then((response) => response.json())
         .then((data) => {
-          console.log("Order updated:", data);
           htmx.trigger(document.body, "load-tasks");
         })
         .catch((error) => {

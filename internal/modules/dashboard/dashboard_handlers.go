@@ -47,6 +47,7 @@ func (h *DashboardHandlers) HandleDashboard(w http.ResponseWriter, r *http.Reque
 		"Week":         utils.FormatISOWeek(startInterval),
 		"PreviousWeek": previousWeek,
 		"NextWeek":     nextWeek,
+		"NowWithTimezone": nowWithTimezone,
 	})
 
 }

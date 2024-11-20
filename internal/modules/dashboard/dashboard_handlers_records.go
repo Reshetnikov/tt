@@ -203,11 +203,12 @@ func (h *DashboardHandlers) HandleRecordsList(w http.ResponseWriter, r *http.Req
 	nextWeek := utils.FormatISOWeek(endInterval.AddDate(0, 0, 7))
 	week = utils.FormatISOWeek(startInterval)
 	utils.RenderTemplateWithoutLayout(w, []string{"dashboard/record_list"}, "dashboard/record_list", utils.TplData{
-		"DailyRecords": dailyRecords,
-		"User":         user,
-		"Week":         week,
-		"PreviousWeek": previousWeek,
-		"NextWeek":     nextWeek,
+		"DailyRecords":    dailyRecords,
+		"User":            user,
+		"Week":            week,
+		"PreviousWeek":    previousWeek,
+		"NextWeek":        nextWeek,
+		"NowWithTimezone": nowWithTimezone,
 	})
 }
 

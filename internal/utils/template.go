@@ -7,7 +7,6 @@ import (
 	"os"
 	"path/filepath"
 	"text/template"
-	"time"
 	//"time-tracker/internal/middleware"
 )
 
@@ -34,12 +33,6 @@ func dict(values ...interface{}) TplData {
 }
 
 // Example:
-// {{ .SelectedWeek | date "January 2, 2006" }}
-func dateFormat(layout string, t time.Time) string {
-	return t.Format(layout)
-}
-
-// Example:
 // <link href="/css/output.css?v={{fileVersion "/css/output.css"}}" rel="stylesheet" />
 func fileVersion(relPath string) string {
 	absPath := filepath.Join("web/public", relPath)
@@ -53,7 +46,6 @@ func fileVersion(relPath string) string {
 func createTemplate(w http.ResponseWriter, tplPaths []string) (templates *template.Template) {
 	templates = template.New("").Funcs(template.FuncMap{
 		"dict":               dict,
-		"date":               dateFormat,
 		"fileVersion":        fileVersion,
 		"formatTimeRange":    FormatTimeRange,
 		"formatTimeForInput": FormatTimeForInput,
