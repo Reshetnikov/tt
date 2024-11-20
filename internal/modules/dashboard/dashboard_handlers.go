@@ -26,6 +26,7 @@ func (h *DashboardHandlers) HandleDashboard(w http.ResponseWriter, r *http.Reque
 	week := r.URL.Query().Get("week")
 	nowWithTimezone, _ := utils.NowWithTimezone(user.TimeZone)
 	startInterval, endInterval := GetDateInterval(week, nowWithTimezone)
+
 	filterRecords := FilterRecords{
 		UserID:        user.ID,
 		StartInterval: startInterval,
@@ -36,12 +37,16 @@ func (h *DashboardHandlers) HandleDashboard(w http.ResponseWriter, r *http.Reque
 
 	tasks := h.repo.Tasks(user.ID, "")
 
+	previousWeek := utils.FormatISOWeek(startInterval.AddDate(0, 0, -7))
+	nextWeek := utils.FormatISOWeek(endInterval.AddDate(0, 0, 7))
 	utils.RenderTemplate(w, []string{"dashboard/dashboard", "dashboard/task_list", "dashboard/record_list"}, utils.TplData{
 		"Title":        "Tasks & Records Dashboard",
 		"Tasks":        tasks,
 		"DailyRecords": dailyRecords,
 		"User":         user,
-		"Week":         week,
+		"Week":         utils.FormatISOWeek(startInterval),
+		"PreviousWeek": previousWeek,
+		"NextWeek":     nextWeek,
 	})
 
 }

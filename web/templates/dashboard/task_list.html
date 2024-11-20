@@ -12,6 +12,7 @@
     <button
       hx-get="/tasks"
       hx-target="#task-list"
+      hx-swap="outerHTML"
       class="{{ if not .taskCompleted }}bg-indigo-600{{ else }}bg-indigo-400{{ end }} hover:bg-indigo-700 rounded-lg p-2 flex-1"
     >
       Active
@@ -19,6 +20,7 @@
     <button
       hx-get="/tasks?taskCompleted=completed"
       hx-target="#task-list"
+      hx-swap="outerHTML"
       class='{{ if eq .taskCompleted "completed" }}bg-indigo-600{{ else }}bg-indigo-400{{ end }} hover:bg-indigo-700 rounded-lg p-2 flex-1'
     >
       Completed
@@ -26,6 +28,7 @@
     <button
       hx-get="/tasks?taskCompleted=all"
       hx-target="#task-list"
+      hx-swap="outerHTML"
       class='{{ if eq .taskCompleted "all" }}bg-indigo-600{{ else }}bg-indigo-400{{ end }} hover:bg-indigo-700 rounded-lg p-2 flex-1'
     >
       All

@@ -94,23 +94,16 @@ func GetWeekInterval(isoWeek string) (time.Time, time.Time, error) {
 		return time.Time{}, time.Time{}, fmt.Errorf("invalid week number: %d", week)
 	}
 
-	// Set the date to January 1 of the specified year
 	firstJan := time.Date(year, 1, 1, 0, 0, 0, 0, time.UTC)
-
-	// Calculate the day of the week (ISO 8601 considers Monday as the first day of the week)
-	// In Go, the week starts with Sunday (0), so we translate.
-	isoWeekday := int(firstJan.Weekday())
-	if isoWeekday == 0 {
-		isoWeekday = 7
+	isoY, _ := firstJan.ISOWeek()
+	var dateInWeek time.Time
+	if isoY < year {
+		dateInWeek = firstJan.AddDate(0, 0, (week)*7)
+	} else {
+		dateInWeek = firstJan.AddDate(0, 0, (week-1)*7)
 	}
 
-	// Shift the first day of the year to the nearest Monday (ISO 8601)
-	startOfWeek := firstJan.AddDate(0, 0, -isoWeekday+1)
-
-	// Adding weeks
-	startInterval := startOfWeek.AddDate(0, 0, (week-1)*7)
-	endInterval := startInterval.AddDate(0, 0, 7).Add(-time.Nanosecond)
-
+	startInterval, endInterval := GetDateInterval(dateInWeek)
 	return startInterval, endInterval, nil
 }
 
@@ -128,4 +121,10 @@ func GetDateInterval(date time.Time) (time.Time, time.Time) {
 	endInterval := startInterval.AddDate(0, 0, 7).Add(-time.Nanosecond)
 
 	return startInterval, endInterval
+}
+
+// ISO Week Date Format "2006-W02"
+func FormatISOWeek(t time.Time) string {
+	year, week := t.ISOWeek()
+	return fmt.Sprintf("%04d-W%02d", year, week)
 }

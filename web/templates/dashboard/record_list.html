@@ -1,69 +1,110 @@
 <!-- prettier-ignore -->
 {{ define "dashboard/record_list" }}
 <div
+  id="records-list"
   hx-get="/records{{ if .Week }}?week={{ .Week }}{{ end }}"
   hx-trigger="load-records from:body"
   hx-swap="outerHTML"
   class="space-y-4"
 >
-  {{ range .DailyRecords}}
-  <hr />
-  {{ .Day }}
-  <hr />
-  {{ range .Records }}
-  <div class="relative flex items-center space-x-3 rounded-lg border border-gray-200 bg-white p-3 shadow-md">
-    <div
-      class="absolute top-0 h-1 rounded-full"
-      style="background-color: {{ .Task.Color }}; left: {{ .StartPercent }}%; width: {{ .DurationPercent }}%"
-    ></div>
-
-    <!-- Task.Title, Time, Comment -->
-    <div class="flex-grow">
-      <div class="text-lg font-bold text-gray-800">
-        {{ .Task.Title }}
-        <span class="text-sm font-normal text-gray-600">
-          {{ formatTimeRange .TimeStart .TimeEnd $.User.TimeZone}}
-        </span>
-      </div>
-      <div class="mt-2 whitespace-pre-wrap text-gray-700">{{ .Comment }}</div>
-    </div>
-
-    <!-- Stop -->
-    <button
-      class="rounded-full bg-green-100 p-2 hover:bg-green-200"
-      hx-get="/records/stop?taskId={{ .ID }}"
-      hx-swap="none"
+  <!-- Navigation -->
+  <div class="flex items-center justify-center space-x-4">
+    <!-- Previous Week -->
+    <a
+      href="/records?week={{ .PreviousWeek }}"
+      class="text-blue-500 hover:underline"
+      hx-get="/records?week={{ .PreviousWeek }}"
+      hx-target="#records-list"
+      hx-swap="outerHTML"
+      >&laquo; Previous Week</a
     >
-      <svg class="size-4 text-green-600">
-        <use xlink:href="#icon-stop"></use>
-      </svg>
-    </button>
 
-    <!-- Edit -->
-    <button
-      class="rounded-full bg-blue-100 p-2 hover:bg-blue-200"
-      hx-get="/records/{{ .ID }}"
-      hx-target="#modal-content"
-      hx-swap="innerHTML"
-    >
-      <svg class="size-4 text-blue-600">
-        <use xlink:href="#icon-edit"></use>
-      </svg>
-    </button>
+    <!-- Week Selector -->
+    <form class="flex items-center space-x-2">
+      <input
+        type="week"
+        name="week"
+        value="{{ .Week }}"
+        class="focus:shadow-outline w-full appearance-none rounded-xl border border-gray-300 bg-white px-3 py-2 leading-tight text-gray-700 shadow focus:outline-none focus:ring-1 focus:ring-gray-500"
+        hx-get="/records"
+        hx-target="#records-list"
+        hx-swap="outerHTML"
+        hx-trigger="blur"
+      />
+    </form>
 
-    <!-- Delete -->
-    <button
-      hx-delete="/records/{{ .ID }}"
-      hx-swap="none"
-      hx-confirm="Are you sure you wish to delete your record?"
-      class="rounded-full bg-red-100 p-2 hover:bg-red-200"
+    <!-- Next Week -->
+    <a
+      href="/records?week={{ .NextWeek }}"
+      class="text-blue-500 hover:underline"
+      hx-get="/records?week={{ .NextWeek }}"
+      hx-target="#records-list"
+      hx-swap="outerHTML"
+      >Next Week &raquo;</a
     >
-      <svg class="size-4 text-red-600">
-        <use xlink:href="#icon-delete"></use>
-      </svg>
-    </button>
   </div>
-  {{ end }} {{ end }}
+
+  {{ range .DailyRecords}}
+  <div class="space-y-2">
+    <!-- Day Header -->
+    <div class="text-center text-lg font-semibold text-gray-800">{{ .Day | date "January 2, 2006"}}</div>
+    <hr class="border-gray-300" />
+    {{ range .Records }}
+    <div class="relative flex items-center space-x-3 rounded-lg border border-gray-200 bg-white p-3 shadow-md">
+      <div
+        class="absolute top-0 h-1 rounded-full"
+        style="background-color: {{ .Task.Color }}; left: {{ .StartPercent }}%; width: {{ .DurationPercent }}%"
+      ></div>
+
+      <!-- Task.Title, Time, Comment -->
+      <div class="flex-grow">
+        <div class="text-lg font-bold text-gray-800">
+          {{ .Task.Title }}
+          <span class="text-sm font-normal text-gray-600">
+            {{ formatTimeRange .TimeStart .TimeEnd $.User.TimeZone}}
+          </span>
+        </div>
+        <div class="mt-2 whitespace-pre-wrap text-gray-700">{{ .Comment }}</div>
+      </div>
+
+      <!-- Stop -->
+      <button
+        class="rounded-full bg-green-100 p-2 hover:bg-green-200"
+        hx-get="/records/stop?taskId={{ .ID }}"
+        hx-swap="none"
+      >
+        <svg class="size-4 text-green-600">
+          <use xlink:href="#icon-stop"></use>
+        </svg>
+      </button>
+
+      <!-- Edit -->
+      <button
+        class="rounded-full bg-blue-100 p-2 hover:bg-blue-200"
+        hx-get="/records/{{ .ID }}"
+        hx-target="#modal-content"
+        hx-swap="innerHTML"
+      >
+        <svg class="size-4 text-blue-600">
+          <use xlink:href="#icon-edit"></use>
+        </svg>
+      </button>
+
+      <!-- Delete -->
+      <button
+        hx-delete="/records/{{ .ID }}"
+        hx-swap="none"
+        hx-confirm="Are you sure you wish to delete your record?"
+        class="rounded-full bg-red-100 p-2 hover:bg-red-200"
+      >
+        <svg class="size-4 text-red-600">
+          <use xlink:href="#icon-delete"></use>
+        </svg>
+      </button>
+    </div>
+    {{ end }}
+  </div>
+  {{ end }}
 </div>
 <!-- prettier-ignore -->
 {{ end }}
