@@ -27,8 +27,8 @@
         if (inputElement.dataset.savedValue) {
           inputElement.value = inputElement.dataset.savedValue;
         } else if (inputElement.type == "datetime-local") {
-          let date = new Date();
-          inputElement.value = new Date(date.getTime() - date.getTimezoneOffset() * 60000).toISOString().slice(0, 16);
+          const now = new Date();
+          inputElement.value = new Date(now.getTime() - now.getTimezoneOffset() * 60000).toISOString().slice(0, 16);
         } else {
           inputElement.value = "";
         }

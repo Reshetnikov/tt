@@ -55,7 +55,7 @@ func (r *DashboardRepositoryPostgres) RecordsWithTasks(filterRecords FilterRecor
 
 	// Recording must end after interval starts or does not end
 	if !filterRecords.StartInterval.IsZero() {
-		filters = append(filters, fmt.Sprintf("(r.time_end >= $%d OR r.time_end IS NULL)", argIndex))
+		filters = append(filters, fmt.Sprintf("(r.time_end > $%d OR r.time_end IS NULL)", argIndex))
 		args = append(args, filterRecords.StartInterval)
 		argIndex++
 	}
@@ -204,7 +204,18 @@ func (r *DashboardRepositoryPostgres) DailyRecords(filterRecords FilterRecords, 
 			totalDaySeconds := float32(86400)
 			recordCopy.StartPercent = float32(timeStartIntraday.Sub(dayRecord)/time.Second) / totalDaySeconds * 100
 			recordCopy.DurationPercent = float32(timeEndIntraday.Sub(timeStartIntraday)/time.Second) / totalDaySeconds * 100
-			recordCopy.Duration = timeEndIntraday.Sub(timeStartIntraday)
+
+			recordCopy.TimeStartIntraday = timeStartIntraday.Format("15:04")
+			recordCopy.TimeEndIntraday = timeEndIntraday.Format("15:04")
+
+			duration := timeEndIntraday.Sub(timeStartIntraday)
+			hours := int(duration.Hours())
+			minutes := int(duration.Minutes()) % 60
+			if hours > 0 {
+				recordCopy.DurationHM = fmt.Sprintf("%02dh %02dm", hours, minutes)
+			} else {
+				recordCopy.DurationHM = fmt.Sprintf("%02dm", minutes)
+			}
 
 			dayMap[dayRecord] = append(dayMap[dayRecord], recordCopy)
 		}

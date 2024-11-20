@@ -11,6 +11,7 @@ import (
 )
 
 type recordForm struct {
+	ID        int
 	TaskID    int    `form:"task_id" validate:"required"`
 	TimeStart string `form:"time_start" validate:"required,datetime=2006-01-02T15:04" label:"Time Start"`
 	TimeEnd   string `form:"time_end" validate:"omitempty,datetime=2006-01-02T15:04" label:"Time End"`
@@ -20,7 +21,6 @@ type recordForm struct {
 type recordFormData struct {
 	Errors utils.FormErrors
 	Form   recordForm
-	URL    string
 	Tasks  []*Task
 }
 
@@ -41,13 +41,12 @@ func (h *DashboardHandlers) HandleRecordsNew(w http.ResponseWriter, r *http.Requ
 	now, _ := utils.NowWithTimezone(user.TimeZone)
 	form := recordForm{
 		TaskID:    taskId,
-		TimeStart: formatTimeForInput(&now),
+		TimeStart: utils.FormatTimeForInput(&now),
 		TimeEnd:   "",
 	}
 	data := recordFormData{
 		Form:   form,
 		Errors: utils.FormErrors{},
-		URL:    "/records",
 		Tasks:  h.repo.Tasks(user.ID, ""),
 	}
 	h.renderRecordForm(w, data)
@@ -97,7 +96,6 @@ func (h *DashboardHandlers) HandleRecordsCreate(w http.ResponseWriter, r *http.R
 	data := recordFormData{
 		Form:   form,
 		Errors: formErrors,
-		URL:    "/records",
 		Tasks:  h.repo.Tasks(user.ID, ""),
 	}
 	h.renderRecordForm(w, data)
@@ -110,19 +108,21 @@ func (h *DashboardHandlers) HandleRecordsEdit(w http.ResponseWriter, r *http.Req
 	}
 
 	form := recordForm{
+		ID:        record.ID,
 		TaskID:    record.TaskID,
-		TimeStart: formatTimeForInput(&record.TimeStart),
-		TimeEnd:   formatTimeForInput(record.TimeEnd),
+		TimeStart: utils.FormatTimeForInput(&record.TimeStart),
+		TimeEnd:   utils.FormatTimeForInput(record.TimeEnd),
 		Comment:   record.Comment,
 	}
-	tasks := h.repo.Tasks(user.ID, "") // Active tasks
+	// List active tasks
+	tasks := h.repo.Tasks(user.ID, "")
 	if record.Task.IsCompleted {
-		tasks = append(tasks, record.Task) // Add current inactive task
+		// Add current inactive task
+		tasks = append(tasks, record.Task)
 	}
 	data := recordFormData{
 		Form:   form,
 		Errors: utils.FormErrors{},
-		URL:    fmt.Sprintf("/records/%d", record.ID),
 		Tasks:  tasks,
 	}
 	h.renderRecordForm(w, data)
@@ -136,6 +136,7 @@ func (h *DashboardHandlers) HandleRecordsUpdate(w http.ResponseWriter, r *http.R
 
 	var form recordForm
 	utils.ParseFormToStruct(r, &form)
+	D("form", "form", form)
 	formErrors := utils.NewValidator(&form).Validate()
 	if !formErrors.HasErrors() {
 		h.validateIntersectingRecords(form, user, record.ID, formErrors)
@@ -156,14 +157,16 @@ func (h *DashboardHandlers) HandleRecordsUpdate(w http.ResponseWriter, r *http.R
 			}
 		}
 	}
-	tasks := h.repo.Tasks(user.ID, "") // Active tasks
+	// List active tasks
+	tasks := h.repo.Tasks(user.ID, "")
 	if record.Task.IsCompleted {
-		tasks = append(tasks, record.Task) // Add current inactive task
+		// Add current inactive task
+		tasks = append(tasks, record.Task)
 	}
+	form.ID = record.ID
 	data := recordFormData{
 		Form:   form,
 		Errors: formErrors,
-		URL:    fmt.Sprintf("/records/%d", record.ID),
 		Tasks:  tasks,
 	}
 	h.renderRecordForm(w, data)
@@ -212,7 +215,6 @@ func (h *DashboardHandlers) renderRecordForm(w http.ResponseWriter, data recordF
 	utils.RenderTemplateWithoutLayout(w, []string{"dashboard/record_form"}, "dashboard/record_form", utils.TplData{
 		"Errors": data.Errors,
 		"Form":   data.Form,
-		"URL":    data.URL,
 		"Tasks":  data.Tasks,
 	})
 }
@@ -249,7 +251,7 @@ func (h *DashboardHandlers) validateIntersectingRecords(form recordForm, user *u
 	timeEnd := parseTimeFromInput(form.TimeEnd)
 	effectiveEnd := utils.EffectiveTime(timeEnd, user.TimeZone)
 
-	if timeEnd != nil && timeEnd.Before(*timeStart) {
+	if timeEnd != nil && (timeEnd.Before(*timeStart) || timeEnd.Equal(*timeStart)) {
 		formErrors.Add("TimeEnd", "Time End must be greater than Time Start")
 	}
 
@@ -293,13 +295,6 @@ func recortToString(record *Record, user *users.User) string {
 		utils.FormatTimeRange(record.TimeStart, record.TimeEnd, user.TimeZone),
 		html.EscapeString(record.Comment),
 	)
-}
-
-func formatTimeForInput(t *time.Time) string {
-	if t == nil {
-		return "" // Пустое значение для nil
-	}
-	return t.Format("2006-01-02T15:04")
 }
 
 // Time can be nil, so *time.Time

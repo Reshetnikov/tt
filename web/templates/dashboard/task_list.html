@@ -51,7 +51,9 @@
     <div class="rounded-full p-4" style="background-color: {{ .Color }};"></div>
 
     <!-- Title -->
-    <span class="hidden truncate lg:inline {{ if .IsCompleted }}line-through{{ end }}">{{ .Title }}</span>
+    <span class="hidden truncate lg:inline font-bold text-gray-800 {{ if .IsCompleted }}line-through{{ end }}"
+      >{{ .Title }}</span
+    >
     <span class="flex-grow"></span>
 
     <!-- Play -->

@@ -176,7 +176,12 @@
       }
       document.addEventListener("htmx:afterOnLoad", function (event) {
         if (event.detail.target.id === "modal-content") {
-          openModal();
+          const triggers = event.detail.xhr.getResponseHeader("hx-trigger");
+          if (triggers && triggers.includes("close-modal")) {
+            // don't open
+          } else {
+            openModal();
+          }
         }
       });
       document.body.addEventListener("close-modal", function (evt) {

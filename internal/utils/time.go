@@ -128,3 +128,10 @@ func FormatISOWeek(t time.Time) string {
 	year, week := t.ISOWeek()
 	return fmt.Sprintf("%04d-W%02d", year, week)
 }
+
+func FormatTimeForInput(t *time.Time) string {
+	if t == nil {
+		return "" // Пустое значение для nil
+	}
+	return t.Format("2006-01-02T15:04")
+}

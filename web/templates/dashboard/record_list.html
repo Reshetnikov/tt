@@ -51,60 +51,92 @@
     <hr class="border-gray-300" />
     {{ range .Records }}
     <div class="relative flex items-center space-x-3 rounded-lg border border-gray-200 bg-white p-3 shadow-md">
+
+      <!-- Progressbar -->
+      {{ if ge .DurationPercent 0.5 }}
       <div
-        class="absolute top-0 h-1 rounded-full"
+        class="absolute top-0 h-1.5"
         style="background-color: {{ .Task.Color }}; left: {{ .StartPercent }}%; width: {{ .DurationPercent }}%"
-      ></div>
-
-      <!-- Task.Title, Time, Comment -->
-      <div class="flex-grow">
-        <div class="text-lg font-bold text-gray-800">
-          {{ .Task.Title }}
-          <span class="text-sm font-normal text-gray-600">
-            {{ formatTimeRange .TimeStart .TimeEnd $.User.TimeZone}}
-          </span>
+        title="{{ .TimeStartIntraday }}&nbsp;({{ .DurationHM }})&nbsp;{{ .TimeEndIntraday }}"
+      >
+        <div class="flex w-full justify-between truncate whitespace-nowrap pt-1 text-xs text-gray-600">
+          <span>{{ .TimeStartIntraday }}</span>
+          <span>&nbsp;({{ .DurationHM }})&nbsp;</span>
+          <span>{{ .TimeEndIntraday }}</span>
         </div>
-        <div class="mt-2 whitespace-pre-wrap text-gray-700">{{ .Comment }}</div>
       </div>
+      {{ else }}
+      <div
+        class="absolute top-0"
+        style="left: {{ .StartPercent }}%; width: 8px; height: 8px; background-color: {{ .Task.Color }}; border-radius: 50%;"
+        title="{{ .TimeStartIntraday }}&nbsp;({{ .DurationHM }})&nbsp;{{ .TimeEndIntraday }}"
+      ></div>
+      {{ end }}
 
-      <!-- Stop -->
-      <button
-        class="rounded-full bg-green-100 p-2 hover:bg-green-200"
-        hx-get="/records/stop?taskId={{ .ID }}"
-        hx-swap="none"
-      >
-        <svg class="size-4 text-green-600">
-          <use xlink:href="#icon-stop"></use>
-        </svg>
-      </button>
+        <!-- Task.Title, Time, Comment -->
+        <div class="flex-grow">
+          <div class="font-bold text-gray-800">{{ .Task.Title }}</div>
+          <div class="mt-2 whitespace-pre-wrap text-gray-600">{{ .Comment }}</div>
+        </div>
 
-      <!-- Edit -->
-      <button
-        class="rounded-full bg-blue-100 p-2 hover:bg-blue-200"
-        hx-get="/records/{{ .ID }}"
-        hx-target="#modal-content"
-        hx-swap="innerHTML"
-      >
-        <svg class="size-4 text-blue-600">
-          <use xlink:href="#icon-edit"></use>
-        </svg>
-      </button>
+        <!-- Stop -->
+        {{ if not .TimeEnd}}
+        <form
+          hx-post="/records/{{ .ID }}"
+          hx-swap="innerHTML"
+          hx-target="#modal-content"
+          hx-trigger="submit"
+          onsubmit="setTimeEndBeforeSubmit(this)"
+        >
+          <input type="hidden" name="task_id" value="{{ .TaskID }}" />
+          <input type="hidden" name="time_start" value="{{ formatTimeForInput .TimeStart}}" />
+          <input type="hidden" name="time_end" />
+          <input type="hidden" name="comment" value="{{ .Comment }}" />
+          <button class="rounded-full bg-green-100 p-2 hover:bg-green-200">
+            <svg class="size-4 text-green-600">
+              <use xlink:href="#icon-stop"></use>
+            </svg>
+          </button>
+        </form>
+        <script>
+          function setTimeEndBeforeSubmit(form) {
+            const timeEndInput = form.querySelector('input[name="time_end"]');
+            if (timeEndInput) {
+              const now = new Date();
+              timeEndInput.value = new Date(now.getTime() - now.getTimezoneOffset() * 60000).toISOString().slice(0, 16);
+            }
+          }
+        </script>
+        {{ end}}
 
-      <!-- Delete -->
-      <button
-        hx-delete="/records/{{ .ID }}"
-        hx-swap="none"
-        hx-confirm="Are you sure you wish to delete your record?"
-        class="rounded-full bg-red-100 p-2 hover:bg-red-200"
-      >
-        <svg class="size-4 text-red-600">
-          <use xlink:href="#icon-delete"></use>
-        </svg>
-      </button>
+        <!-- Edit -->
+        <button
+          class="rounded-full bg-blue-100 p-2 hover:bg-blue-200"
+          hx-get="/records/{{ .ID }}"
+          hx-target="#modal-content"
+          hx-swap="innerHTML"
+        >
+          <svg class="size-4 text-blue-600">
+            <use xlink:href="#icon-edit"></use>
+          </svg>
+        </button>
+
+        <!-- Delete -->
+        <button
+          hx-delete="/records/{{ .ID }}"
+          hx-swap="none"
+          hx-confirm="Are you sure you wish to delete your record?"
+          class="rounded-full bg-red-100 p-2 hover:bg-red-200"
+        >
+          <svg class="size-4 text-red-600">
+            <use xlink:href="#icon-delete"></use>
+          </svg>
+        </button>
+      </div>
+      {{ end }}
     </div>
     {{ end }}
   </div>
+  <!-- prettier-ignore -->
   {{ end }}
 </div>
-<!-- prettier-ignore -->
-{{ end }}

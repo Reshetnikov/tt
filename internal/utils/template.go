@@ -52,10 +52,11 @@ func fileVersion(relPath string) string {
 
 func createTemplate(w http.ResponseWriter, tplPaths []string) (templates *template.Template) {
 	templates = template.New("").Funcs(template.FuncMap{
-		"dict":            dict,
-		"date":            dateFormat,
-		"fileVersion":     fileVersion,
-		"formatTimeRange": FormatTimeRange,
+		"dict":               dict,
+		"date":               dateFormat,
+		"fileVersion":        fileVersion,
+		"formatTimeRange":    FormatTimeRange,
+		"formatTimeForInput": FormatTimeForInput,
 	})
 
 	components := filepath.Join("web", "templates", "components", "*")

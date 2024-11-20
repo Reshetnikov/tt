@@ -1,5 +1,5 @@
 {{ define "dashboard/record_form" }}
-<form hx-post="{{ .URL }}" hx-swap="innerHTML" hx-trigger="submit">
+<form hx-post="/records{{ if .Form.ID }}/{{ .Form.ID }}{{ end }}" hx-swap="innerHTML" hx-trigger="submit">
   <!-- prettier-ignore -->
   {{ template "components/input_field" dict 
     "Label" "Task"
