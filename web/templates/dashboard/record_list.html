@@ -85,13 +85,8 @@
         <!-- Progressbar -->
         <!-- prettier-ignore -->
         <div
-          {{ if ge .DurationPercent 0.5 }}
-          class="absolute top-0 h-1.5 rounded-lg cursor-pointer group"
+          class="absolute top-0 h-1.5 rounded-lg cursor-pointer group min-w-1"
           style="background-color: {{ .Task.Color }}; left: {{ .StartPercent }}%; width: {{ .DurationPercent }}%"
-          {{ else }}
-          class="absolute top-0 cursor-pointer w-2 h-2 rounded-full group"
-          style="left: calc({{ .StartPercent }}% + {{ .DurationPercent }}% / 2); background-color: {{ .Task.Color }};"
-          {{ end }}
         >
           <div  class="transition-all duration-200 flex w-full justify-between whitespace-nowrap pt-1 text-xs text-gray-600 group-hover:overflow-visible group-hover:text-sm group-hover:font-medium">
             <span>{{ .TimeStartIntraday }} </span>

@@ -13,7 +13,7 @@
       hx-get="/tasks"
       hx-target="#task-list"
       hx-swap="outerHTML"
-      class="{{ if not .taskCompleted }}bg-indigo-600{{ else }}bg-indigo-400{{ end }} hover:bg-indigo-700 rounded-lg p-2 flex-1"
+      class="{{ if not .TaskCompleted }}bg-indigo-600{{ else }}bg-indigo-400{{ end }} hover:bg-indigo-700 rounded-lg p-2 flex-1"
     >
       Active
     </button>
@@ -21,7 +21,7 @@
       hx-get="/tasks?taskCompleted=completed"
       hx-target="#task-list"
       hx-swap="outerHTML"
-      class='{{ if eq .taskCompleted "completed" }}bg-indigo-600{{ else }}bg-indigo-400{{ end }} hover:bg-indigo-700 rounded-lg p-2 flex-1'
+      class='{{ if eq .TaskCompleted "completed" }}bg-indigo-600{{ else }}bg-indigo-400{{ end }} hover:bg-indigo-700 rounded-lg p-2 flex-1'
     >
       Completed
     </button>
@@ -29,7 +29,7 @@
       hx-get="/tasks?taskCompleted=all"
       hx-target="#task-list"
       hx-swap="outerHTML"
-      class='{{ if eq .taskCompleted "all" }}bg-indigo-600{{ else }}bg-indigo-400{{ end }} hover:bg-indigo-700 rounded-lg p-2 flex-1'
+      class='{{ if eq .TaskCompleted "all" }}bg-indigo-600{{ else }}bg-indigo-400{{ end }} hover:bg-indigo-700 rounded-lg p-2 flex-1'
     >
       All
     </button>
@@ -94,7 +94,21 @@
       </svg>
     </button>
   </div>
-  {{ end }}
+  {{ end }} {{/* range .Tasks */}}
+
+  <!-- Create new task button -->
+  <div class="m-1 mt-6">
+    <button
+      class="w-full rounded-lg bg-indigo-400 py-2 text-white shadow-md hover:bg-indigo-700
+    {{ if and (not .Tasks) (not .TaskCompleted) }}animate-pulse border-indigo-600 border-2{{ end }}"
+      hx-get="/tasks/new"
+      hx-target="#modal-content"
+      hx-trigger="click"
+      hx-swap="innerHTML"
+    >
+      Create Task
+    </button>
+  </div>
 </div>
 <!-- prettier-ignore -->
 {{ end }}

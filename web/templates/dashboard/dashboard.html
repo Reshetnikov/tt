@@ -4,19 +4,6 @@
   <div class="w-1/4 min-w-60 border-r border-gray-300 pr-4">
     <!-- Task list -->
     {{ template "dashboard/task_list" . }}
-
-    <!-- Create new task button -->
-    <div class="m-1 mt-6">
-      <button
-        class="w-full rounded-lg bg-indigo-400 py-2 text-white shadow-md hover:bg-indigo-700"
-        hx-get="/tasks/new"
-        hx-target="#modal-content"
-        hx-trigger="click"
-        hx-swap="innerHTML"
-      >
-        Create Task
-      </button>
-    </div>
   </div>
 
   <!-- Right column (Records) -->
