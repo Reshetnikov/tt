@@ -50,6 +50,7 @@ func main() {
 	mux.HandleFunc("/login", usersHandlers.HandleLogin)
 	mux.HandleFunc("/activation", usersHandlers.HandleActivation)
 	mux.HandleFunc("POST /logout", usersHandlers.HandleLogout)
+	mux.HandleFunc("/settings", usersHandlers.HandleSettings)
 
 	mux.HandleFunc("/dashboard", dashboardHandler.HandleDashboard)
 	mux.HandleFunc("GET /tasks/new", dashboardHandler.HandleTasksNew)
@@ -69,8 +70,6 @@ func main() {
 	// mux.HandleFunc("/projects", handler)
 	// http.HandleFunc("/projects/{project_id}", handler)
 	// mux.HandleFunc("/reports", pages.IndexHandler)
-	// mux.HandleFunc("/profile", pages.IndexHandler)
-	// mux.HandleFunc("/settings", pages.IndexHandler)
 
 	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		D("main() HandleFunc(\"/\")", fmt.Sprintf("%s: %s", r.Method, r.URL.String()))

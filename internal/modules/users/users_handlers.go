@@ -6,8 +6,6 @@ import (
 	"time"
 )
 
-var D = slog.Debug
-
 type UsersHandler struct {
 	usersService *UsersService
 }
@@ -28,3 +26,5 @@ func setSessionCookie(w http.ResponseWriter, sessionID string, expires time.Time
 		Path: "/",
 	})
 }
+
+var D = slog.Debug

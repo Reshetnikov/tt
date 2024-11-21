@@ -1,6 +1,7 @@
 package users
 
 import (
+	"log/slog"
 	"net/http"
 	"time-tracker/internal/utils"
 )
@@ -47,7 +48,9 @@ func (h *UsersHandler) HandleSignup(w http.ResponseWriter, r *http.Request) {
 			if err == ErrEmailExists {
 				formErrors.Add("Email", "Email is already in use")
 			} else {
-				formErrors.Add("Common", utils.Ukfirst((err.Error())))
+				slog.Error("HandleSignup", "err", err)
+				http.Error(w, "Error. Please try again later.", http.StatusBadGateway)
+				return
 			}
 		}
 	}

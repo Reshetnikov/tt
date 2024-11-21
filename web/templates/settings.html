@@ -1,0 +1,128 @@
+{{ define "content" }}
+<h2 class="mb-6 text-center text-2xl font-bold">Settings</h2>
+<form action="/settings" method="POST" class="mx-auto max-w-md rounded-xl bg-white p-6 shadow">
+  <!-- prettier-ignore -->
+  {{ template "components/input_field" dict
+    "Label" "Name"
+    "Type" "text"
+    "Name" "name"
+    "ID" "name"
+    "Value" .Form.Name
+    "Errors" .Errors.Name
+    "Autocomplete" "username"
+  }}
+
+  {{ template "components/input_field" dict
+    "Label" "Timezone"
+    "Type" "select"
+    "Name" "timezone"
+    "ID" "timezone"
+    "Value" .Form.TimeZone
+    "Errors" .Errors.TimeZone
+  }}
+  <button type="button" id="set-browser-timezone" class="mb-4 text-sm hover:underline">
+    Set to Browser Timezone: <span id="browser-timezone-label">Loading...</span>
+  </button>
+
+  <!-- prettier-ignore -->
+  {{ template "components/input_field" dict
+    "Label" "IsWeekStartMonday"
+    "Type" "checkbox"
+    "Name" "is_week_start_monday"
+    "ID" "is_week_start_monday"
+    "Value" .Form.IsWeekStartMonday
+    "Errors" .Errors.IsWeekStartMonday
+  }}
+
+  {{ template "components/input_field" dict 
+      "Label" "Change Password"
+      "Type" "password"
+      "Name" "password"
+      "ID" "password"
+      "Value" .Form.Password
+      "Errors" .Errors.Password
+      "Autocomplete" "new-password"
+  }}
+  {{ template "components/input_field" dict
+      "Label" "Confirm Password"
+      "Type" "password"
+      "Name" "password_confirmation"
+      "ID" "password_confirmation"
+      "Value" .Form.PasswordConfirmation
+      "Errors" .Errors.PasswordConfirmation
+      "Autocomplete" "new-password"
+  }}
+  
+  {{ template "components/errors" .Errors.Common}}
+
+  <button
+    type="submit"
+    class="focus:shadow-outline rounded-xl bg-blue-500 px-4 py-2 font-bold text-white shadow hover:bg-blue-700 focus:outline-none"
+  >
+    Save
+  </button>
+
+  {{ if .SaveOk }}
+  <span
+    id="save-notification"
+    class="rounded-xl bg-green-100 px-4 py-2 text-green-800 opacity-0 transition-opacity duration-1000 ease-in-out"
+  >
+    Saved
+  </span>
+
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      const notification = document.getElementById("save-notification");
+      if (notification) {
+        setTimeout(() => {
+          notification.classList.add("opacity-100");
+          notification.classList.remove("opacity-0");
+        }, 100);
+        setTimeout(() => {
+          notification.classList.add("opacity-0");
+          notification.classList.remove("opacity-100");
+        }, 1000);
+      }
+    });
+  </script>
+  {{ end }} {{/* if .SaveOk */}}
+</form>
+<script>
+  document.addEventListener("DOMContentLoaded", () => {
+    const timezoneSelect = document.getElementById("timezone");
+    const setBrowserTimezoneButton = document.getElementById("set-browser-timezone");
+    const browserTimezoneLabel = document.getElementById("browser-timezone-label");
+
+    const browserTimeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+
+    if (browserTimezoneLabel) {
+      browserTimezoneLabel.textContent = browserTimeZone;
+    }
+
+    if (timezoneSelect && setBrowserTimezoneButton) {
+      if (timezoneSelect.options.length === 0) {
+        const timeZones = Intl.supportedValuesOf("timeZone");
+        timeZones.forEach((tz) => {
+          const option = document.createElement("option");
+          option.value = tz;
+          option.textContent = tz;
+          if (tz === "{{ .Form.TimeZone }}") {
+            option.selected = true;
+          }
+          timezoneSelect.appendChild(option);
+        });
+      }
+
+      setBrowserTimezoneButton.addEventListener("click", () => {
+        const optionToSelect = Array.from(timezoneSelect.options).find((option) => option.value === browserTimeZone);
+
+        if (optionToSelect) {
+          timezoneSelect.value = browserTimeZone;
+        } else {
+          alert("Your browser timezone is not available in the list.");
+        }
+      });
+    }
+  });
+</script>
+{{ end }}
