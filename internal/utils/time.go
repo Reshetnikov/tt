@@ -76,7 +76,7 @@ func FormatTimeRange(timeStart time.Time, timeEnd *time.Time, timezone string) s
 }
 
 // "2024-W03"
-func GetWeekInterval(isoWeek string) (time.Time, time.Time, error) {
+func GetWeekInterval(isoWeek string, isWeekStartMonday bool) (time.Time, time.Time, error) {
 	parts := strings.Split(isoWeek, "-W")
 	if len(parts) != 2 {
 		return time.Time{}, time.Time{}, errors.New("invalid ISO week format: " + isoWeek)
@@ -103,11 +103,11 @@ func GetWeekInterval(isoWeek string) (time.Time, time.Time, error) {
 		dateInWeek = firstJan.AddDate(0, 0, (week-1)*7)
 	}
 
-	startInterval, endInterval := GetDateInterval(dateInWeek)
+	startInterval, endInterval := GetDateInterval(dateInWeek, isWeekStartMonday)
 	return startInterval, endInterval, nil
 }
 
-func GetDateInterval(date time.Time) (time.Time, time.Time) {
+func GetDateInterval(date time.Time, isWeekStartMonday bool) (time.Time, time.Time) {
 	// Calculate the day of the week (ISO 8601: Monday = 1)
 	weekday := int(date.Weekday())
 	if weekday == 0 {
@@ -115,7 +115,14 @@ func GetDateInterval(date time.Time) (time.Time, time.Time) {
 	}
 
 	// Calculate the beginning of the week (Monday)
-	startInterval := date.AddDate(0, 0, -weekday+1).Truncate(24 * time.Hour)
+	var startInterval time.Time
+	if isWeekStartMonday {
+		// If the week starts on Monday
+		startInterval = date.AddDate(0, 0, -weekday+1).Truncate(24 * time.Hour)
+	} else {
+		// If the week starts on Sunday
+		startInterval = date.AddDate(0, 0, -weekday+0).Truncate(24 * time.Hour)
+	}
 
 	// End of the week (Sunday 23:59:59.999999999)
 	endInterval := startInterval.AddDate(0, 0, 7).Add(-time.Nanosecond)

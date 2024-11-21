@@ -29,8 +29,35 @@
         hx-get="/records"
         hx-target="#records-list"
         hx-swap="outerHTML"
-        hx-trigger="blur"
+        hx-trigger="change"
+        onkeydown="weekDown(event)"
+        onchange="weekChange(event)"
+        onclick="weekClick(event)"
       />
+      <script>
+        {
+          // https://stackoverflow.com/questions/40762549/html5-input-type-date-onchange-event
+          let weekGo = true;
+          function weekDown(event) {
+            const input = event.target;
+            if (event.key === "Enter" || event.key === "Tab" || event.keyCode === 13 || event.keyCode === 9) {
+              weekGo = true;
+              input.dispatchEvent(new Event("change", { bubbles: true }));
+            } else {
+              weekGo = false;
+            }
+          }
+          function weekChange(event) {
+            const weekPattern = /^[1-9][0-9]{3}-W[0-9]{2}$/;
+            if (!weekPattern.test(event.target.value) || !weekGo) {
+              event.stopImmediatePropagation();
+            }
+          }
+          function weekClick(event) {
+            weekGo = true;
+          }
+        }
+      </script>
     </form>
 
     <!-- Next Week -->
@@ -63,6 +90,7 @@
       <script>
         function updateTimeIndicator() {
           const indicator = document.getElementById("time-indicator");
+          if (!indicator) return;
           const now = new Date();
           const currentMinutes = now.getHours() * 60 + now.getMinutes();
           const percent = (currentMinutes / 1440) * 100; // 1440 = 24 * 60

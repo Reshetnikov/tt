@@ -25,7 +25,7 @@ func (h *DashboardHandlers) HandleDashboard(w http.ResponseWriter, r *http.Reque
 
 	week := r.URL.Query().Get("week")
 	nowWithTimezone, _ := utils.NowWithTimezone(user.TimeZone)
-	startInterval, endInterval := GetDateInterval(week, nowWithTimezone)
+	startInterval, endInterval := GetDateInterval(week, nowWithTimezone, user.IsWeekStartMonday)
 
 	filterRecords := FilterRecords{
 		UserID:        user.ID,
@@ -40,27 +40,27 @@ func (h *DashboardHandlers) HandleDashboard(w http.ResponseWriter, r *http.Reque
 	previousWeek := utils.FormatISOWeek(startInterval.AddDate(0, 0, -7))
 	nextWeek := utils.FormatISOWeek(endInterval.AddDate(0, 0, 7))
 	utils.RenderTemplate(w, []string{"dashboard/dashboard", "dashboard/task_list", "dashboard/record_list"}, utils.TplData{
-		"Title":        "Tasks & Records Dashboard",
-		"Tasks":        tasks,
-		"DailyRecords": dailyRecords,
-		"User":         user,
-		"Week":         utils.FormatISOWeek(startInterval),
-		"PreviousWeek": previousWeek,
-		"NextWeek":     nextWeek,
+		"Title":           "Tasks & Records Dashboard",
+		"Tasks":           tasks,
+		"DailyRecords":    dailyRecords,
+		"User":            user,
+		"Week":            utils.FormatISOWeek(startInterval),
+		"PreviousWeek":    previousWeek,
+		"NextWeek":        nextWeek,
 		"NowWithTimezone": nowWithTimezone,
 	})
 
 }
 
-func GetDateInterval(week string, nowWithTimezone time.Time) (startInterval time.Time, endInterval time.Time) {
+func GetDateInterval(week string, nowWithTimezone time.Time, isWeekStartMonday bool) (startInterval time.Time, endInterval time.Time) {
 	if week != "" {
 		var err error
-		startInterval, endInterval, err = utils.GetWeekInterval(week)
+		startInterval, endInterval, err = utils.GetWeekInterval(week, isWeekStartMonday)
 		if err == nil {
 			return
 		}
 	}
-	startInterval, endInterval = utils.GetDateInterval(nowWithTimezone)
+	startInterval, endInterval = utils.GetDateInterval(nowWithTimezone, isWeekStartMonday)
 	return
 }
 

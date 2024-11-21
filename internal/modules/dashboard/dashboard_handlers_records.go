@@ -136,7 +136,6 @@ func (h *DashboardHandlers) HandleRecordsUpdate(w http.ResponseWriter, r *http.R
 
 	var form recordForm
 	utils.ParseFormToStruct(r, &form)
-	D("form", "form", form)
 	formErrors := utils.NewValidator(&form).Validate()
 	if !formErrors.HasErrors() {
 		h.validateIntersectingRecords(form, user, record.ID, formErrors)
@@ -190,7 +189,7 @@ func (h *DashboardHandlers) HandleRecordsList(w http.ResponseWriter, r *http.Req
 	}
 	week := r.URL.Query().Get("week")
 	nowWithTimezone, _ := utils.NowWithTimezone(user.TimeZone)
-	startInterval, endInterval := GetDateInterval(week, nowWithTimezone)
+	startInterval, endInterval := GetDateInterval(week, nowWithTimezone, user.IsWeekStartMonday)
 	filterRecords := FilterRecords{
 		UserID:        user.ID,
 		StartInterval: startInterval,
