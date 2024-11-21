@@ -30,7 +30,7 @@ func (r *UsersRepositoryPostgres) getByField(fieldName string, fieldValue interf
 		slog.Error("UsersRepositoryPostgres getByField validFields", "fieldName", fieldName)
 		return nil
 	}
-	query := "SELECT id, name, password, timezone, email, date_add, activation_hash, activation_hash_date, is_active FROM users WHERE " + fieldName + " = $1"
+	query := "SELECT id, name, password, timezone, is_week_start_monday, email, date_add, activation_hash, activation_hash_date, is_active FROM users WHERE " + fieldName + " = $1"
 	rows, err := r.db.Query(context.Background(), query, fieldValue)
 	if err != nil {
 		slog.Error("UsersRepositoryPostgres getByField Query", "err", err)
@@ -71,6 +71,7 @@ func (r *UsersRepositoryPostgres) Create(user *User) error {
 		{"activation_hash_date", user.ActivationHashDate},
 		{"is_active", user.IsActive},
 		{"timezone", user.TimeZone},
+		{"is_week_start_monday", user.IsWeekStartMonday},
 	})
 	query := "INSERT INTO users (" + fields + ") VALUES (" + placeholders + ")"
 	_, err := r.db.Exec(context.Background(), query, params...)
@@ -91,6 +92,8 @@ func (r *UsersRepositoryPostgres) Update(user *User) error {
 		{"activation_hash", user.ActivationHash},
 		{"activation_hash_date", user.ActivationHashDate},
 		{"is_active", user.IsActive},
+		{"timezone", user.TimeZone},
+		{"is_week_start_monday", user.IsWeekStartMonday},
 	})
 	where := builder.BuildFromArr(utils.Arr{{"id", user.ID}})
 	query := "UPDATE users SET " + set + " WHERE " + where

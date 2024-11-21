@@ -3,6 +3,7 @@
 
 <form action="/signup" method="POST" class="mx-auto max-w-md rounded-xl bg-white p-6 shadow">
   <input type="hidden" name="timezone" id="timezone" value="" />
+  <input type="hidden" name="is_week_start_monday" id="is_week_start_monday" value="" />
   <!-- prettier-ignore -->
   {{ template "components/input_field" dict
     "Label" "Name"
@@ -48,8 +49,15 @@
   >
     Sign Up
   </button>
+  <span class="text-gray-600">
+    or
+    <a href="/login" class="text-blue-500 hover:underline">Log In</a>
+    if you have an account.
+  </span>
 </form>
 <script>
   document.getElementById("timezone").value = Intl.DateTimeFormat().resolvedOptions().timeZone;
+  const firstDayMonday = new Date(2023, 0, 2).toLocaleDateString("en-US", { weekday: "short" }) === "Mon";
+  document.getElementById("is_week_start_monday").value = firstDayMonday;
 </script>
 {{ end }}

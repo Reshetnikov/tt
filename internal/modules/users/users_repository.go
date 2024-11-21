@@ -8,6 +8,7 @@ type User struct {
 	Email              string    `json:"email" db:"email"`
 	Password           string    `json:"-" db:"password"`
 	TimeZone           string    `json:"timezone" db:"timezone"`
+	IsWeekStartMonday  bool      `json:"is_week_start_monday" db:"is_week_start_monday"`
 	IsActive           bool      `json:"is_active" db:"is_active"`
 	DateAdd            time.Time `json:"date_add" db:"date_add"`
 	ActivationHash     string    `json:"activation_hash" db:"activation_hash"`

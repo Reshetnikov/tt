@@ -26,10 +26,11 @@ func NewUsersService(usersRepo UsersRepository, sessionsRepo SessionsRepository)
 }
 
 type RegisterUserData struct {
-	Name     string
-	Email    string
-	Password string
-	TimeZone string
+	Name              string
+	Email             string
+	Password          string
+	TimeZone          string
+	IsWeekStartMonday bool
 }
 
 var ErrEmailExists = errors.New("email is already in use")
@@ -53,12 +54,13 @@ func (s *UsersService) RegisterUser(registerUserData RegisterUserData) error {
 	}
 	date := time.Now().UTC()
 	user := &User{
-		Name:     registerUserData.Name,
-		Email:    registerUserData.Email,
-		Password: hashedPassword,
-		TimeZone: registerUserData.TimeZone,
-		IsActive: false,
-		DateAdd:  date,
+		Name:              registerUserData.Name,
+		Email:             registerUserData.Email,
+		Password:          hashedPassword,
+		TimeZone:          registerUserData.TimeZone,
+		IsWeekStartMonday: registerUserData.IsWeekStartMonday,
+		IsActive:          false,
+		DateAdd:           date,
 		// @TODO: move to sendActivationMassage()
 		ActivationHash:     activationHash,
 		ActivationHashDate: date,

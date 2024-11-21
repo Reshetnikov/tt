@@ -11,6 +11,7 @@ type signupForm struct {
 	Password             string `form:"password" validate:"required,min=8"`
 	PasswordConfirmation string `form:"password_confirmation" validate:"required,eqfield=Password" label:"Confirm Password"`
 	TimeZone             string `form:"timezone"`
+	IsWeekStartMonday    bool   `form:"is_week_start_monday"`
 }
 
 func (h *UsersHandler) HandleSignup(w http.ResponseWriter, r *http.Request) {
@@ -28,10 +29,11 @@ func (h *UsersHandler) HandleSignup(w http.ResponseWriter, r *http.Request) {
 			formErrors = utils.NewValidator(&form).Validate()
 			if !formErrors.HasErrors() {
 				err = h.usersService.RegisterUser(RegisterUserData{
-					Name:     form.Name,
-					Email:    form.Email,
-					Password: form.Password,
-					TimeZone: form.TimeZone,
+					Name:              form.Name,
+					Email:             form.Email,
+					Password:          form.Password,
+					TimeZone:          form.TimeZone,
+					IsWeekStartMonday: form.IsWeekStartMonday,
 				})
 				if err == nil {
 					utils.RenderTemplate(w, []string{"signup-success"}, utils.TplData{
