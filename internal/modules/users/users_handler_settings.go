@@ -53,6 +53,8 @@ func (h *UsersHandler) HandleSettings(w http.ResponseWriter, r *http.Request) {
 					http.Error(w, "Error. Please try again later.", http.StatusBadGateway)
 					return
 				}
+				form.Password = ""
+				form.PasswordConfirmation = ""
 				saveOk = true
 			}
 		}
