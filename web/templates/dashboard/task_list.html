@@ -6,6 +6,7 @@
   hx-get="/tasks{{ if .TaskCompleted }}?taskCompleted={{ .TaskCompleted }}{{ end }}"
   hx-trigger="load-tasks from:body"
   hx-swap="outerHTML"
+  class="sticky top-0 max-h-screen overflow-y-auto"
 >
   <!-- Task filter -->
   <div class="m-1 mb-4 flex items-center space-x-2 text-white">
