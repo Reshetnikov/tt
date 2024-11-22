@@ -52,17 +52,20 @@ func (h *DashboardHandlers) HandleRecordsNew(w http.ResponseWriter, r *http.Requ
 	// Set TimeStart
 	now, _ := utils.NowWithTimezone(user.TimeZone)
 	var timeStart string
+	var timeEnd string
 	dateStr := r.URL.Query().Get("date")
 	if dateStr != "" {
 		timeStart = dateStr + "T" + now.Format("15:04")
+		timeEnd = timeStart
 	} else {
 		timeStart = utils.FormatTimeForInput(&now)
+		timeEnd = ""
 	}
 
 	form := recordForm{
 		TaskID:    taskId,
 		TimeStart: timeStart,
-		TimeEnd:   "",
+		TimeEnd:   timeEnd,
 	}
 	data := recordFormData{
 		Form:   form,
