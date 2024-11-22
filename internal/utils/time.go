@@ -95,6 +95,7 @@ func GetWeekInterval(isoWeek string, isWeekStartMonday bool) (time.Time, time.Ti
 	}
 
 	firstJan := time.Date(year, 1, 1, 0, 0, 0, 0, time.UTC)
+
 	isoY, _ := firstJan.ISOWeek()
 	var dateInWeek time.Time
 	if isoY < year {
@@ -131,14 +132,18 @@ func GetDateInterval(date time.Time, isWeekStartMonday bool) (time.Time, time.Ti
 }
 
 // ISO Week Date Format "2006-W02"
-func FormatISOWeek(t time.Time) string {
+func FormatISOWeek(t time.Time, isWeekStartMonday bool) string {
+	if !isWeekStartMonday {
+		// Shift to Monday if week starts on Sunday
+		t = t.AddDate(0, 0, 1)
+	}
 	year, week := t.ISOWeek()
 	return fmt.Sprintf("%04d-W%02d", year, week)
 }
 
 func FormatTimeForInput(t *time.Time) string {
 	if t == nil {
-		return "" // Пустое значение для nil
+		return ""
 	}
 	return t.Format("2006-01-02T15:04")
 }

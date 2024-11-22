@@ -1,0 +1,64 @@
+{{ define "dashboard/record_list_navigation" }}
+<div class="flex items-center justify-center space-x-4">
+  <!-- Previous Week -->
+  <a
+    href="/records?week={{ .PreviousWeek }}"
+    class="text-blue-500 hover:underline"
+    hx-get="/records?week={{ .PreviousWeek }}"
+    hx-target="#records-list"
+    hx-swap="outerHTML"
+    >&laquo; Previous Week</a
+  >
+
+  <!-- Week Selector -->
+  <form class="flex items-center space-x-2">
+    <input
+      type="week"
+      name="week"
+      value="{{ .Week }}"
+      class="focus:shadow-outline w-full appearance-none rounded-xl border border-gray-300 bg-white px-3 py-2 leading-tight text-gray-700 shadow focus:outline-none focus:ring-1 focus:ring-gray-500"
+      hx-get="/records"
+      hx-target="#records-list"
+      hx-swap="outerHTML"
+      hx-trigger="change"
+      onkeydown="weekDown(event)"
+      onchange="weekChange(event)"
+      onclick="weekClick(event)"
+    />
+    <script>
+      {
+        // https://stackoverflow.com/questions/40762549/html5-input-type-date-onchange-event
+        let weekGo = true;
+        function weekDown(event) {
+          const input = event.target;
+          if (event.key === "Enter" || event.key === "Tab" || event.keyCode === 13 || event.keyCode === 9) {
+            weekGo = true;
+            input.dispatchEvent(new Event("change", { bubbles: true }));
+          } else {
+            weekGo = false;
+          }
+        }
+        function weekChange(event) {
+          const weekPattern = /^[1-9][0-9]{3}-W[0-9]{2}$/;
+          if (!weekPattern.test(event.target.value) || !weekGo) {
+            event.stopImmediatePropagation();
+          }
+        }
+        function weekClick(event) {
+          weekGo = true;
+        }
+      }
+    </script>
+  </form>
+
+  <!-- Next Week -->
+  <a
+    href="/records?week={{ .NextWeek }}"
+    class="text-blue-500 hover:underline"
+    hx-get="/records?week={{ .NextWeek }}"
+    hx-target="#records-list"
+    hx-swap="outerHTML"
+    >Next Week &raquo;</a
+  >
+</div>
+{{ end}}

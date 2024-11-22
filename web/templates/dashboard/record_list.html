@@ -8,79 +8,39 @@
   class="space-y-4"
 >
   <!-- Navigation -->
-  <div class="flex items-center justify-center space-x-4">
-    <!-- Previous Week -->
-    <a
-      href="/records?week={{ .PreviousWeek }}"
-      class="text-blue-500 hover:underline"
-      hx-get="/records?week={{ .PreviousWeek }}"
-      hx-target="#records-list"
-      hx-swap="outerHTML"
-      >&laquo; Previous Week</a
-    >
+  {{ template "dashboard/record_list_navigation" . }}
 
-    <!-- Week Selector -->
-    <form class="flex items-center space-x-2">
-      <input
-        type="week"
-        name="week"
-        value="{{ .Week }}"
-        class="focus:shadow-outline w-full appearance-none rounded-xl border border-gray-300 bg-white px-3 py-2 leading-tight text-gray-700 shadow focus:outline-none focus:ring-1 focus:ring-gray-500"
-        hx-get="/records"
-        hx-target="#records-list"
-        hx-swap="outerHTML"
-        hx-trigger="change"
-        onkeydown="weekDown(event)"
-        onchange="weekChange(event)"
-        onclick="weekClick(event)"
-      />
-      <script>
-        {
-          // https://stackoverflow.com/questions/40762549/html5-input-type-date-onchange-event
-          let weekGo = true;
-          function weekDown(event) {
-            const input = event.target;
-            if (event.key === "Enter" || event.key === "Tab" || event.keyCode === 13 || event.keyCode === 9) {
-              weekGo = true;
-              input.dispatchEvent(new Event("change", { bubbles: true }));
-            } else {
-              weekGo = false;
-            }
-          }
-          function weekChange(event) {
-            const weekPattern = /^[1-9][0-9]{3}-W[0-9]{2}$/;
-            if (!weekPattern.test(event.target.value) || !weekGo) {
-              event.stopImmediatePropagation();
-            }
-          }
-          function weekClick(event) {
-            weekGo = true;
-          }
-        }
-      </script>
-    </form>
-
-    <!-- Next Week -->
-    <a
-      href="/records?week={{ .NextWeek }}"
-      class="text-blue-500 hover:underline"
-      hx-get="/records?week={{ .NextWeek }}"
-      hx-target="#records-list"
-      hx-swap="outerHTML"
-      >Next Week &raquo;</a
-    >
-  </div>
-
+  <!-- DailyRecords -->
   {{ range .DailyRecords}}
 
   <div
-    class='space-y-2 overflow-hidden rounded-lg {{ if eq (.Day.Format "2006-01-02") ($.NowWithTimezone.Format "2006-01-02") }}bg-yellow-50 border-yellow-200 border-2 shadow-lg{{ end }}'
+    class='space-y-2 overflow-hidden rounded-lg border-gray-300 border{{ if eq (.Day.Format "2006-01-02") ($.NowWithTimezone.Format "2006-01-02") }}bg-yellow-50 border-yellow-200 border-2 shadow-lg{{ end }}'
   >
     <!-- Day Header -->
-    <div class="text-center text-lg font-semibold text-gray-800">{{ .Day.Format "January 2, 2006"}}</div>
-    <hr class="border-gray-300" />
+    <div class="flex items-center justify-between px-4 py-2">
+      <!-- Date -->
+      <div
+        class='text-center w-full text-lg font-semibold {{ if or (eq .Day.Weekday.String "Saturday") (eq .Day.Weekday.String "Sunday") }}text-red-600{{ else }}text-gray-800{{ end }}'
+      >
+        {{ .Day.Format "2 Jan 2006 (Mon)"}}
+      </div>
+      <!-- Play Button -->
+      <button
+        class="rounded-full bg-green-100 p-2 hover:bg-green-200"
+        hx-get="/records/new?date={{.Day.Format "2006-01-02"}}"
+        hx-target="#modal-content"
+        hx-trigger="click"
+        hx-swap="innerHTML"
+      >
+        <svg class="size-4 text-green-600">
+          <use xlink:href="#icon-play"></use>
+        </svg>
+      </button>
+    </div>
+
+    <!-- Record List -->
     <div class="relative">
-      <!-- Line Timer  -->
+      <!-- Red vertical timer line  -->
       {{ if eq (.Day.Format "2006-01-02") ($.NowWithTimezone.Format "2006-01-02") }}
       <div
         id="time-indicator"
@@ -103,9 +63,9 @@
           }
         });
         updateTimeIndicator();
-        setInterval(updateTimeIndicator, 60000); // Update every minute
+        setInterval(updateTimeIndicator, 6000); // Update every minute
       </script>
-      {{ end}}
+      {{ end}} {{/* Red vertical timer line */}}
 
       <!-- List Records -->
       {{ range .Records }}
@@ -113,13 +73,18 @@
         <!-- Progressbar -->
         <!-- prettier-ignore -->
         <div
-          class="absolute top-0 h-1.5 rounded-lg cursor-pointer group min-w-1"
+          class="absolute top-0 h-1.5 rounded-lg cursor-pointer group min-w-1 {{ if not .TimeEnd }}animate-pulse{{ end }}"
           style="background-color: {{ .Task.Color }}; left: {{ .StartPercent }}%; width: {{ .DurationPercent }}%"
         >
           <div  class="transition-all duration-200 flex w-full justify-between whitespace-nowrap pt-1 text-xs text-gray-600 group-hover:overflow-visible group-hover:text-sm group-hover:font-medium">
             <span>{{ .TimeStartIntraday }} </span>
             <span>&nbsp;({{ .DurationHM }})&nbsp;</span>
-            <span>{{ .TimeEndIntraday }}</span>
+            <span>
+              {{ .TimeEndIntraday }}
+              {{ if not .TimeEnd }}
+              <span class="absolute left-full pl-1">...</span>
+              {{ end }}
+            </span>
           </div>
         </div>
 

@@ -32,16 +32,36 @@ func (h *DashboardHandlers) HandleRecordsNew(w http.ResponseWriter, r *http.Requ
 		return
 	}
 
+	// Set Task
 	taskId := 0
 	taskIdStr := r.URL.Query().Get("taskId")
 	if taskIdStr != "" {
 		taskId, _ = strconv.Atoi(taskIdStr)
+		task := h.repo.TaskByID(taskId)
+		if task == nil {
+			http.Error(w, "Task not found", http.StatusNotFound)
+			return
+		}
+
+		if task.UserID != user.ID {
+			http.Error(w, "Access denied", http.StatusForbidden)
+			return
+		}
 	}
 
+	// Set TimeStart
 	now, _ := utils.NowWithTimezone(user.TimeZone)
+	var timeStart string
+	dateStr := r.URL.Query().Get("date")
+	if dateStr != "" {
+		timeStart = dateStr + "T" + now.Format("15:04")
+	} else {
+		timeStart = utils.FormatTimeForInput(&now)
+	}
+
 	form := recordForm{
 		TaskID:    taskId,
-		TimeStart: utils.FormatTimeForInput(&now),
+		TimeStart: timeStart,
 		TimeEnd:   "",
 	}
 	data := recordFormData{
@@ -195,13 +215,14 @@ func (h *DashboardHandlers) HandleRecordsList(w http.ResponseWriter, r *http.Req
 		StartInterval: startInterval,
 		EndInterval:   endInterval,
 	}
+	// D("filterRecords r", "filterRecords", filterRecords)
 
 	dailyRecords := h.repo.DailyRecords(filterRecords, nowWithTimezone)
 
-	previousWeek := utils.FormatISOWeek(startInterval.AddDate(0, 0, -7))
-	nextWeek := utils.FormatISOWeek(endInterval.AddDate(0, 0, 7))
-	week = utils.FormatISOWeek(startInterval)
-	utils.RenderTemplateWithoutLayout(w, []string{"dashboard/record_list"}, "dashboard/record_list", utils.TplData{
+	previousWeek := utils.FormatISOWeek(startInterval.AddDate(0, 0, -7), user.IsWeekStartMonday)
+	nextWeek := utils.FormatISOWeek(endInterval.AddDate(0, 0, 7), user.IsWeekStartMonday)
+	week = utils.FormatISOWeek(startInterval, user.IsWeekStartMonday)
+	utils.RenderTemplateWithoutLayout(w, []string{"dashboard/record_list", "dashboard/record_list_navigation"}, "dashboard/record_list", utils.TplData{
 		"DailyRecords":    dailyRecords,
 		"User":            user,
 		"Week":            week,

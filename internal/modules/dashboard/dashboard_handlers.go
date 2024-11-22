@@ -37,14 +37,14 @@ func (h *DashboardHandlers) HandleDashboard(w http.ResponseWriter, r *http.Reque
 
 	tasks := h.repo.Tasks(user.ID, "")
 
-	previousWeek := utils.FormatISOWeek(startInterval.AddDate(0, 0, -7))
-	nextWeek := utils.FormatISOWeek(endInterval.AddDate(0, 0, 7))
-	utils.RenderTemplate(w, []string{"dashboard/dashboard", "dashboard/task_list", "dashboard/record_list"}, utils.TplData{
+	previousWeek := utils.FormatISOWeek(startInterval.AddDate(0, 0, -7), user.IsWeekStartMonday)
+	nextWeek := utils.FormatISOWeek(endInterval.AddDate(0, 0, 7), user.IsWeekStartMonday)
+	utils.RenderTemplate(w, []string{"dashboard/dashboard", "dashboard/task_list", "dashboard/record_list", "dashboard/record_list_navigation"}, utils.TplData{
 		"Title":           "Tasks & Records Dashboard",
 		"Tasks":           tasks,
 		"DailyRecords":    dailyRecords,
 		"User":            user,
-		"Week":            utils.FormatISOWeek(startInterval),
+		"Week":            utils.FormatISOWeek(startInterval, user.IsWeekStartMonday),
 		"PreviousWeek":    previousWeek,
 		"NextWeek":        nextWeek,
 		"NowWithTimezone": nowWithTimezone,
