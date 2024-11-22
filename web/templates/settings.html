@@ -25,15 +25,46 @@
   </button>
 
   <!-- prettier-ignore -->
-  {{ template "components/input_field" dict
+  {{/* template "components/input_field" dict
     "Label" "IsWeekStartMonday"
     "Type" "checkbox"
     "Name" "is_week_start_monday"
     "ID" "is_week_start_monday"
     "Value" .Form.IsWeekStartMonday
     "Errors" .Errors.IsWeekStartMonday
-  }}
+  */}}
+  <div class="mb-4">
+    <label class="mb-2 block font-bold text-gray-700">Start of week</label>
+    <div>
+      <label class="inline-flex items-center">
+        <!-- prettier-ignore -->
+        <input
+          type="radio"
+          name="is_week_start_monday"
+          value="true"
+          {{ if .Form.IsWeekStartMonday }}checked{{ end }}
+          class="focus:shadow-outline text-blue-500"
+        />
+        <span class="ml-2">Monday</span>
+      </label>
+    </div>
+    <div>
+      <label class="inline-flex items-center">
+        <!-- prettier-ignore -->
+        <input
+          type="radio"
+          name="is_week_start_monday"
+          value="false"
+          {{ if not .Form.IsWeekStartMonday }}checked{{ end }}
+          class="focus:shadow-outline text-blue-500"
+        />
+        <span class="ml-2">Sunday</span>
+      </label>
+    </div>
+    {{ template "components/errors" .Errors.StartOfWeek }}
+  </div>
 
+  <!-- prettier-ignore -->
   {{ template "components/input_field" dict 
       "Label" "Change Password"
       "Type" "password"
@@ -74,10 +105,9 @@
     document.addEventListener("DOMContentLoaded", () => {
       const notification = document.getElementById("save-notification");
       if (notification) {
-        setTimeout(() => {
-          notification.classList.add("opacity-100");
-          notification.classList.remove("opacity-0");
-        }, 100);
+        notification.classList.add("opacity-100");
+        notification.classList.remove("opacity-0");
+
         setTimeout(() => {
           notification.classList.add("opacity-0");
           notification.classList.remove("opacity-100");
