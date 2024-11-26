@@ -29,29 +29,34 @@ func (h *UsersHandler) HandleSignup(w http.ResponseWriter, r *http.Request) {
 	formErrors := utils.FormErrors{}
 	if r.Method == http.MethodPost {
 		err := utils.ParseFormToStruct(r, &form)
-		if err == nil {
-			formErrors = utils.NewValidator(&form).Validate()
-			if !formErrors.HasErrors() {
-				err = h.usersService.RegisterUser(RegisterUserData{
-					Name:              form.Name,
-					Email:             form.Email,
-					Password:          form.Password,
-					TimeZone:          form.TimeZone,
-					IsWeekStartMonday: form.IsWeekStartMonday,
-				})
-				if err == nil {
-					utils.RedirectSignupSuccess(w, r, form.Email)
-					return
-				}
-			}
-		}
 		if err != nil {
+			http.Error(w, "Bad Request", http.StatusBadRequest)
+			return
+		}
+
+		formErrors = utils.NewValidator(&form).Validate()
+		if formErrors.HasErrors() {
+			renderSignup(w, formErrors, form)
+			return
+		}
+
+		err = h.usersService.RegisterUser(RegisterUserData{
+			Name:              form.Name,
+			Email:             form.Email,
+			Password:          form.Password,
+			TimeZone:          form.TimeZone,
+			IsWeekStartMonday: form.IsWeekStartMonday,
+		})
+		if err == nil {
+			utils.RedirectSignupSuccess(w, r, form.Email)
+			return
+		} else {
 			if err == ErrEmailExists {
 				formErrors.Add("Email", "Email is already in use")
 			} else if err == ErrAccountNotActivated {
 				message := fmt.Sprintf(
 					`Your account is not activated. Please check your email and follow the activation link. 
-					If you didn’t receive the email, <a href="/signup-success?email=%s">click here to resend it</a>.`,
+							If you didn’t receive the email, <a href="/signup-success?email=%s">click here to resend it</a>.`,
 					url.QueryEscape(html.EscapeString(form.Email)),
 				)
 				formErrors.Add("Common", message)
@@ -62,6 +67,11 @@ func (h *UsersHandler) HandleSignup(w http.ResponseWriter, r *http.Request) {
 			}
 		}
 	}
+
+	renderSignup(w, formErrors, form)
+}
+
+func renderSignup(w http.ResponseWriter, formErrors utils.FormErrors, form signupForm) {
 	utils.RenderTemplate(w, []string{"signup"}, utils.TplData{
 		"Title":  "Sign Up",
 		"Errors": formErrors,

@@ -31,36 +31,52 @@ func (h *UsersHandler) HandleSettings(w http.ResponseWriter, r *http.Request) {
 	saveOk := false
 	if r.Method == http.MethodPost {
 		err := utils.ParseFormToStruct(r, &form)
-		D("form", "form", form)
-		if err == nil {
-			formErrors = utils.NewValidator(&form).Validate()
-			if !formErrors.HasErrors() {
-				user.Name = form.Name
-				user.TimeZone = form.TimeZone
-				user.IsWeekStartMonday = form.IsWeekStartMonday
-				if form.Password != "" {
-					hashedPassword, err := hashPassword(form.Password)
-					if err != nil {
-						slog.Error("HandleSettings hashPassword()", "err", err)
-						http.Error(w, "Error. Please try again later.", http.StatusBadGateway)
-						return
-					}
-					user.Password = hashedPassword
-				}
-				err = h.usersService.usersRepo.Update(user)
-				if err != nil {
-					slog.Error("HandleSettings Update()", "err", err)
-					http.Error(w, "Error. Please try again later.", http.StatusBadGateway)
-					return
-				}
-				form.Password = ""
-				form.PasswordConfirmation = ""
-				saveOk = true
-			}
+		if err != nil {
+			http.Error(w, "Bad Request", http.StatusBadRequest)
+			return
 		}
+
+		formErrors = utils.NewValidator(&form).Validate()
+		if !formErrors.HasErrors() {
+			renderSettings(w, formErrors, form, user, saveOk)
+			return
+		}
+
+		user.Name = form.Name
+		user.TimeZone = form.TimeZone
+		user.IsWeekStartMonday = form.IsWeekStartMonday
+		if form.Password != "" {
+			hashedPassword, err := hashPassword(form.Password)
+			if err != nil {
+				slog.Error("HandleSettings hashPassword()", "err", err)
+				w.WriteHeader(http.StatusBadGateway)
+				utils.RenderTemplate(w, []string{"error"}, utils.TplData{
+					"Title":   "Error",
+					"Message": "Error. Please try again later.",
+				})
+				return
+			}
+			user.Password = hashedPassword
+		}
+		err = h.usersService.usersRepo.Update(user)
+		if err != nil {
+			slog.Error("HandleSettings Update()", "err", err)
+			w.WriteHeader(http.StatusBadGateway)
+			utils.RenderTemplate(w, []string{"error"}, utils.TplData{
+				"Title":   "Error",
+				"Message": "Error. Please try again later.",
+			})
+			return
+		}
+		form.Password = ""
+		form.PasswordConfirmation = ""
+		saveOk = true
 	}
 
-	D("form2", "form", form)
+	renderSettings(w, formErrors, form, user, saveOk)
+}
+
+func renderSettings(w http.ResponseWriter, formErrors utils.FormErrors, form settingsForm, user *User, saveOk bool) {
 	utils.RenderTemplate(w, []string{"settings"}, utils.TplData{
 		"Title":  "Settings",
 		"User":   user,

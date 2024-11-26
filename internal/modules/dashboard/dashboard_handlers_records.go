@@ -18,12 +18,6 @@ type recordForm struct {
 	Comment   string `form:"comment" validate:"max=10000"`
 }
 
-type recordFormData struct {
-	Errors utils.FormErrors
-	Form   recordForm
-	Tasks  []*Task
-}
-
 func (h *DashboardHandlers) HandleRecordsNew(w http.ResponseWriter, r *http.Request) {
 	// time.Sleep(1 * time.Second)
 	user := users.GetUserFromRequest(r)
@@ -67,12 +61,7 @@ func (h *DashboardHandlers) HandleRecordsNew(w http.ResponseWriter, r *http.Requ
 		TimeStart: timeStart,
 		TimeEnd:   timeEnd,
 	}
-	data := recordFormData{
-		Form:   form,
-		Errors: utils.FormErrors{},
-		Tasks:  h.repo.Tasks(user.ID, ""),
-	}
-	h.renderRecordForm(w, data)
+	h.renderRecordForm(w, form, utils.FormErrors{}, h.repo.Tasks(user.ID, ""))
 }
 
 func (h *DashboardHandlers) HandleRecordsCreate(w http.ResponseWriter, r *http.Request) {
@@ -83,45 +72,42 @@ func (h *DashboardHandlers) HandleRecordsCreate(w http.ResponseWriter, r *http.R
 	}
 
 	var form recordForm
-	utils.ParseFormToStruct(r, &form)
+	err := utils.ParseFormToStruct(r, &form)
+	if err != nil {
+		http.Error(w, "Bad Request", http.StatusBadRequest)
+		return
+	}
 	formErrors := utils.NewValidator(&form).Validate()
-	if !formErrors.HasErrors() {
-		task := h.repo.TaskByID(form.TaskID)
-		if task == nil {
-			http.Error(w, "Task not found", http.StatusNotFound)
-			return
-		}
-
-		if task.UserID != user.ID {
-			http.Error(w, "Access denied", http.StatusForbidden)
-			return
-		}
-
-		h.validateIntersectingRecords(form, user, 0, formErrors)
-		if !formErrors.HasErrors() {
-			_, err := h.repo.CreateRecord(&Record{
-				TaskID:    form.TaskID,
-				TimeStart: *parseTimeFromInput(form.TimeStart),
-				TimeEnd:   parseTimeFromInput(form.TimeEnd),
-				Comment:   form.Comment,
-			})
-
-			if err == nil {
-				w.Header().Set("HX-Trigger", "load-records, close-modal")
-				w.Write([]byte("ok"))
-				return
-			} else {
-				formErrors.Add("Common", "Error. Please try again later.")
-			}
-		}
+	if formErrors.HasErrors() {
+		h.renderRecordForm(w, form, formErrors, h.repo.Tasks(user.ID, ""))
+		return
 	}
 
-	data := recordFormData{
-		Form:   form,
-		Errors: formErrors,
-		Tasks:  h.repo.Tasks(user.ID, ""),
+	task := h.repo.TaskByID(form.TaskID)
+	if task == nil {
+		http.Error(w, "Task not found", http.StatusNotFound)
+		return
 	}
-	h.renderRecordForm(w, data)
+
+	if task.UserID != user.ID {
+		http.Error(w, "Access denied", http.StatusForbidden)
+		return
+	}
+
+	h.validateIntersectingRecords(form, user, 0, formErrors)
+	if formErrors.HasErrors() {
+		h.renderRecordForm(w, form, formErrors, h.repo.Tasks(user.ID, ""))
+		return
+	}
+	h.repo.CreateRecord(&Record{
+		TaskID:    form.TaskID,
+		TimeStart: *parseTimeFromInput(form.TimeStart),
+		TimeEnd:   parseTimeFromInput(form.TimeEnd),
+		Comment:   form.Comment,
+	})
+
+	w.Header().Set("HX-Trigger", "load-records, close-modal")
+	w.Write([]byte("ok"))
 }
 
 func (h *DashboardHandlers) HandleRecordsEdit(w http.ResponseWriter, r *http.Request) {
@@ -143,12 +129,8 @@ func (h *DashboardHandlers) HandleRecordsEdit(w http.ResponseWriter, r *http.Req
 		// Add current inactive task
 		tasks = append(tasks, record.Task)
 	}
-	data := recordFormData{
-		Form:   form,
-		Errors: utils.FormErrors{},
-		Tasks:  tasks,
-	}
-	h.renderRecordForm(w, data)
+
+	h.renderRecordForm(w, form, utils.FormErrors{}, tasks)
 }
 
 func (h *DashboardHandlers) HandleRecordsUpdate(w http.ResponseWriter, r *http.Request) {
@@ -158,27 +140,12 @@ func (h *DashboardHandlers) HandleRecordsUpdate(w http.ResponseWriter, r *http.R
 	}
 
 	var form recordForm
-	utils.ParseFormToStruct(r, &form)
-	formErrors := utils.NewValidator(&form).Validate()
-	if !formErrors.HasErrors() {
-		h.validateIntersectingRecords(form, user, record.ID, formErrors)
-		if !formErrors.HasErrors() {
-			err := h.repo.UpdateRecord(&Record{
-				ID:        record.ID,
-				TaskID:    form.TaskID,
-				TimeStart: *parseTimeFromInput(form.TimeStart),
-				TimeEnd:   parseTimeFromInput(form.TimeEnd),
-				Comment:   form.Comment,
-			})
-			if err == nil {
-				w.Header().Set("HX-Trigger", "load-records, close-modal")
-				w.Write([]byte(`ok`))
-				return
-			} else {
-				formErrors.Add("Common", "Error. Please try again later.")
-			}
-		}
+	err := utils.ParseFormToStruct(r, &form)
+	if err != nil {
+		http.Error(w, "Bad Request", http.StatusBadRequest)
+		return
 	}
+
 	// List active tasks
 	tasks := h.repo.Tasks(user.ID, "")
 	if record.Task.IsCompleted {
@@ -186,12 +153,25 @@ func (h *DashboardHandlers) HandleRecordsUpdate(w http.ResponseWriter, r *http.R
 		tasks = append(tasks, record.Task)
 	}
 	form.ID = record.ID
-	data := recordFormData{
-		Form:   form,
-		Errors: formErrors,
-		Tasks:  tasks,
+
+	formErrors := utils.NewValidator(&form).Validate()
+	if formErrors.HasErrors() {
+		h.renderRecordForm(w, form, formErrors, tasks)
 	}
-	h.renderRecordForm(w, data)
+	h.validateIntersectingRecords(form, user, record.ID, formErrors)
+	if formErrors.HasErrors() {
+		h.renderRecordForm(w, form, formErrors, tasks)
+	}
+
+	h.repo.UpdateRecord(&Record{
+		ID:        record.ID,
+		TaskID:    form.TaskID,
+		TimeStart: *parseTimeFromInput(form.TimeStart),
+		TimeEnd:   parseTimeFromInput(form.TimeEnd),
+		Comment:   form.Comment,
+	})
+	w.Header().Set("HX-Trigger", "load-records, close-modal")
+	w.Write([]byte(`ok`))
 }
 
 func (h *DashboardHandlers) HandleRecordsDelete(w http.ResponseWriter, r *http.Request) {
@@ -235,11 +215,11 @@ func (h *DashboardHandlers) HandleRecordsList(w http.ResponseWriter, r *http.Req
 	})
 }
 
-func (h *DashboardHandlers) renderRecordForm(w http.ResponseWriter, data recordFormData) {
+func (h *DashboardHandlers) renderRecordForm(w http.ResponseWriter, form recordForm, formErrors utils.FormErrors, tasks []*Task) {
 	utils.RenderTemplateWithoutLayout(w, []string{"dashboard/record_form"}, "dashboard/record_form", utils.TplData{
-		"Errors": data.Errors,
-		"Form":   data.Form,
-		"Tasks":  data.Tasks,
+		"Errors": formErrors,
+		"Form":   form,
+		"Tasks":  tasks,
 	})
 }
 

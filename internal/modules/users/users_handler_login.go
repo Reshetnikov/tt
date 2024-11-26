@@ -25,34 +25,44 @@ func (h *UsersHandler) HandleLogin(w http.ResponseWriter, r *http.Request) {
 
 	if r.Method == http.MethodPost {
 		err := utils.ParseFormToStruct(r, &form)
-		if err == nil {
-			formErrors = utils.NewValidator(&form).Validate()
-			if !formErrors.HasErrors() {
-				var session *Session
-				session, err = h.usersService.LoginUser(form.Email, form.Password)
-				if err == nil {
-					setSessionCookie(w, session.SessionID, session.Expiry)
-
-					utils.RedirectDashboard(w, r)
-					return
-				}
-			}
-		}
 		if err != nil {
+			http.Error(w, "Bad Request", http.StatusBadRequest)
+			return
+		}
+
+		formErrors = utils.NewValidator(&form).Validate()
+		if formErrors.HasErrors() {
+			renderLogin(w, formErrors, form)
+			return
+		}
+
+		var session *Session
+		session, err = h.usersService.LoginUser(form.Email, form.Password)
+		if err == nil {
+			setSessionCookie(w, session.SessionID, session.Expiry)
+
+			utils.RedirectDashboard(w, r)
+			return
+		} else {
 			if err == ErrInvalidEmailOrPassword {
 				formErrors.Add("Common", "Invalid email or password")
 			} else if err == ErrAccountNotActivated {
 				message := fmt.Sprintf(
 					`Your account is not activated. Please check your email and follow the activation link. 
-					If you didn’t receive the email, <a href="/signup-success?email=%s">click here to resend it</a>.`,
+						If you didn’t receive the email, <a href="/signup-success?email=%s">click here to resend it</a>.`,
 					url.QueryEscape(html.EscapeString(form.Email)),
 				)
 				formErrors.Add("Common", message)
 			} else {
-				formErrors.Add("Common", utils.Ukfirst(err.Error()))
+				formErrors.Add("Common", "Error. Please try again later.")
 			}
 		}
+
 	}
+
+	renderLogin(w, formErrors, form)
+}
+func renderLogin(w http.ResponseWriter, formErrors utils.FormErrors, form loginForm) {
 	utils.RenderTemplate(w, []string{"login"}, utils.TplData{
 		"Title":  "Log In",
 		"Errors": formErrors,

@@ -23,7 +23,7 @@ func (h *DashboardHandlers) HandleTasksNew(w http.ResponseWriter, r *http.Reques
 		utils.RenderBlockNeedLogin(w)
 		return
 	}
-	h.renderTaskForm(w, formTask{Color: "#FFFFFF"}, utils.FormErrors{}, "/tasks")
+	h.renderTaskForm(w, formTask{Color: "#EEEEEE"}, utils.FormErrors{}, "/tasks")
 }
 
 func (h *DashboardHandlers) HandleTasksCreate(w http.ResponseWriter, r *http.Request) {
@@ -34,23 +34,27 @@ func (h *DashboardHandlers) HandleTasksCreate(w http.ResponseWriter, r *http.Req
 	}
 
 	var form formTask
-	utils.ParseFormToStruct(r, &form)
+	err := utils.ParseFormToStruct(r, &form)
+	if err != nil {
+		http.Error(w, "Bad Request", http.StatusBadRequest)
+		return
+	}
 	formErrors := utils.NewValidator(&form).Validate()
-	if !formErrors.HasErrors() {
-		h.repo.CreateTask(&Task{
-			UserID:      user.ID,
-			Title:       form.Title,
-			Description: form.Description,
-			Color:       form.Color,
-			IsCompleted: form.IsCompleted,
-		})
-
-		w.Header().Set("HX-Trigger", "load-tasks, close-modal")
-		w.Write([]byte("ok"))
+	if formErrors.HasErrors() {
+		h.renderTaskForm(w, form, formErrors, "/tasks")
 		return
 	}
 
-	h.renderTaskForm(w, form, formErrors, "/tasks")
+	h.repo.CreateTask(&Task{
+		UserID:      user.ID,
+		Title:       form.Title,
+		Description: form.Description,
+		Color:       form.Color,
+		IsCompleted: form.IsCompleted,
+	})
+
+	w.Header().Set("HX-Trigger", "load-tasks, close-modal")
+	w.Write([]byte("ok"))
 }
 
 func (h *DashboardHandlers) HandleTasksEdit(w http.ResponseWriter, r *http.Request) {
@@ -75,28 +79,31 @@ func (h *DashboardHandlers) HandleTasksUpdate(w http.ResponseWriter, r *http.Req
 	}
 
 	var form formTask
-	utils.ParseFormToStruct(r, &form)
+	err := utils.ParseFormToStruct(r, &form)
+	if err != nil {
+		http.Error(w, "Bad Request", http.StatusBadRequest)
+		return
+	}
 	formErrors := utils.NewValidator(&form).Validate()
-	if !formErrors.HasErrors() {
-		if form.IsCompleted != task.IsCompleted {
-			task.SortOrder = h.repo.GetMaxSortOrder(user.ID, form.IsCompleted) + 1
-		}
-		err := h.repo.UpdateTask(&Task{
-			ID:          task.ID,
-			Title:       form.Title,
-			Description: form.Description,
-			Color:       form.Color,
-			IsCompleted: form.IsCompleted,
-			SortOrder:   task.SortOrder,
-		})
-		if err == nil {
-			w.Header().Set("HX-Trigger", "load-tasks, load-records, close-modal")
-			w.Write([]byte(`ok`))
-			return
-		}
+	if formErrors.HasErrors() {
+		h.renderTaskForm(w, form, formErrors, fmt.Sprintf("/tasks/%d", task.ID))
+		return
 	}
 
-	h.renderTaskForm(w, form, formErrors, fmt.Sprintf("/tasks/%d", task.ID))
+	if form.IsCompleted != task.IsCompleted {
+		task.SortOrder = h.repo.GetMaxSortOrder(user.ID, form.IsCompleted) + 1
+	}
+	h.repo.UpdateTask(&Task{
+		ID:          task.ID,
+		Title:       form.Title,
+		Description: form.Description,
+		Color:       form.Color,
+		IsCompleted: form.IsCompleted,
+		SortOrder:   task.SortOrder,
+	})
+
+	w.Header().Set("HX-Trigger", "load-tasks, load-records, close-modal")
+	w.Write([]byte(`ok`))
 }
 
 func (h *DashboardHandlers) HandleTasksDelete(w http.ResponseWriter, r *http.Request) {

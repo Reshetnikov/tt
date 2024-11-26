@@ -55,7 +55,7 @@ func (r *DashboardRepositoryPostgres) TaskByID(id int) *Task {
 	return &task
 }
 
-func (r *DashboardRepositoryPostgres) CreateTask(task *Task) int {
+func (r *DashboardRepositoryPostgres) CreateTask(task *Task) (int, error) {
 	maxSortOrder := r.GetMaxSortOrder(task.UserID, task.IsCompleted)
 	task.SortOrder = maxSortOrder + 1
 
@@ -67,9 +67,9 @@ func (r *DashboardRepositoryPostgres) CreateTask(task *Task) int {
 	`, task.UserID, task.Title, task.Description, task.Color, task.SortOrder, task.IsCompleted).Scan(&newTaskID)
 	if err != nil {
 		slog.Error("DashboardRepositoryPostgres CreateTask QueryRow", "err", err)
-		return 0
+		return 0, err
 	}
-	return newTaskID
+	return newTaskID, nil
 }
 
 func (r *DashboardRepositoryPostgres) UpdateTask(task *Task) error {
