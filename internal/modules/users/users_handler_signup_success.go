@@ -1,8 +1,8 @@
 package users
 
 import (
+	"fmt"
 	"net/http"
-	"time"
 	"time-tracker/internal/utils"
 )
 
@@ -15,32 +15,42 @@ func (h *UsersHandler) HandleSignupSuccess(w http.ResponseWriter, r *http.Reques
 
 	email := r.URL.Query().Get("email")
 	if email == "" {
-		http.Error(w, "Email not found", http.StatusNotFound)
+		w.WriteHeader(http.StatusNotFound)
+		utils.RenderTemplate(w, []string{"error"}, utils.TplData{
+			"Title":   "Error",
+			"Message": "Email not found",
+		})
 		return
 	}
 
-	user = h.usersService.usersRepo.GetByEmail(email)
-	if user == nil {
-		http.Error(w, "User not found", http.StatusNotFound)
+	notActiveUser := h.usersService.usersRepo.GetByEmail(email)
+	if notActiveUser == nil {
+		w.WriteHeader(http.StatusNotFound)
+		utils.RenderTemplate(w, []string{"error"}, utils.TplData{
+			"Title":   "Error",
+			"Message": "User not found",
+		})
 		return
 	}
 
-	if user.IsActive {
+	if notActiveUser.IsActive {
 		utils.RedirectLogin(w, r)
 		return
 	}
 
-	dt := 60 - int(time.Since(user.ActivationHashDate).Seconds())
-	if dt < 0 {
-		dt = 0
-	}
-	if r.Method == http.MethodPost && dt == 0 {
-		h.usersService.ReSendActivationMassage(user)
+	errorMessage := ""
+	if r.Method == http.MethodPost {
+		if timeUntilResend := notActiveUser.TimeUntilResend(); timeUntilResend == 0 {
+			h.usersService.ReSendActivationMassage(notActiveUser) // will update TimeUntilResend
+		} else {
+			errorMessage = fmt.Sprintf("Wait %d sec.", timeUntilResend)
+		}
 	}
 
 	utils.RenderTemplate(w, []string{"signup-success"}, utils.TplData{
-		"Title": "Sign Up Successful",
-		"Email": email,
-		"Dt":    dt,
+		"Title":           "Sign Up Successful",
+		"Email":           email,
+		"TimeUntilResend": notActiveUser.TimeUntilResend(), // need new TimeUntilResend
+		"ErrorMessage":    errorMessage,
 	})
 }

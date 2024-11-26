@@ -15,6 +15,14 @@ type User struct {
 	ActivationHashDate time.Time `json:"activation_hash_date" db:"activation_hash_date"`
 }
 
+func (u User) TimeUntilResend() int {
+	t := 60 - int(time.Since(u.ActivationHashDate).Seconds())
+	if t < 0 {
+		t = 0
+	}
+	return t
+}
+
 type UsersRepository interface {
 	Create(user *User) error
 	GetByID(id int) *User

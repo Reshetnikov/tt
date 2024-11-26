@@ -58,7 +58,7 @@ func (h *LogHandlerDev) Handle(ctx context.Context, r slog.Record) error {
 		})
 	}
 
-	timeStr := r.Time.Format("[15:05:05.000]")
+	timeStr := r.Time.Format("[15:04:05.000]")
 	msg := highlightPanicAndApp(r.Message)
 	h.log.Println(timeStr, level, StrColor(msg, Colors.Green), oneParams)
 

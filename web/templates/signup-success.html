@@ -2,12 +2,53 @@
 <h2 class="mb-6 text-center text-2xl font-bold">Sign Up Successful</h2>
 
 <div class="mx-auto max-w-md rounded-xl bg-white p-6 text-center shadow">
-  <p class="text-lg text-gray-700">Thank you for signing up! Please check your email {{ .Email }} to confirm your registration.</p>
-  <p class="mt-4 text-sm text-gray-500">
-    Didn’t receive the email? Check your spam folder or
-    <form action="/signup-success?email={{ .Email }}">
-      <button class="text-blue-500 hover:text-blue-700" type="submit">resend confirmation</button>.
-    </form>
+  <p class="text-lg text-gray-700">
+    Thank you for signing up! Please check your email {{ .Email }} to confirm your registration.
   </p>
+  <p class="mt-4 text-sm text-gray-500">Didn’t receive the email? Check your spam folder or</p>
+
+  <form action="/signup-success?email={{ .Email }}" method="post">
+    <!-- prettier-ignore -->
+    <button
+      id="resend-button"
+      class="mt-4 rounded bg-blue-500 px-4 py-2 text-white hover:bg-blue-700"
+      type="submit"
+      {{ if .TimeUntilResend }}disabled{{ end }}
+    >
+      Resend confirmation
+    </button>
+    {{ if .TimeUntilResend }}
+    <p id="time-until-resend" class="mt-2 text-sm text-gray-500">Please wait {{ .TimeUntilResend }}s to resend</p>
+    {{ end }}
+  </form>
+
+  {{ if .ErrorMessage }}
+  <p class="mt-2 text-sm text-red-500 [&_a:hover]:text-red-700 [&_a]:underline">{{ .ErrorMessage }}</p>
+  {{ end}}
 </div>
+{{ if .TimeUntilResend }}
+<script>
+  {
+    const initialTime = "{{ .TimeUntilResend }}";
+    const button = document.getElementById("resend-button");
+    const timerDisplay = document.getElementById("time-until-resend");
+
+    let timeRemaining = Number(initialTime);
+
+    function updateTimer() {
+      if (timeRemaining > 0) {
+        timerDisplay.textContent = `Please wait ${timeRemaining}s to resend`;
+        timeRemaining--;
+      } else {
+        button.disabled = false;
+        timerDisplay.textContent = "";
+        clearInterval(timer);
+      }
+    }
+
+    const timer = setInterval(updateTimer, 1000);
+  }
+</script>
+{{ end }} {{/* if .TimeUntilResend */}}
+<!-- prettier-ignore -->
 {{ end }}
