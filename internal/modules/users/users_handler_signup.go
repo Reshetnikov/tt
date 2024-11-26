@@ -1,8 +1,11 @@
 package users
 
 import (
+	"fmt"
+	"html"
 	"log/slog"
 	"net/http"
+	"net/url"
 	"time-tracker/internal/utils"
 )
 
@@ -37,9 +40,7 @@ func (h *UsersHandler) HandleSignup(w http.ResponseWriter, r *http.Request) {
 					IsWeekStartMonday: form.IsWeekStartMonday,
 				})
 				if err == nil {
-					utils.RenderTemplate(w, []string{"signup-success"}, utils.TplData{
-						"Title": "Sign Up Successful",
-					})
+					utils.RedirectSignupSuccess(w, r, form.Email)
 					return
 				}
 			}
@@ -47,6 +48,13 @@ func (h *UsersHandler) HandleSignup(w http.ResponseWriter, r *http.Request) {
 		if err != nil {
 			if err == ErrEmailExists {
 				formErrors.Add("Email", "Email is already in use")
+			} else if err == ErrAccountNotActivated {
+				message := fmt.Sprintf(
+					`Your account is not activated. Please check your email and follow the activation link. 
+					If you didn’t receive the email, <a href="/signup-success?email=%s">click here to resend it</a>.`,
+					url.QueryEscape(html.EscapeString(form.Email)),
+				)
+				formErrors.Add("Common", message)
 			} else {
 				slog.Error("HandleSignup", "err", err)
 				http.Error(w, "Error. Please try again later.", http.StatusBadGateway)

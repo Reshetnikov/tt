@@ -2,10 +2,12 @@
 <h2 class="mb-6 text-center text-2xl font-bold">Sign Up Successful</h2>
 
 <div class="mx-auto max-w-md rounded-xl bg-white p-6 text-center shadow">
-  <p class="text-lg text-gray-700">Thank you for signing up! Please check your email to confirm your registration.</p>
+  <p class="text-lg text-gray-700">Thank you for signing up! Please check your email {{ .Email }} to confirm your registration.</p>
   <p class="mt-4 text-sm text-gray-500">
     Didn’t receive the email? Check your spam folder or
-    <a href="/resend-confirmation" class="text-blue-500 hover:text-blue-700">resend confirmation</a>.
+    <form action="/signup-success?email={{ .Email }}">
+      <button class="text-blue-500 hover:text-blue-700" type="submit">resend confirmation</button>.
+    </form>
   </p>
 </div>
 {{ end }}

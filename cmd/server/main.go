@@ -47,6 +47,7 @@ func main() {
 
 	mux.HandleFunc("/{$}", pages.IndexHandler)
 	mux.HandleFunc("/signup", usersHandlers.HandleSignup)
+	mux.HandleFunc("/signup-success", usersHandlers.HandleSignupSuccess)
 	mux.HandleFunc("/login", usersHandlers.HandleLogin)
 	mux.HandleFunc("/activation", usersHandlers.HandleActivation)
 	mux.HandleFunc("POST /logout", usersHandlers.HandleLogout)

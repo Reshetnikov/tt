@@ -3,7 +3,6 @@ package users
 import (
 	"context"
 	"fmt"
-	"log"
 	"log/slog"
 	"time-tracker/internal/utils"
 
@@ -76,7 +75,7 @@ func (r *UsersRepositoryPostgres) Create(user *User) error {
 	query := "INSERT INTO users (" + fields + ") VALUES (" + placeholders + ")"
 	_, err := r.db.Exec(context.Background(), query, params...)
 	if err != nil {
-		log.Printf("Failed to insert user: %v", err)
+		slog.Error("Failed to insert user", "err", err)
 		return fmt.Errorf("failed to insert user: %w", err)
 	}
 	return nil
@@ -99,7 +98,7 @@ func (r *UsersRepositoryPostgres) Update(user *User) error {
 	query := "UPDATE users SET " + set + " WHERE " + where
 	_, err := r.db.Exec(context.Background(), query, builder.Params()...)
 	if err != nil {
-		log.Printf("Failed to update user %d: %v", user.ID, err)
+		slog.Error("Failed to update user", "id", user.ID, "err", err)
 		return fmt.Errorf("failed to update user %d: %w", user.ID, err)
 	}
 	return nil
@@ -110,7 +109,7 @@ func (r *UsersRepositoryPostgres) Delete(id int) error {
 
 	_, err := r.db.Exec(context.Background(), query, id)
 	if err != nil {
-		log.Printf("Failed to delete user %d: %v", id, err)
+		slog.Error("Failed to delete user", "id", id, "err", err)
 		return fmt.Errorf("failed to delete user %d: %w", id, err)
 	}
 	return nil

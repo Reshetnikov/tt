@@ -1,7 +1,10 @@
 package users
 
 import (
+	"fmt"
+	"html"
 	"net/http"
+	"net/url"
 	"time-tracker/internal/utils"
 )
 
@@ -39,7 +42,12 @@ func (h *UsersHandler) HandleLogin(w http.ResponseWriter, r *http.Request) {
 			if err == ErrInvalidEmailOrPassword {
 				formErrors.Add("Common", "Invalid email or password")
 			} else if err == ErrAccountNotActivated {
-				formErrors.Add("Common", "Account not activated. Follow the link from the email to activate your account.")
+				message := fmt.Sprintf(
+					`Your account is not activated. Please check your email and follow the activation link. 
+					If you didn’t receive the email, <a href="/signup-success?email=%s">click here to resend it</a>.`,
+					url.QueryEscape(html.EscapeString(form.Email)),
+				)
+				formErrors.Add("Common", message)
 			} else {
 				formErrors.Add("Common", utils.Ukfirst(err.Error()))
 			}
