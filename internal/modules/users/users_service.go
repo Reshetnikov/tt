@@ -79,8 +79,8 @@ func (s *UsersService) RegisterUser(registerUserData RegisterUserData) error {
 
 func (s *UsersService) ActivateUser(activationHash string) (*Session, error) {
 	user := s.usersRepo.GetByActivationHash(activationHash)
-	if user == nil {
-		return nil, ErrUserNotFoundOrActivationHashIsInvalid
+	if user == nil || time.Since(user.ActivationHashDate).Minutes() > 15 {
+		return nil, ErrUserNotFound
 	}
 
 	user.IsActive = true
@@ -88,7 +88,28 @@ func (s *UsersService) ActivateUser(activationHash string) (*Session, error) {
 
 	err := s.usersRepo.Update(user)
 	if err != nil {
-		return nil, fmt.Errorf("could not activate user: %w", err)
+		return nil, fmt.Errorf("could not Update user: %w", err)
+	}
+
+	session, err := s.makeSession(user.ID)
+	return session, err
+}
+
+func (s *UsersService) LoginWithToken(token string) (*Session, error) {
+	user := s.usersRepo.GetByActivationHash(token)
+	if user == nil || time.Since(user.ActivationHashDate).Minutes() > 15 {
+		return nil, ErrUserNotFound
+	}
+
+	if !user.IsActive {
+		return nil, ErrAccountNotActivated
+	}
+
+	user.ActivationHash = ""
+
+	err := s.usersRepo.Update(user)
+	if err != nil {
+		return nil, fmt.Errorf("could not Update user: %w", err)
 	}
 
 	session, err := s.makeSession(user.ID)
