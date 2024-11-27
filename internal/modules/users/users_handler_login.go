@@ -1,10 +1,7 @@
 package users
 
 import (
-	"fmt"
-	"html"
 	"net/http"
-	"net/url"
 	"time-tracker/internal/utils"
 )
 
@@ -40,22 +37,16 @@ func (h *UsersHandler) HandleLogin(w http.ResponseWriter, r *http.Request) {
 		session, err = h.usersService.LoginUser(form.Email, form.Password)
 		if err == nil {
 			setSessionCookie(w, session.SessionID, session.Expiry)
-
 			utils.RedirectDashboard(w, r)
 			return
+		}
+
+		if err == ErrInvalidEmailOrPassword {
+			formErrors.Add("Common", "Invalid email or password")
+		} else if err == ErrAccountNotActivated {
+			formErrors.Add("Common", getNotActivatedMessage(form.Email))
 		} else {
-			if err == ErrInvalidEmailOrPassword {
-				formErrors.Add("Common", "Invalid email or password")
-			} else if err == ErrAccountNotActivated {
-				message := fmt.Sprintf(
-					`Your account is not activated. Please check your email and follow the activation link. 
-						If you didn’t receive the email, <a href="/signup-success?email=%s">click here to resend it</a>.`,
-					url.QueryEscape(html.EscapeString(form.Email)),
-				)
-				formErrors.Add("Common", message)
-			} else {
-				formErrors.Add("Common", "Error. Please try again later.")
-			}
+			formErrors.Add("Common", "Error. Please try again later.")
 		}
 
 	}

@@ -1,0 +1,27 @@
+<!-- prettier-ignore -->
+{{ define "components/time_until_resend" }}
+<p id="time-until-resend" class="mt-2 text-sm text-gray-500">Please wait {{ . }}s to resend</p>
+<script>
+  {
+    const initialTime = "{{ . }}";
+    const button = document.getElementById("resend-button");
+    const timerDisplay = document.getElementById("time-until-resend");
+
+    let timeRemaining = Number(initialTime);
+
+    function updateTimer() {
+      if (timeRemaining > 0) {
+        timerDisplay.textContent = `Please wait ${timeRemaining}s to resend`;
+        timeRemaining--;
+      } else {
+        button.disabled = false;
+        timerDisplay.textContent = "";
+        clearInterval(timer);
+      }
+    }
+
+    const timer = setInterval(updateTimer, 1000);
+  }
+</script>
+<!-- prettier-ignore -->
+{{ end }}

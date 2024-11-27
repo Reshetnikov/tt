@@ -37,7 +37,7 @@ func (h *UsersHandler) HandleSettings(w http.ResponseWriter, r *http.Request) {
 		}
 
 		formErrors = utils.NewValidator(&form).Validate()
-		if !formErrors.HasErrors() {
+		if formErrors.HasErrors() {
 			renderSettings(w, formErrors, form, user, saveOk)
 			return
 		}

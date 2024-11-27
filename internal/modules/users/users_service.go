@@ -6,7 +6,6 @@ import (
 	"encoding/hex"
 	"errors"
 	"fmt"
-	"log/slog"
 	"time"
 
 	"github.com/google/uuid"
@@ -38,6 +37,8 @@ var ErrEmailExists = errors.New("email is already in use")
 var ErrAccountNotActivated = errors.New("account not activated")
 var ErrInvalidEmailOrPassword = errors.New("invalid email or password")
 var ErrUserNotFoundOrActivationHashIsInvalid = errors.New("user not found or activation hash is invalid")
+var ErrUserNotFound = errors.New("user not found")
+var ErrTimeUntilResend = errors.New("please wait before resending")
 
 func (s *UsersService) RegisterUser(registerUserData RegisterUserData) error {
 	existingUser := s.usersRepo.GetByEmail(registerUserData.Email)
@@ -70,7 +71,7 @@ func (s *UsersService) RegisterUser(registerUserData RegisterUserData) error {
 	}
 	err = s.usersRepo.Create(user)
 	if err == nil {
-		s.SendActivationMassage(user)
+		s.sendActivationEmail(user)
 	}
 
 	return err
@@ -111,7 +112,37 @@ func (s *UsersService) LogoutUser(sessionID string) error {
 	return s.sessionsRepo.Delete(sessionID)
 }
 
-func (s *UsersService) ReSendActivationMassage(user *User) error {
+func (s *UsersService) SendLinkToLogin(email string) (timeUntilResend int, err error) {
+	user := s.usersRepo.GetByEmail(email)
+	if user == nil {
+		return 0, ErrUserNotFound
+	}
+
+	if !user.IsActive {
+		return 0, ErrAccountNotActivated
+	}
+
+	timeUntilResend = user.TimeUntilResend()
+	if timeUntilResend > 0 {
+		return timeUntilResend, ErrTimeUntilResend
+	}
+
+	activationHash, err := generateActivationHash(user.Email)
+	if err != nil {
+		return 0, err
+	}
+	user.ActivationHash = activationHash
+	user.ActivationHashDate = time.Now().UTC()
+	err = s.usersRepo.Update(user)
+	if err != nil {
+		return 0, err
+	}
+	s.sendLoginEmail(user)
+
+	return user.TimeUntilResend(), nil
+}
+
+func (s *UsersService) ReSendActivationEmail(user *User) error {
 
 	activationHash, err := generateActivationHash(user.Email)
 	if err != nil {
@@ -123,13 +154,15 @@ func (s *UsersService) ReSendActivationMassage(user *User) error {
 	if err != nil {
 		return err
 	}
-	s.SendActivationMassage(user)
-	slog.Info("ReSending activation", "user", user)
+	s.sendActivationEmail(user)
 	return nil
 }
 
-func (s *UsersService) SendActivationMassage(user *User) {
-	slog.Info("Sending activation", "user", user)
+func (s *UsersService) sendActivationEmail(user *User) {
+	D("Sending activation", "user", user)
+}
+func (s *UsersService) sendLoginEmail(user *User) {
+	D("Sending Login Email", "user", user)
 }
 
 func (s *UsersService) makeSession(userId int) (*Session, error) {

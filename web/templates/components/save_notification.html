@@ -1,0 +1,27 @@
+<!-- prettier-ignore -->
+{{ define "components/save_notification" }}
+<span
+  id="save-notification"
+  class="rounded-xl bg-green-100 px-4 py-2 text-green-800 opacity-0 transition-opacity duration-1000 ease-in-out"
+>
+  {{ . }}
+</span>
+<script>
+  document.addEventListener("DOMContentLoaded", () => {
+    const notification = document.getElementById("save-notification");
+    if (notification) {
+      notification.classList.add("opacity-100");
+      notification.classList.remove("opacity-0");
+
+      setTimeout(() => {
+        notification.classList.add("opacity-0");
+        notification.classList.remove("opacity-100");
+      }, 2000);
+      setTimeout(() => {
+        notification.classList.add("hidden");
+      }, 3000);
+    }
+  });
+</script>
+<!-- prettier-ignore -->
+{{ end }}

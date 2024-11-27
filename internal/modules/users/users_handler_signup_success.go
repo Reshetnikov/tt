@@ -6,6 +6,8 @@ import (
 	"time-tracker/internal/utils"
 )
 
+// Page /signup-success
+// Button "Resend confirmation"
 func (h *UsersHandler) HandleSignupSuccess(w http.ResponseWriter, r *http.Request) {
 	user := GetUserFromRequest(r)
 	if user != nil {
@@ -39,9 +41,11 @@ func (h *UsersHandler) HandleSignupSuccess(w http.ResponseWriter, r *http.Reques
 	}
 
 	errorMessage := ""
+	saveOk := false
 	if r.Method == http.MethodPost {
 		if timeUntilResend := notActiveUser.TimeUntilResend(); timeUntilResend == 0 {
-			h.usersService.ReSendActivationMassage(notActiveUser) // will update TimeUntilResend
+			h.usersService.ReSendActivationEmail(notActiveUser) // will update TimeUntilResend
+			saveOk = true
 		} else {
 			errorMessage = fmt.Sprintf("Wait %d sec.", timeUntilResend)
 		}
@@ -52,5 +56,6 @@ func (h *UsersHandler) HandleSignupSuccess(w http.ResponseWriter, r *http.Reques
 		"Email":           email,
 		"TimeUntilResend": notActiveUser.TimeUntilResend(), // need new TimeUntilResend
 		"ErrorMessage":    errorMessage,
+		"SaveOk":          saveOk,
 	})
 }
