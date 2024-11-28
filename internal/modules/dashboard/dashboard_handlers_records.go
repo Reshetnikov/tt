@@ -192,7 +192,7 @@ func (h *DashboardHandlers) HandleRecordsList(w http.ResponseWriter, r *http.Req
 	}
 	week := r.URL.Query().Get("week")
 	nowWithTimezone, _ := utils.NowWithTimezone(user.TimeZone)
-	startInterval, endInterval := GetDateInterval(week, nowWithTimezone, user.IsWeekStartMonday)
+	startInterval, endInterval := getWeekInterval(week, nowWithTimezone, user.IsWeekStartMonday)
 	filterRecords := FilterRecords{
 		UserID:        user.ID,
 		StartInterval: startInterval,

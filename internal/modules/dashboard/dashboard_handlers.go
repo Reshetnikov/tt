@@ -23,9 +23,9 @@ func (h *DashboardHandlers) HandleDashboard(w http.ResponseWriter, r *http.Reque
 		return
 	}
 
-	week := r.URL.Query().Get("week")
+	weekStr := r.URL.Query().Get("week")
 	nowWithTimezone, _ := utils.NowWithTimezone(user.TimeZone)
-	startInterval, endInterval := GetDateInterval(week, nowWithTimezone, user.IsWeekStartMonday)
+	startInterval, endInterval := getWeekInterval(weekStr, nowWithTimezone, user.IsWeekStartMonday)
 
 	filterRecords := FilterRecords{
 		UserID:        user.ID,
@@ -52,15 +52,15 @@ func (h *DashboardHandlers) HandleDashboard(w http.ResponseWriter, r *http.Reque
 
 }
 
-func GetDateInterval(week string, nowWithTimezone time.Time, isWeekStartMonday bool) (startInterval time.Time, endInterval time.Time) {
-	if week != "" {
+func getWeekInterval(weekStr string, nowWithTimezone time.Time, isWeekStartMonday bool) (startInterval time.Time, endInterval time.Time) {
+	if weekStr != "" {
 		var err error
-		startInterval, endInterval, err = utils.GetWeekInterval(week, isWeekStartMonday)
+		startInterval, endInterval, err = utils.GetWeekInterval(weekStr, isWeekStartMonday)
 		if err == nil {
 			return
 		}
 	}
-	startInterval, endInterval = utils.GetDateInterval(nowWithTimezone, isWeekStartMonday)
+	startInterval, endInterval = utils.GetWeekIntervalByDate(nowWithTimezone, isWeekStartMonday)
 	return
 }
 
