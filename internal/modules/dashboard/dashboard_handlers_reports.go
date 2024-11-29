@@ -25,9 +25,9 @@ func (h *DashboardHandlers) HandleReports(w http.ResponseWriter, r *http.Request
 		EndInterval:   endInterval,
 	}
 
-	//dailyRecords := h.repo.DailyRecords(filterRecords, nowWithTimezone)
+	reportRows, days := h.repo.Reports(user.ID, startInterval, endInterval, nowWithTimezone)
 	D("HandleReports", "filterRecords", filterRecords)
-	//D("HandleReports", "dailyRecords", dailyRecords)
+	D("HandleReports", "reportRows", reportRows, "days", days)
 
 	utils.RenderTemplate(w, []string{"dashboard/reports"}, utils.TplData{
 		"Title": "Reports",

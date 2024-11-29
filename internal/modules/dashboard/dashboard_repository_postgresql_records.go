@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"log/slog"
+	"sort"
 	"strings"
 	"time"
 )
@@ -209,6 +210,7 @@ func (r *DashboardRepositoryPostgres) DailyRecords(filterRecords FilterRecords, 
 			recordCopy.TimeEndIntraday = timeEndIntraday.Format("15:04")
 
 			duration := timeEndIntraday.Sub(timeStartIntraday)
+			recordCopy.Duration = duration
 			hours := int(duration.Hours())
 			minutes := int(duration.Minutes()) % 60
 			if hours > 0 {
@@ -229,4 +231,54 @@ func (r *DashboardRepositoryPostgres) DailyRecords(filterRecords FilterRecords, 
 	}
 
 	return dailyRecords
+}
+
+func (r *DashboardRepositoryPostgres) Reports(userID int, startInterval time.Time, endInterval time.Time, nowWithTimezone time.Time) ([]ReportRow, []time.Time) {
+	recordsFilter := FilterRecords{
+		UserID:        userID,
+		StartInterval: startInterval,
+		EndInterval:   endInterval,
+	}
+	dailyRecords := r.DailyRecords(recordsFilter, nowWithTimezone)
+
+	reportRowsMap := make(map[int]*ReportRow)
+	var days []time.Time
+	var totalDurationAllTasks time.Duration
+
+	for _, dailyRecord := range dailyRecords {
+		days = append(days, dailyRecord.Day)
+		for _, record := range dailyRecord.Records {
+			// Create reportRowsMap[record.TaskID]
+			if _, exists := reportRowsMap[record.TaskID]; !exists {
+				reportRowsMap[record.TaskID] = &ReportRow{
+					Task:           record.Task,
+					DailyDurations: make(map[time.Time]time.Duration),
+				}
+			}
+			// Filling reportRowsMap[record.TaskID]
+			reportRowsMap[record.TaskID].DailyDurations[dailyRecord.Day] += record.Duration
+			reportRowsMap[record.TaskID].TotalDuration += record.Duration
+			totalDurationAllTasks += record.Duration
+		}
+	}
+	// Calculate DurationPercent
+	for _, row := range reportRowsMap {
+		if totalDurationAllTasks > 0 {
+			row.DurationPercent = float64(row.TotalDuration) / float64(totalDurationAllTasks) * 100
+		}
+	}
+	// reportRowsMap -> reportRows slice
+	reportRows := make([]ReportRow, 0, len(reportRowsMap))
+	for _, row := range reportRowsMap {
+		reportRows = append(reportRows, *row)
+	}
+	// Sort reportRows
+	sort.Slice(reportRows, func(i, j int) bool {
+		if reportRows[i].Task.IsCompleted != reportRows[j].Task.IsCompleted {
+			return !reportRows[i].Task.IsCompleted
+		}
+		return reportRows[i].Task.SortOrder < reportRows[j].Task.SortOrder
+	})
+
+	return reportRows, days
 }
