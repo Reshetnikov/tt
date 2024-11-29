@@ -49,6 +49,7 @@ func createTemplate(w http.ResponseWriter, tplPaths []string) (templates *templa
 		"fileVersion":        fileVersion,
 		"formatTimeRange":    FormatTimeRange,
 		"formatTimeForInput": FormatTimeForInput,
+		"formatDuration":     FormatDuration,
 	})
 
 	components := filepath.Join("web", "templates", "components", "*")

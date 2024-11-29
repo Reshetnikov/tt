@@ -233,7 +233,7 @@ func (r *DashboardRepositoryPostgres) DailyRecords(filterRecords FilterRecords, 
 	return dailyRecords
 }
 
-func (r *DashboardRepositoryPostgres) Reports(userID int, startInterval time.Time, endInterval time.Time, nowWithTimezone time.Time) ([]ReportRow, []time.Time) {
+func (r *DashboardRepositoryPostgres) Reports(userID int, startInterval time.Time, endInterval time.Time, nowWithTimezone time.Time) (reportRows []ReportRow, days []time.Time, totalDuration time.Duration) {
 	recordsFilter := FilterRecords{
 		UserID:        userID,
 		StartInterval: startInterval,
@@ -242,8 +242,6 @@ func (r *DashboardRepositoryPostgres) Reports(userID int, startInterval time.Tim
 	dailyRecords := r.DailyRecords(recordsFilter, nowWithTimezone)
 
 	reportRowsMap := make(map[int]*ReportRow)
-	var days []time.Time
-	var totalDurationAllTasks time.Duration
 
 	for _, dailyRecord := range dailyRecords {
 		days = append(days, dailyRecord.Day)
@@ -258,17 +256,16 @@ func (r *DashboardRepositoryPostgres) Reports(userID int, startInterval time.Tim
 			// Filling reportRowsMap[record.TaskID]
 			reportRowsMap[record.TaskID].DailyDurations[dailyRecord.Day] += record.Duration
 			reportRowsMap[record.TaskID].TotalDuration += record.Duration
-			totalDurationAllTasks += record.Duration
+			totalDuration += record.Duration
 		}
 	}
 	// Calculate DurationPercent
 	for _, row := range reportRowsMap {
-		if totalDurationAllTasks > 0 {
-			row.DurationPercent = float64(row.TotalDuration) / float64(totalDurationAllTasks) * 100
+		if totalDuration > 0 {
+			row.DurationPercent = float64(row.TotalDuration) / float64(totalDuration) * 100
 		}
 	}
 	// reportRowsMap -> reportRows slice
-	reportRows := make([]ReportRow, 0, len(reportRowsMap))
 	for _, row := range reportRowsMap {
 		reportRows = append(reportRows, *row)
 	}
@@ -280,5 +277,5 @@ func (r *DashboardRepositoryPostgres) Reports(userID int, startInterval time.Tim
 		return reportRows[i].Task.SortOrder < reportRows[j].Task.SortOrder
 	})
 
-	return reportRows, days
+	return reportRows, days, totalDuration
 }

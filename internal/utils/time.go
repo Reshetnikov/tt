@@ -75,6 +75,20 @@ func FormatTimeRange(timeStart time.Time, timeEnd *time.Time, timezone string) s
 	return timeRange
 }
 
+func FormatDuration(d time.Duration) string {
+	hours := int(d.Hours())
+	minutes := int(d.Minutes()) % 60
+
+	if hours > 0 && minutes > 0 {
+		return fmt.Sprintf("%dh %dm", hours, minutes)
+	} else if hours > 0 {
+		return fmt.Sprintf("%dh", hours)
+	} else if minutes > 0 {
+		return fmt.Sprintf("%dm", minutes)
+	}
+	return "-"
+}
+
 // "2024-W03"
 func GetWeekInterval(weekStr string, isWeekStartMonday bool) (time.Time, time.Time, error) {
 	parts := strings.Split(weekStr, "-W")

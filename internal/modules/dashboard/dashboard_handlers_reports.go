@@ -25,14 +25,25 @@ func (h *DashboardHandlers) HandleReports(w http.ResponseWriter, r *http.Request
 		EndInterval:   endInterval,
 	}
 
-	reportRows, days := h.repo.Reports(user.ID, startInterval, endInterval, nowWithTimezone)
+	reportRows, days, totalDuration := h.repo.Reports(user.ID, startInterval, endInterval, nowWithTimezone)
 	D("HandleReports", "filterRecords", filterRecords)
 	D("HandleReports", "reportRows", reportRows, "days", days)
 
-	utils.RenderTemplate(w, []string{"dashboard/reports"}, utils.TplData{
-		"Title": "Reports",
-		"User":  user,
-	})
+	tplData := utils.TplData{
+		"Title":         "Reports",
+		"User":          user,
+		"ReportRows":    reportRows,
+		"Days":          days,
+		"TotalDuration": totalDuration,
+		"Month":         startInterval.Format("2006-01"),
+		"PreviousMonth": startInterval.AddDate(0, -1, 0).Format("2006-01"),
+		"NextMonth":     startInterval.AddDate(0, 1, 0).Format("2006-01"),
+	}
+	if r.Header.Get("HX-Request") == "true" {
+		utils.RenderTemplateWithoutLayout(w, []string{"dashboard/reports"}, "content", tplData)
+	} else {
+		utils.RenderTemplate(w, []string{"dashboard/reports"}, tplData)
+	}
 }
 
 func getMonthInterval(monthStr string, nowWithTimezone time.Time) (startInterval time.Time, endInterval time.Time) {
