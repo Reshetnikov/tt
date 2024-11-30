@@ -202,22 +202,13 @@ func (r *DashboardRepositoryPostgres) DailyRecords(filterRecords FilterRecords, 
 				timeEndIntraday = dayEndRecord
 			}
 
+			recordCopy.TimeStartIntraday = timeStartIntraday
+			recordCopy.TimeEndIntraday = timeEndIntraday
+			recordCopy.Duration = timeEndIntraday.Sub(timeStartIntraday)
+
 			totalDaySeconds := float32(86400)
 			recordCopy.StartPercent = float32(timeStartIntraday.Sub(dayRecord)/time.Second) / totalDaySeconds * 100
 			recordCopy.DurationPercent = float32(timeEndIntraday.Sub(timeStartIntraday)/time.Second) / totalDaySeconds * 100
-
-			recordCopy.TimeStartIntraday = timeStartIntraday.Format("15:04")
-			recordCopy.TimeEndIntraday = timeEndIntraday.Format("15:04")
-
-			duration := timeEndIntraday.Sub(timeStartIntraday)
-			recordCopy.Duration = duration
-			hours := int(duration.Hours())
-			minutes := int(duration.Minutes()) % 60
-			if hours > 0 {
-				recordCopy.DurationHM = fmt.Sprintf("%02dh %02dm", hours, minutes)
-			} else {
-				recordCopy.DurationHM = fmt.Sprintf("%02dm", minutes)
-			}
 
 			dayMap[dayRecord] = append(dayMap[dayRecord], recordCopy)
 		}
@@ -233,7 +224,12 @@ func (r *DashboardRepositoryPostgres) DailyRecords(filterRecords FilterRecords, 
 	return dailyRecords
 }
 
-func (r *DashboardRepositoryPostgres) Reports(userID int, startInterval time.Time, endInterval time.Time, nowWithTimezone time.Time) (reportRows []ReportRow, days []time.Time, totalDuration time.Duration) {
+func (r *DashboardRepositoryPostgres) Reports(
+	userID int,
+	startInterval time.Time,
+	endInterval time.Time,
+	nowWithTimezone time.Time,
+) ReportData {
 	recordsFilter := FilterRecords{
 		UserID:        userID,
 		StartInterval: startInterval,
@@ -241,7 +237,11 @@ func (r *DashboardRepositoryPostgres) Reports(userID int, startInterval time.Tim
 	}
 	dailyRecords := r.DailyRecords(recordsFilter, nowWithTimezone)
 
+	var reportRows []ReportRow
+	var days []time.Time
+	var totalDuration time.Duration
 	reportRowsMap := make(map[int]*ReportRow)
+	dailyTotalDuration := make(map[time.Time]time.Duration)
 
 	for _, dailyRecord := range dailyRecords {
 		days = append(days, dailyRecord.Day)
@@ -256,6 +256,7 @@ func (r *DashboardRepositoryPostgres) Reports(userID int, startInterval time.Tim
 			// Filling reportRowsMap[record.TaskID]
 			reportRowsMap[record.TaskID].DailyDurations[dailyRecord.Day] += record.Duration
 			reportRowsMap[record.TaskID].TotalDuration += record.Duration
+			dailyTotalDuration[dailyRecord.Day] += record.Duration
 			totalDuration += record.Duration
 		}
 	}
@@ -277,5 +278,10 @@ func (r *DashboardRepositoryPostgres) Reports(userID int, startInterval time.Tim
 		return reportRows[i].Task.SortOrder < reportRows[j].Task.SortOrder
 	})
 
-	return reportRows, days, totalDuration
+	return ReportData{
+		ReportRows:         reportRows,
+		Days:               days,
+		DailyTotalDuration: dailyTotalDuration,
+		TotalDuration:      totalDuration,
+	}
 }

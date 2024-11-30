@@ -24,9 +24,8 @@ type Record struct {
 	StartPercent      float32
 	DurationPercent   float32
 	Duration          time.Duration
-	DurationHM        string
-	TimeStartIntraday string
-	TimeEndIntraday   string
+	TimeStartIntraday time.Time
+	TimeEndIntraday   time.Time
 }
 
 type DailyRecords struct {
@@ -39,4 +38,11 @@ type ReportRow struct {
 	DailyDurations  map[time.Time]time.Duration
 	TotalDuration   time.Duration
 	DurationPercent float64
+}
+
+type ReportData struct {
+	ReportRows         []ReportRow
+	Days               []time.Time
+	DailyTotalDuration map[time.Time]time.Duration
+	TotalDuration      time.Duration
 }

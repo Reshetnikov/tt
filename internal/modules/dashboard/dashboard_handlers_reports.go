@@ -25,16 +25,14 @@ func (h *DashboardHandlers) HandleReports(w http.ResponseWriter, r *http.Request
 		EndInterval:   endInterval,
 	}
 
-	reportRows, days, totalDuration := h.repo.Reports(user.ID, startInterval, endInterval, nowWithTimezone)
+	reportData := h.repo.Reports(user.ID, startInterval, endInterval, nowWithTimezone)
 	D("HandleReports", "filterRecords", filterRecords)
-	D("HandleReports", "reportRows", reportRows, "days", days)
+	D("HandleReports", "reportData", reportData)
 
 	tplData := utils.TplData{
 		"Title":         "Reports",
 		"User":          user,
-		"ReportRows":    reportRows,
-		"Days":          days,
-		"TotalDuration": totalDuration,
+		"ReportData":    reportData,
 		"Month":         startInterval.Format("2006-01"),
 		"PreviousMonth": startInterval.AddDate(0, -1, 0).Format("2006-01"),
 		"NextMonth":     startInterval.AddDate(0, 1, 0).Format("2006-01"),

@@ -14,7 +14,7 @@
       onchange="toggleVisibility(this.checked, '{{ .ID }}');"
       {{ if not .Value }}checked{{ end }}
     />
-    <label for="reset-{{ .ID }}" class="text-sm text-gray-600">{{ .ResetLabel }}</label>
+    <label for="reset-{{ .ID }}" class="text-sm">{{ .ResetLabel }}</label>
   </div>
   <script>
     function toggleVisibility(isChecked, ID) {

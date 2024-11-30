@@ -35,36 +35,37 @@
     >
   </div>
 
-  <div class="space-y-8 text-gray-600">
+  <div class="space-y-8 text-xs">
     <div class="overflow-x-auto">
       <table class="w-full border-collapse rounded-lg border border-gray-300 bg-white shadow-md">
         <thead>
-          <tr class="bg-gray-200 text-xs">
-            <th class="border border-gray-300 px-2 py-1 text-left">Task</th>
-            {{ range .Days }}
+          <tr class="bg-gray-200">
+            <th class="border border-gray-300 px-1 py-1 text-left">Task</th>
+            {{ range .ReportData.Days }}
             <th
-              class='whitespace-nowrap border border-gray-300 px-2 py-1 text-center 
+              class='whitespace-nowrap border border-gray-300 px-1 py-1 text-center 
                 {{ if or (eq .Weekday.String "Saturday") (eq .Weekday.String "Sunday") }}bg-red-100{{ end }}'
             >
               {{ .Format "Mon 2" }}
             </th>
             {{ end }}
-            <th class="border border-gray-300 px-2 py-1 text-right">Total</th>
+            <th class="border border-gray-300 px-1 py-1 text-right">Total</th>
           </tr>
         </thead>
+
         <tbody>
-          {{ range $row := .ReportRows }}
-          <tr class="text-sm odd:bg-gray-50 even:bg-white">
+          {{ range $row := .ReportData.ReportRows }}
+          <tr class="odd:bg-gray-50 even:bg-white">
             <!-- Task.Title -->
-            <td class="max-w-80 truncate whitespace-nowrap border border-gray-300 px-2 py-1 text-left">
+            <td class="max-w-60 truncate whitespace-nowrap border border-gray-300 px-1 py-1 text-left font-bold">
               <span class="mr-2 inline-block h-4 w-4 rounded-full" style="background-color: {{ .Task.Color }}"></span>
               {{ .Task.Title }}
             </td>
 
             <!-- Duration -->
-            {{ range $day := $.Days }}
+            {{ range $day := $.ReportData.Days }}
             <td
-              class='whitespace-nowrap border border-gray-300 px-2 py-1 text-center
+              class='whitespace-nowrap border border-gray-300 px-1 py-1 text-center
                 {{ if or (eq .Weekday.String "Saturday") (eq .Weekday.String "Sunday") }}bg-red-100{{ end }}'
             >
               {{ with $duration := index $row.DailyDurations $day }} {{ formatDuration $duration }}{{ else }}-{{ end }}
@@ -72,12 +73,28 @@
             {{ end }}
 
             <!-- TotalDuration -->
-            <td class="whitespace-nowrap border border-gray-300 px-2 py-1 text-right">
+            <td class="whitespace-nowrap border border-gray-300 px-1 py-1 text-right font-bold">
               {{ formatDuration .TotalDuration }}
             </td>
           </tr>
           {{ end }}
         </tbody>
+
+        <tfoot>
+          <tr class="bg-gray-200">
+            <th class="border border-gray-300 px-1 py-1 text-left">Total</th>
+            {{ range $day := .ReportData.Days }}
+            <th
+              class='whitespace-nowrap border border-gray-300 px-1 py-1 text-center 
+                {{ if or (eq .Weekday.String "Saturday") (eq .Weekday.String "Sunday") }}bg-red-100{{ end }}'
+            >
+              {{ with $duration := index $.ReportData.DailyTotalDuration $day }} {{ formatDuration $duration }} {{ else
+              }}-{{ end }}
+            </th>
+            {{ end }}
+            <th class="border border-gray-300 px-1 py-1 text-right">{{ .ReportData.TotalDuration }}</th>
+          </tr>
+        </tfoot>
       </table>
     </div>
   </div>

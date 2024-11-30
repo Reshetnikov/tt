@@ -20,7 +20,7 @@
     <div class="flex items-center justify-between px-4 py-2">
       <!-- Date -->
       <div
-        class='text-center w-full text-lg font-semibold {{ if or (eq .Day.Weekday.String "Saturday") (eq .Day.Weekday.String "Sunday") }}text-red-600{{ else }}text-gray-800{{ end }}'
+        class='text-center w-full text-lg font-semibold {{ if or (eq .Day.Weekday.String "Saturday") (eq .Day.Weekday.String "Sunday") }}text-red-600{{ end }}'
       >
         {{ .Day.Format "2 Jan 2006 (Mon)"}}
       </div>
@@ -76,11 +76,11 @@
           class="absolute top-0 h-1.5 rounded-lg cursor-pointer group min-w-1 {{ if not .TimeEnd }}animate-pulse{{ end }}"
           style="background-color: {{ .Task.Color }}; left: {{ .StartPercent }}%; width: {{ .DurationPercent }}%"
         >
-          <div  class="transition-all duration-200 flex w-full justify-between whitespace-nowrap pt-1 text-xs text-gray-600 group-hover:overflow-visible group-hover:text-sm group-hover:font-medium">
-            <span>{{ .TimeStartIntraday }} </span>
-            <span>&nbsp;({{ .DurationHM }})&nbsp;</span>
+          <div  class="transition-all duration-200 flex w-full justify-between whitespace-nowrap pt-1 text-xs group-hover:overflow-visible group-hover:text-sm group-hover:font-medium">
+            <span>{{ .TimeStartIntraday.Format "15:04" }} </span>
+            <span>&nbsp;({{ formatDuration .Duration }})&nbsp;</span>
             <span>
-              {{ .TimeEndIntraday }}
+              {{ .TimeEndIntraday.Format "15:04" }}
               {{ if not .TimeEnd }}
               <span class="absolute left-full pl-1">...</span>
               {{ end }}
@@ -90,8 +90,8 @@
 
         <!-- Task.Title, Time, Comment -->
         <div class="flex-grow">
-          <div class="font-bold text-gray-800">{{ .Task.Title }}</div>
-          <div class="mt-2 whitespace-pre-wrap text-gray-600">{{ .Comment }}</div>
+          <div class="font-bold">{{ .Task.Title }}</div>
+          <div class="mt-2 whitespace-pre-wrap">{{ .Comment }}</div>
         </div>
 
         <!-- Stop -->
