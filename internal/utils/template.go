@@ -50,6 +50,15 @@ func createTemplate(w http.ResponseWriter, tplPaths []string) (templates *templa
 		"formatTimeRange":    FormatTimeRange,
 		"formatTimeForInput": FormatTimeForInput,
 		"formatDuration":     FormatDuration,
+		"add": func(a, b float64) float64 {
+			return a + b
+		},
+		"addInt": func(a, b int) int {
+			return a + b
+		},
+		"sub": func(a, b float64) float64 {
+			return a - b
+		},
 	})
 
 	components := filepath.Join("web", "templates", "components", "*")

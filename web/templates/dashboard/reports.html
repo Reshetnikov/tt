@@ -97,6 +97,38 @@
         </tfoot>
       </table>
     </div>
+    <!-- Pie Chart -->
+    <div class="mt-8 flex justify-center">
+      <div class="h-64 w-64">
+        <div
+          class="h-64 w-64 rounded-full"
+          style="
+            background: conic-gradient(
+              {{ $currentOffset := 0.0 }}
+              {{ $total := len .ReportData.ReportRows }}
+              {{ range $index, $row := .ReportData.ReportRows }}
+              {{ $row.Task.Color }} {{$currentOffset}}% {{add $currentOffset $row.DurationPercent }}%
+              {{ if ne (addInt $index 1) $total }},{{ end }}
+              {{ $currentOffset = add $currentOffset $row.DurationPercent }}
+              {{ end }}
+            );
+          "
+        ></div>
+
+        <!-- Legend -->
+        <div class="mt-4 flex flex-col items-start space-y-2">
+          {{ range .ReportData.ReportRows }}
+          <div class="flex items-center">
+            <span
+              class="mr-2 inline-block h-3 w-3 shrink-0 rounded-full"
+              style="background-color: {{ .Task.Color }}"
+            ></span>
+            <span class="text-xs"> {{ .Task.Title }} ({{ printf "%.1f%%" .DurationPercent }}) </span>
+          </div>
+          {{ end }}
+        </div>
+      </div>
+    </div>
   </div>
 </div>
 {{ end }}
