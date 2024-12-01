@@ -15,13 +15,15 @@ import (
 type UsersService struct {
 	usersRepo    UsersRepository
 	sessionsRepo SessionsRepository
+	mailService  MailService
 }
 
 // Конструктор для UserService
-func NewUsersService(usersRepo UsersRepository, sessionsRepo SessionsRepository) *UsersService {
+func NewUsersService(usersRepo UsersRepository, sessionsRepo SessionsRepository, mailService MailService) *UsersService {
 	return &UsersService{
 		usersRepo:    usersRepo,
 		sessionsRepo: sessionsRepo,
+		mailService:  mailService,
 	}
 }
 

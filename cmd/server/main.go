@@ -3,7 +3,6 @@ package main
 import (
 	"context"
 	"fmt"
-	"log"
 	"log/slog"
 	"net/http"
 	"os"
@@ -25,13 +24,20 @@ func main() {
 
 	db, err := connectToDatabase(cfg)
 	if err != nil {
-		log.Fatalf("Database connection failed: %v", err)
+		slog.Error("Database connection failed", "err", err)
+		os.Exit(1)
 	}
 	defer db.Close()
 
+	mailService, err := utils.NewMailService()
+	if err != nil {
+		slog.Error("NewMailService failed", "err", err)
+		os.Exit(1)
+	}
+
 	usersRepo := users.NewUsersRepositoryPostgres(db)
 	sessionsRepo := users.NewSessionsRepositoryRedis(cfg.RedisAddr, "", 0)
-	usersService := users.NewUsersService(usersRepo, sessionsRepo)
+	usersService := users.NewUsersService(usersRepo, sessionsRepo, mailService)
 	usersHandlers := users.NewUsersHandlers(usersService)
 
 	dashboardRepo := dashboard.NewDashboardRepositoryPostgres(db)
@@ -87,7 +93,8 @@ func main() {
 		Addr:    ":8080",
 		Handler: muxRecovery,
 	}
-	log.Fatal(server.ListenAndServe())
+	listenError := server.ListenAndServe()
+	slog.Error("Server stop", "listenError", listenError)
 }
 
 func connectToDatabase(cfg *config.Config) (*pgxpool.Pool, error) {

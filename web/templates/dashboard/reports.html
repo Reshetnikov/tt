@@ -92,11 +92,12 @@
               }}-{{ end }}
             </th>
             {{ end }}
-            <th class="border border-gray-300 px-1 py-1 text-right">{{ .ReportData.TotalDuration }}</th>
+            <th class="border border-gray-300 px-1 py-1 text-right">{{ formatDuration .ReportData.TotalDuration }}</th>
           </tr>
         </tfoot>
       </table>
     </div>
+
     <!-- Pie Chart -->
     <div class="mt-8 flex justify-center">
       <div class="h-64 w-64">
@@ -129,6 +130,7 @@
         </div>
       </div>
     </div>
+    <!-- Pie Chart -->
   </div>
 </div>
 {{ end }}

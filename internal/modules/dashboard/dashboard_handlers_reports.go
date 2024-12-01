@@ -16,19 +16,8 @@ func (h *DashboardHandlers) HandleReports(w http.ResponseWriter, r *http.Request
 
 	monthStr := r.URL.Query().Get("month")
 	nowWithTimezone, _ := utils.NowWithTimezone(user.TimeZone)
-
 	startInterval, endInterval := getMonthInterval(monthStr, nowWithTimezone)
-
-	filterRecords := FilterRecords{
-		UserID:        user.ID,
-		StartInterval: startInterval,
-		EndInterval:   endInterval,
-	}
-
 	reportData := h.repo.Reports(user.ID, startInterval, endInterval, nowWithTimezone)
-	D("HandleReports", "filterRecords", filterRecords)
-	D("HandleReports", "reportData", reportData)
-
 	tplData := utils.TplData{
 		"Title":         "Reports",
 		"User":          user,
