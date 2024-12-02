@@ -15,7 +15,7 @@ var name = flag.String("name", "", "Name address to send registration email")
 
 // docker exec -it tt-app-1 go test -v ./internal/utils --tags=manual -run TestMailService_SendActivationEmail -email=
 func TestMailService_SendActivationEmail(t *testing.T) {
-	err := os.Chdir("/app")
+	os.Chdir("/app")
 
 	if *email == "" {
 		t.Skip("Run with -email flag to execute")
@@ -25,7 +25,7 @@ func TestMailService_SendActivationEmail(t *testing.T) {
 	}
 
 	ms := NewMailServiceForTest(t)
-	err = ms.SendActivationEmail(*email, *name, "http://localhost:8080/activation?hash=123")
+	err := ms.SendActivationEmail(*email, *name, "http://localhost:8080/activation?hash=123")
 	if err == nil {
 		t.Log("Mail was successfully sent to " + *email)
 	}
