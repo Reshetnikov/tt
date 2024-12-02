@@ -14,7 +14,7 @@ type MailService struct {
 }
 
 func NewMailService() (*MailService, error) {
-	cfg, err := config.LoadDefaultConfig(context.Background(), config.WithRegion("us-east-1"))
+	cfg, err := config.LoadDefaultConfig(context.Background())
 	if err != nil {
 		return nil, err
 	}
