@@ -26,5 +26,8 @@ func TestMailService_SendActivationEmail(t *testing.T) {
 
 	ms := NewMailServiceForTest(t)
 	err = ms.SendActivationEmail(*email, *name, "http://localhost:8080/activation?hash=123")
+	if err == nil {
+		t.Log("Mail was successfully sent to " + *email)
+	}
 	require.NoError(t, err, "failed to SendActivationEmail")
 }
