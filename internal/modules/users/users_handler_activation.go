@@ -5,7 +5,7 @@ import (
 	"time-tracker/internal/utils"
 )
 
-// HandleActivation — обработчик для активации учетной записи
+// http://localhost:8080/activation?hash=95c0f0bfec4376d2192bac0239b3d050ea962de312a3090bf09c60f70e51f95f
 func (h *UsersHandler) HandleActivation(w http.ResponseWriter, r *http.Request) {
 	user := GetUserFromRequest(r)
 	if user != nil {

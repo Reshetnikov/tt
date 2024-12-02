@@ -10,6 +10,7 @@ services:
       - "8080:8080"
     environment:
       - APP_ENV=development
+      - SITE_URL=${SITE_URL}
       - DB_HOST=postgres
       - DB_PORT=5432
       - DB_USER=${DB_USER}
@@ -19,6 +20,7 @@ services:
       - AWS_REGION=${AWS_REGION}
       - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
       - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
+      - EMAIL_FROM=${EMAIL_FROM}
     volumes:
       - .:/app
     tty: true # For "npm run watch:css" https://github.com/rails/rails/issues/44048

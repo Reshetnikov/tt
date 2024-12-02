@@ -16,14 +16,16 @@ type UsersService struct {
 	usersRepo    UsersRepository
 	sessionsRepo SessionsRepository
 	mailService  MailService
+	siteUrl      string
 }
 
 // Конструктор для UserService
-func NewUsersService(usersRepo UsersRepository, sessionsRepo SessionsRepository, mailService MailService) *UsersService {
+func NewUsersService(usersRepo UsersRepository, sessionsRepo SessionsRepository, mailService MailService, siteUrl string) *UsersService {
 	return &UsersService{
 		usersRepo:    usersRepo,
 		sessionsRepo: sessionsRepo,
 		mailService:  mailService,
+		siteUrl:      siteUrl,
 	}
 }
 
@@ -73,7 +75,7 @@ func (s *UsersService) RegisterUser(registerUserData RegisterUserData) error {
 	}
 	err = s.usersRepo.Create(user)
 	if err == nil {
-		s.sendActivationEmail(user)
+		s.mailService.SendActivationEmail(user.Email, user.Name, s.activationLink(user.ActivationHash))
 	}
 
 	return err
@@ -177,13 +179,10 @@ func (s *UsersService) ReSendActivationEmail(user *User) error {
 	if err != nil {
 		return err
 	}
-	s.sendActivationEmail(user)
+	s.mailService.SendActivationEmail(user.Email, user.Name, s.activationLink(user.ActivationHash))
 	return nil
 }
 
-func (s *UsersService) sendActivationEmail(user *User) {
-	D("Sending activation", "user", user)
-}
 func (s *UsersService) sendLoginEmail(user *User) {
 	D("Sending Login Email", "user", user)
 }
@@ -200,6 +199,10 @@ func (s *UsersService) makeSession(userId int) (*Session, error) {
 		return nil, fmt.Errorf("could not create session: %w", err)
 	}
 	return session, nil
+}
+
+func (s *UsersService) activationLink(hash string) (link string) {
+	return fmt.Sprintf("%s/activation?hash=%s", s.siteUrl, hash)
 }
 
 func hashPassword(password string) (string, error) {

@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Activate Your Account in Time Tracker</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        line-height: 1.6;
+        max-width: 600px;
+        margin: 0 auto;
+        padding: 20px;
+        color: #333;
+      }
+      .container {
+        background-color: #f4f4f4;
+        border-radius: 5px;
+        padding: 20px;
+      }
+      .activation-link {
+        display: inline-block;
+        background-color: #4caf50;
+        color: white;
+        padding: 10px 20px;
+        text-decoration: none;
+        border-radius: 5px;
+        margin-top: 20px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h2>Hello, {{.Name}}!</h2>
+      <p>Thank you for signing up for Time Tracker. To activate your account, please click the link below:</p>
+      <a href="{{.ActivationLink}}" class="activation-link">Activate Account</a>
+      <p>If you did not sign up, please ignore this email.</p>
+      <p>This link is valid for 15 minutes.</p>
+      <small>Best regards,<br />The Time Tracker Team</small>
+    </div>
+  </body>
+</html>

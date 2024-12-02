@@ -29,7 +29,7 @@ func main() {
 	}
 	defer db.Close()
 
-	mailService, err := utils.NewMailService()
+	mailService, err := utils.NewMailService(cfg.EmailFrom)
 	if err != nil {
 		slog.Error("NewMailService failed", "err", err)
 		os.Exit(1)
@@ -37,7 +37,7 @@ func main() {
 
 	usersRepo := users.NewUsersRepositoryPostgres(db)
 	sessionsRepo := users.NewSessionsRepositoryRedis(cfg.RedisAddr, "", 0)
-	usersService := users.NewUsersService(usersRepo, sessionsRepo, mailService)
+	usersService := users.NewUsersService(usersRepo, sessionsRepo, mailService, cfg.SiteUrl)
 	usersHandlers := users.NewUsersHandlers(usersService)
 
 	dashboardRepo := dashboard.NewDashboardRepositoryPostgres(db)

@@ -6,8 +6,9 @@ import (
 )
 
 type Config struct {
-	Port       string
 	AppEnv     string
+	SiteUrl    string
+	EmailFrom  string
 	DBHost     string
 	DBPort     string
 	DBUser     string
@@ -19,8 +20,9 @@ type Config struct {
 // LoadConfig загружает конфигурацию из переменных окружения
 func LoadConfig() *Config {
 	return &Config{
-		Port:       os.Getenv("PORT"),
 		AppEnv:     os.Getenv("APP_ENV"),
+		SiteUrl:    os.Getenv("SITE_URL"),
+		EmailFrom:  os.Getenv("EMAIL_FROM"),
 		DBHost:     os.Getenv("DB_HOST"),
 		DBPort:     os.Getenv("DB_PORT"),
 		DBUser:     os.Getenv("DB_USER"),

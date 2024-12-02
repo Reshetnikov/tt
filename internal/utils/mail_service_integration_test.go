@@ -1,6 +1,7 @@
 //go:build integration
 
-package integration
+// docker exec -it tt-app-1 go test -v ./internal/utils --tags=integration
+package utils
 
 import (
 	"testing"
@@ -13,11 +14,8 @@ func TestMailService_SendEmail_Success(t *testing.T) {
 		t.Skip("Skipping integration test in short mode.")
 	}
 
-	ms, err := NewMailService()
-	assert.NoError(t, err, "failed to create MailService")
-
-	err = ms.SendEmail(
-		"verified-email@example.com",
+	ms := NewMailServiceForTest(t)
+	err := ms.SendEmail(
 		"success@simulator.amazonses.com",
 		"Test Subject",
 		"Test Body",
@@ -30,11 +28,8 @@ func TestMailService_SendEmail_Bounce(t *testing.T) {
 		t.Skip("Skipping integration test in short mode.")
 	}
 
-	ms, err := NewMailService()
-	assert.NoError(t, err, "failed to create MailService")
-
-	err = ms.SendEmail(
-		"verified-email@example.com",
+	ms := NewMailServiceForTest(t)
+	err := ms.SendEmail(
 		"bounce@simulator.amazonses.com",
 		"Test Subject",
 		"Test Body",
@@ -47,11 +42,8 @@ func TestMailService_SendEmail_Complaint(t *testing.T) {
 		t.Skip("Skipping integration test in short mode.")
 	}
 
-	ms, err := NewMailService()
-	assert.NoError(t, err, "failed to create MailService")
-
-	err = ms.SendEmail(
-		"verified-email@example.com",
+	ms := NewMailServiceForTest(t)
+	err := ms.SendEmail(
 		"complaint@simulator.amazonses.com",
 		"Test Subject",
 		"Test Body",
@@ -64,11 +56,8 @@ func TestMailService_SendEmail_SuppressionList(t *testing.T) {
 		t.Skip("Skipping integration test in short mode.")
 	}
 
-	ms, err := NewMailService()
-	assert.NoError(t, err, "failed to create MailService")
-
-	err = ms.SendEmail(
-		"verified-email@example.com",
+	ms := NewMailServiceForTest(t)
+	err := ms.SendEmail(
 		"suppressionlist@simulator.amazonses.com",
 		"Test Subject",
 		"Test Body",
