@@ -27,7 +27,7 @@ func createMockRequest(values url.Values) *http.Request {
 	return req
 }
 
-// docker exec -it tt-app-1 go test -v ./internal/utils --tags=unit -run TestParseFormToStruct.*
+// docker exec -it tt-app-1 go test -v ./internal/utils --tags=unit -cover -run TestParseFormToStruct.*
 func TestParseFormToStruct(t *testing.T) {
 	testCases := []struct {
 		name           string
