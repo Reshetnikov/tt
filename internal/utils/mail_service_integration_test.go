@@ -9,58 +9,54 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestMailService_SendEmail_Success(t *testing.T) {
-	if testing.Short() {
-		t.Skip("Skipping integration test in short mode.")
+// docker exec -it tt-app-1 go test -v ./internal/utils --tags=integration -run TestMailService_SendEmail
+// docker exec -it tt-app-1 go test -v ./internal/utils --tags=integration -run TestMailService_SendEmail/SuppressionList
+func TestMailService_SendEmail(t *testing.T) {
+	TShort(t)
+	tests := []struct {
+		email    string
+		subject  string
+		body     string
+		testName string
+	}{
+		{SimulatorSuccess, "Test Subject", "Test Body", "Success"},
+		{SimulatorBounce, "Test Subject", "Test Body", "Bounce"},
+		{SimulatorComplaint, "Test Subject", "Test Body", "Complaint"},
+		{SimulatorSuppressionlist, "Test Subject", "Test Body", "SuppressionList"},
 	}
 
 	ms := NewMailServiceForTest(t)
-	err := ms.sendEmail(
-		"success@simulator.amazonses.com",
-		"Test Subject",
-		"Test Body",
+
+	for _, test := range tests {
+		t.Run(test.testName, func(t *testing.T) {
+			err := ms.sendEmail(test.email, test.subject, test.body)
+			assert.NoError(t, err, "failed to send email for "+test.testName)
+		})
+	}
+}
+
+// docker exec -it tt-app-1 go test -v ./internal/utils --tags=integration -run TestMailService_SendActivationEmail_SimulatorSuccess
+func TestMailService_SendActivationEmail_SimulatorSuccess(t *testing.T) {
+	TShort(t)
+	SetAppDir()
+	ms := NewMailServiceForTest(t)
+	err := ms.SendActivationEmail(
+		SimulatorSuccess,
+		"My Name",
+		TestActivationURL,
 	)
 	assert.NoError(t, err, "failed to send email")
 }
 
-func TestMailService_SendEmail_Bounce(t *testing.T) {
-	if testing.Short() {
-		t.Skip("Skipping integration test in short mode.")
-	}
-
+// docker exec -it tt-app-1 go test -v ./internal/utils --tags=integration -run TestMailService_SendLoginWithTokenEmail_SimulatorSuccess
+func TestMailService_SendLoginWithTokenEmail_SimulatorSuccess(t *testing.T) {
+	TShort(t)
+	SetAppDir()
 	ms := NewMailServiceForTest(t)
-	err := ms.sendEmail(
-		"bounce@simulator.amazonses.com",
-		"Test Subject",
-		"Test Body",
+	err := ms.SendLoginWithTokenEmail(
+		SimulatorSuccess,
+		"My Name",
+		TestTokenURL,
 	)
-	assert.NoError(t, err, "sending to bounce simulator failed")
-}
-
-func TestMailService_SendEmail_Complaint(t *testing.T) {
-	if testing.Short() {
-		t.Skip("Skipping integration test in short mode.")
-	}
-
-	ms := NewMailServiceForTest(t)
-	err := ms.sendEmail(
-		"complaint@simulator.amazonses.com",
-		"Test Subject",
-		"Test Body",
-	)
-	assert.NoError(t, err, "sending to complaint simulator failed")
-}
-
-func TestMailService_SendEmail_SuppressionList(t *testing.T) {
-	if testing.Short() {
-		t.Skip("Skipping integration test in short mode.")
-	}
-
-	ms := NewMailServiceForTest(t)
-	err := ms.sendEmail(
-		"suppressionlist@simulator.amazonses.com",
-		"Test Subject",
-		"Test Body",
-	)
-	assert.NoError(t, err, "sending to suppression list simulator failed")
+	assert.NoError(t, err, "failed to send email")
 }

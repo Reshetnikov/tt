@@ -1,10 +1,10 @@
 //go:build manual
 
+// The tests are designed for manual launch and visual control of the result.
 package utils
 
 import (
 	"flag"
-	"os"
 	"testing"
 
 	"github.com/stretchr/testify/require"
@@ -13,40 +13,36 @@ import (
 var email = flag.String("email", "", "Email address to send registration email")
 var name = flag.String("name", "", "Name address to send registration email")
 
-// docker exec -it tt-app-1 go test -v ./internal/utils --tags=manual -run TestMailService_SendActivationEmail -email=
-func TestMailService_SendActivationEmail(t *testing.T) {
-	os.Chdir("/app")
-
+func getEmailAndName(t *testing.T) (string, string) {
 	if *email == "" {
 		t.Skip("Run with -email flag to execute")
 	}
 	if *name == "" {
 		*name = "Just God"
 	}
+	return *email, *name
+}
 
+// docker exec -it tt-app-1 go test -v ./internal/utils --tags=manual -run TestMailService_SendActivationEmail -email=
+func TestMailService_SendActivationEmail(t *testing.T) {
+	SetAppDir()
+	email, name := getEmailAndName(t)
 	ms := NewMailServiceForTest(t)
-	err := ms.SendActivationEmail(*email, *name, "http://localhost:8080/activation?hash=123")
+	err := ms.SendActivationEmail(email, name, TestActivationURL)
 	if err == nil {
-		t.Log("Mail was successfully sent to " + *email)
+		t.Log("Mail was successfully sent to " + email)
 	}
 	require.NoError(t, err, "failed to SendActivationEmail")
 }
 
 // docker exec -it tt-app-1 go test -v ./internal/utils --tags=manual -run TestMailService_SendLoginWithTokenEmail -email=
 func TestMailService_SendLoginWithTokenEmail(t *testing.T) {
-	os.Chdir("/app")
-
-	if *email == "" {
-		t.Skip("Run with -email flag to execute")
-	}
-	if *name == "" {
-		*name = "Just God"
-	}
-
+	SetAppDir()
+	email, name := getEmailAndName(t)
 	ms := NewMailServiceForTest(t)
-	err := ms.SendLoginWithTokenEmail(*email, *name, "http://localhost:8080/login-with-token?token=123")
+	err := ms.SendLoginWithTokenEmail(email, name, TestTokenURL)
 	if err == nil {
-		t.Log("Mail was successfully sent to " + *email)
+		t.Log("Mail was successfully sent to " + email)
 	}
 	require.NoError(t, err, "failed to SendActivationEmail")
 }
