@@ -10,6 +10,9 @@ import (
 	//"time-tracker/internal/middleware"
 )
 
+var componentsPath = filepath.Join("web", "templates", "components", "*")
+var layoutPath = filepath.Join("web", "templates", "layout.html")
+
 type TplData map[string]interface{}
 
 // Function for registration in the template engine
@@ -43,6 +46,16 @@ func fileVersion(relPath string) string {
 	return fmt.Sprintf("%d", fileInfo.ModTime().Unix())
 }
 
+func add(a, b float64) float64 {
+	return a + b
+}
+func addInt(a, b int) int {
+	return a + b
+}
+func sub(a, b float64) float64 {
+	return a - b
+}
+
 func createTemplate(w http.ResponseWriter, tplPaths []string) (templates *template.Template) {
 	templates = template.New("").Funcs(template.FuncMap{
 		"dict":               dict,
@@ -50,21 +63,14 @@ func createTemplate(w http.ResponseWriter, tplPaths []string) (templates *templa
 		"formatTimeRange":    FormatTimeRange,
 		"formatTimeForInput": FormatTimeForInput,
 		"formatDuration":     FormatDuration,
-		"add": func(a, b float64) float64 {
-			return a + b
-		},
-		"addInt": func(a, b int) int {
-			return a + b
-		},
-		"sub": func(a, b float64) float64 {
-			return a - b
-		},
+		"add":                add,
+		"addInt":             addInt,
+		"sub":                sub,
 	})
 
-	components := filepath.Join("web", "templates", "components", "*")
-	templates, err := templates.ParseGlob(components)
+	templates, err := templates.ParseGlob(componentsPath)
 	if err != nil {
-		slog.Error("RenderTemplate ParseGlob", "components", components, "err", err.Error())
+		slog.Error("RenderTemplate ParseGlob", "componentsPath", componentsPath, "err", err.Error())
 		http.Error(w, "Error loading template", http.StatusInternalServerError)
 		return
 	}
@@ -90,15 +96,15 @@ func executeTemplate(templates *template.Template, w http.ResponseWriter, tplPat
 
 func RenderTemplate(w http.ResponseWriter, tplPaths []string, data TplData) {
 	templates := createTemplate(w, tplPaths)
-
-	layout := filepath.Join("web", "templates", "layout.html")
-	templates, err := templates.ParseFiles(layout)
+	if templates == nil {
+		return
+	}
+	templates, err := templates.ParseFiles(layoutPath)
 	if err != nil {
-		slog.Error("RenderTemplate ParseFiles", "layout", layout, "err", err.Error())
+		slog.Error("RenderTemplate ParseFiles", "layout", layoutPath, "err", err.Error())
 		http.Error(w, "Error loading template", http.StatusInternalServerError)
 		return
 	}
-
 	executeTemplate(templates, w, "layout", data)
 }
 

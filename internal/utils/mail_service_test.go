@@ -3,7 +3,6 @@
 package utils
 
 import (
-	"os"
 	"testing"
 	"time-tracker/internal/config"
 
@@ -27,14 +26,4 @@ func NewMailServiceForTest(t *testing.T) *MailService {
 	ms, err := NewMailService(cfg.EmailFrom)
 	require.NoError(t, err, "failed to create MailService")
 	return ms
-}
-
-func SetAppDir() {
-	os.Chdir("/app")
-}
-
-func TShort(t *testing.T) {
-	if testing.Short() {
-		t.Skip("Skipping integration test in short mode.")
-	}
 }
