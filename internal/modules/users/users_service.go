@@ -162,7 +162,7 @@ func (s *UsersService) SendLinkToLogin(email string) (timeUntilResend int, err e
 	if err != nil {
 		return 0, err
 	}
-	s.sendLoginEmail(user)
+	s.mailService.SendLoginWithTokenEmail(user.Email, user.Name, s.loginWithTokenLink(user.ActivationHash))
 
 	return user.TimeUntilResend(), nil
 }
@@ -183,10 +183,6 @@ func (s *UsersService) ReSendActivationEmail(user *User) error {
 	return nil
 }
 
-func (s *UsersService) sendLoginEmail(user *User) {
-	D("Sending Login Email", "user", user)
-}
-
 func (s *UsersService) makeSession(userId int) (*Session, error) {
 	sessionID := uuid.New().String()
 	session := &Session{
@@ -203,6 +199,9 @@ func (s *UsersService) makeSession(userId int) (*Session, error) {
 
 func (s *UsersService) activationLink(hash string) (link string) {
 	return fmt.Sprintf("%s/activation?hash=%s", s.siteUrl, hash)
+}
+func (s *UsersService) loginWithTokenLink(token string) (link string) {
+	return fmt.Sprintf("%s/login-with-token?token=%s", s.siteUrl, token)
 }
 
 func hashPassword(password string) (string, error) {

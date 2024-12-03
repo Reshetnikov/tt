@@ -15,7 +15,7 @@ func TestMailService_SendEmail_Success(t *testing.T) {
 	}
 
 	ms := NewMailServiceForTest(t)
-	err := ms.SendEmail(
+	err := ms.sendEmail(
 		"success@simulator.amazonses.com",
 		"Test Subject",
 		"Test Body",
@@ -29,7 +29,7 @@ func TestMailService_SendEmail_Bounce(t *testing.T) {
 	}
 
 	ms := NewMailServiceForTest(t)
-	err := ms.SendEmail(
+	err := ms.sendEmail(
 		"bounce@simulator.amazonses.com",
 		"Test Subject",
 		"Test Body",
@@ -43,7 +43,7 @@ func TestMailService_SendEmail_Complaint(t *testing.T) {
 	}
 
 	ms := NewMailServiceForTest(t)
-	err := ms.SendEmail(
+	err := ms.sendEmail(
 		"complaint@simulator.amazonses.com",
 		"Test Subject",
 		"Test Body",
@@ -57,7 +57,7 @@ func TestMailService_SendEmail_SuppressionList(t *testing.T) {
 	}
 
 	ms := NewMailServiceForTest(t)
-	err := ms.SendEmail(
+	err := ms.sendEmail(
 		"suppressionlist@simulator.amazonses.com",
 		"Test Subject",
 		"Test Body",

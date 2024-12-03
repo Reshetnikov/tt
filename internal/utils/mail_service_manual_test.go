@@ -31,3 +31,22 @@ func TestMailService_SendActivationEmail(t *testing.T) {
 	}
 	require.NoError(t, err, "failed to SendActivationEmail")
 }
+
+// docker exec -it tt-app-1 go test -v ./internal/utils --tags=manual -run TestMailService_SendLoginWithTokenEmail -email=
+func TestMailService_SendLoginWithTokenEmail(t *testing.T) {
+	os.Chdir("/app")
+
+	if *email == "" {
+		t.Skip("Run with -email flag to execute")
+	}
+	if *name == "" {
+		*name = "Just God"
+	}
+
+	ms := NewMailServiceForTest(t)
+	err := ms.SendLoginWithTokenEmail(*email, *name, "http://localhost:8080/login-with-token?token=123")
+	if err == nil {
+		t.Log("Mail was successfully sent to " + *email)
+	}
+	require.NoError(t, err, "failed to SendActivationEmail")
+}

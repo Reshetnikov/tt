@@ -30,7 +30,7 @@ func NewMailService(emailFrom string) (*MailService, error) {
 	}, nil
 }
 
-func (ms *MailService) SendEmail(to string, subject string, body string) error {
+func (ms *MailService) sendEmail(to string, subject string, body string) error {
 
 	input := &ses.SendEmailInput{
 		Destination: &types.Destination{
@@ -79,9 +79,36 @@ func (ms *MailService) SendActivationEmail(email, name, link string) error {
 		return err
 	}
 
-	return ms.SendEmail(
+	return ms.sendEmail(
 		email,
 		"Activating an account in Time Tracker",
+		bodyBuffer.String(),
+	)
+}
+
+func (ms *MailService) SendLoginWithTokenEmail(email, name, link string) error {
+	templatePath := filepath.Join("web", "templates", "email", "login-with-token.html")
+	tmpl, err := template.ParseFiles(templatePath)
+	if err != nil {
+		return err
+	}
+
+	data := struct {
+		Name      string
+		LoginLink string
+	}{
+		Name:      name,
+		LoginLink: link,
+	}
+
+	var bodyBuffer bytes.Buffer
+	if err := tmpl.Execute(&bodyBuffer, data); err != nil {
+		return err
+	}
+
+	return ms.sendEmail(
+		email,
+		"Login to Your Time Tracker Account",
 		bodyBuffer.String(),
 	)
 }
