@@ -266,7 +266,7 @@ func (h *DashboardHandlers) validateIntersectingRecords(form recordForm, user *u
 			InProgress:  true,
 		})
 		if len(intersectingRecords) > 0 {
-			message := "You are already doing task: " + recortToString(intersectingRecords[0], user)
+			message := "You are already doing task: " + recordToString(intersectingRecords[0], user)
 			formErrors.Add("TimeEnd", message)
 			return
 		}
@@ -284,14 +284,14 @@ func (h *DashboardHandlers) validateIntersectingRecords(form recordForm, user *u
 	if len(intersectingRecords) > 0 {
 		message := "The selected time overlaps with other entries: "
 		for _, record := range intersectingRecords {
-			message += "<br> " + recortToString(record, user)
+			message += "<br> " + recordToString(record, user)
 		}
 
 		formErrors.Add("TimeEnd", message)
 	}
 }
 
-func recortToString(record *Record, user *users.User) string {
+func recordToString(record *Record, user *users.User) string {
 	return fmt.Sprintf(
 		"<a href=\"/dashboard?record=%d\" target=\"_blank\">%s %s %s</a>",
 		record.ID,

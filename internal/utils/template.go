@@ -60,7 +60,6 @@ func createTemplate(w http.ResponseWriter, tplPaths []string) (templates *templa
 	templates = template.New("").Funcs(template.FuncMap{
 		"dict":               dict,
 		"fileVersion":        fileVersion,
-		"formatTimeRange":    FormatTimeRange,
 		"formatTimeForInput": FormatTimeForInput,
 		"formatDuration":     FormatDuration,
 		"add":                add,
