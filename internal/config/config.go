@@ -14,6 +14,7 @@ type Config struct {
 	DBUser     string
 	DBPassword string
 	DBName     string
+	DBSSLMode  string
 	RedisAddr  string
 }
 
@@ -28,11 +29,12 @@ func LoadConfig() *Config {
 		DBUser:     os.Getenv("DB_USER"),
 		DBPassword: os.Getenv("DB_PASSWORD"),
 		DBName:     os.Getenv("DB_NAME"),
+		DBSSLMode:  os.Getenv("DB_SSLMODE"),
 		RedisAddr:  os.Getenv("REDIS_ADDR"),
 	}
 }
 
 func (cfg *Config) GetPostgresDSN() string {
-	return fmt.Sprintf("postgres://%s:%s@%s:%s/%s?sslmode=disable",
-		cfg.DBUser, cfg.DBPassword, cfg.DBHost, cfg.DBPort, cfg.DBName)
+	return fmt.Sprintf("postgres://%s:%s@%s:%s/%s?sslmode=%s",
+		cfg.DBUser, cfg.DBPassword, cfg.DBHost, cfg.DBPort, cfg.DBName, cfg.DBSSLMode)
 }

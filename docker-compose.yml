@@ -11,10 +11,11 @@ services:
     environment:
       - APP_ENV=development
       - SITE_URL=${SITE_URL}
-      - DB_HOST=postgres
+      - DB_HOST=${DB_HOST}
       - DB_PORT=5432
       - DB_USER=${DB_USER}
       - DB_PASSWORD=${DB_PASSWORD}
+      - DB_SSLMODE=${DB_SSLMODE}
       - DB_NAME=${DB_NAME}
       - REDIS_ADDR=redis:6379
       - AWS_REGION=${AWS_REGION}
@@ -31,7 +32,7 @@ services:
     # command: ["/bin/sh", "-c", "cd /app/web && npm run watch:css"]
 
   postgres:
-    image: postgres:17.0-alpine3.20
+    image: postgres:17.2-alpine3.20
     environment:
       POSTGRES_USER: ${DB_USER}
       POSTGRES_PASSWORD: ${DB_PASSWORD}
