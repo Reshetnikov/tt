@@ -23,8 +23,8 @@ func getEmailAndName(t *testing.T) (string, string) {
 	return *email, *name
 }
 
-// docker exec -it tt-app-1 go test -v ./internal/utils --tags=manual -run TestMailService_SendActivationEmail -email=
-func TestMailService_SendActivationEmail(t *testing.T) {
+// docker exec -it tt-app-1 go test -v ./internal/utils --tags=manual -run TestMailService_SendActivationEmail_Manual -email=
+func TestMailService_SendActivationEmail_Manual(t *testing.T) {
 	SetAppDir()
 	email, name := getEmailAndName(t)
 	ms := NewMailServiceForTest(t)
@@ -35,8 +35,8 @@ func TestMailService_SendActivationEmail(t *testing.T) {
 	require.NoError(t, err, "failed to SendActivationEmail")
 }
 
-// docker exec -it tt-app-1 go test -v ./internal/utils --tags=manual -run TestMailService_SendLoginWithTokenEmail -email=
-func TestMailService_SendLoginWithTokenEmail(t *testing.T) {
+// docker exec -it tt-app-1 go test -v ./internal/utils --tags=manual -run TestMailService_SendLoginWithTokenEmail_Manual -email=
+func TestMailService_SendLoginWithTokenEmail_Manual(t *testing.T) {
 	SetAppDir()
 	email, name := getEmailAndName(t)
 	ms := NewMailServiceForTest(t)

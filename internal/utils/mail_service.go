@@ -12,8 +12,17 @@ import (
 	"github.com/aws/aws-sdk-go-v2/service/ses/types"
 )
 
+var activationTplPath = filepath.Join("web", "templates", "email", "activation.html")
+var loginWithTokenTplPath = filepath.Join("web", "templates", "email", "login-with-token.html")
+
+// For tests. Instead of *ses.Client
+type SESClient interface {
+	SendEmail(ctx context.Context, params *ses.SendEmailInput, optFns ...func(*ses.Options)) (*ses.SendEmailOutput, error)
+}
+
 type MailService struct {
-	client    *ses.Client
+	// client *ses.Client
+	client    SESClient
 	emailFrom string
 }
 
@@ -60,8 +69,7 @@ func (ms *MailService) sendEmail(to string, subject string, body string) error {
 }
 
 func (ms *MailService) SendActivationEmail(email, name, link string) error {
-	templatePath := filepath.Join("web", "templates", "email", "activation.html")
-	tmpl, err := template.ParseFiles(templatePath)
+	tmpl, err := template.ParseFiles(activationTplPath)
 	if err != nil {
 		return err
 	}
@@ -87,8 +95,7 @@ func (ms *MailService) SendActivationEmail(email, name, link string) error {
 }
 
 func (ms *MailService) SendLoginWithTokenEmail(email, name, link string) error {
-	templatePath := filepath.Join("web", "templates", "email", "login-with-token.html")
-	tmpl, err := template.ParseFiles(templatePath)
+	tmpl, err := template.ParseFiles(loginWithTokenTplPath)
 	if err != nil {
 		return err
 	}
