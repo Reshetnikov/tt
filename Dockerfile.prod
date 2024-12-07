@@ -1,31 +1,33 @@
-# Многоступенчатая сборка
-# Шаг 1: сборка образа
-FROM golang:1.23.2-alpine3.20 AS builder
+FROM golang:1.23.3-alpine3.20 AS builder 
+RUN apk update && apk add --no-cache git nodejs npm
+
+WORKDIR /web
+COPY web/package*.json ./
+RUN npm install
+COPY web/ ./
+RUN mkdir -p ./public/css && npm run build:css
 
 WORKDIR /app
-
 COPY go.mod go.sum ./
-RUN go mod download
+RUN go mod download && go mod verify
+RUN go install -tags 'postgres' github.com/pressly/goose/v3/cmd/goose@latest
 
 COPY . .
+RUN CGO_ENABLED=0 GOOS=linux go build -ldflags="-s -w" -o server ./cmd/server/main.go
 
-# Сборка бинарного файла
-RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o /app/server cmd/server/main.go
+FROM alpine:3.20
+RUN apk add --no-cache tzdata bash mc
 
-# Шаг 2: создание финального минимального образа
-FROM scratch
+RUN apk add --no-cache ca-certificates
+WORKDIR /app
 
-# Настройка окружения
-ENV GO_ENV=production
-ENV PORT=8080
+COPY --from=builder /web/public /app/web/public
+COPY --from=builder /web/templates /app/web/templates
+COPY --from=builder /app/server /app/server
+COPY --from=builder /go/bin/goose /usr/local/bin/goose
 
-# Установка базовых зависимостей
-RUN apk --no-cache add ca-certificates
-
-# Копирование скомпилированного бинарного файла
-COPY --from=builder /app/server /server
+ENV APP_ENV=production
 
 EXPOSE 8080
 
-# Команда для запуска сервера
-CMD ["/server"]
+CMD ["./server"]
