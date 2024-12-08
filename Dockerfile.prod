@@ -16,18 +16,20 @@ COPY . .
 RUN CGO_ENABLED=0 GOOS=linux go build -ldflags="-s -w" -o server ./cmd/server/main.go
 
 FROM alpine:3.20
-RUN apk add --no-cache tzdata bash mc
-
-RUN apk add --no-cache ca-certificates
+RUN apk add --no-cache tzdata ca-certificates mc
 WORKDIR /app
 
 COPY --from=builder /web/public /app/web/public
 COPY --from=builder /web/templates /app/web/templates
 COPY --from=builder /app/server /app/server
+
 COPY --from=builder /go/bin/goose /usr/local/bin/goose
+COPY --from=builder /app/scripts/migrate.sh /app/scripts/migrate.sh
+COPY --from=builder /app/db/migrations /app/db/migrations
 
 ENV APP_ENV=production
 
 EXPOSE 8080
 
-CMD ["./server"]
+CMD ["/bin/sh", "-c", "./scripts/migrate.sh up && ./server"]
+#CMD ["./server"]

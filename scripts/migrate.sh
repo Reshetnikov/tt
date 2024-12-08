@@ -1,9 +1,9 @@
-#!/bin/bash
+#!/bin/sh
 
 # Example:
 # docker exec -it tt-app-1 scripts/migrate.sh up
 
-if [[ -z "$DB_USER" || -z "$DB_PASSWORD" || -z "$DB_HOST" || -z "$DB_PORT" || -z "$DB_NAME" ]]; then
+if [ -z "$DB_USER" ] || [ -z "$DB_PASSWORD" ] || [ -z "$DB_HOST" ] || [ -z "$DB_PORT" ] || [ -z "$DB_NAME" ]; then
   echo "Not all required environment variables are set: DB_USER, DB_PASSWORD, DB_HOST, DB_PORT, DB_NAME"
   exit 1
 fi
