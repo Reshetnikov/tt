@@ -15,6 +15,7 @@ import (
 	"time-tracker/internal/utils"
 
 	"github.com/jackc/pgx/v5/pgxpool"
+	"github.com/redis/go-redis/v9"
 )
 
 func main() {
@@ -29,14 +30,24 @@ func main() {
 	}
 	defer db.Close()
 
+	redisClient, err := connectToRedis(cfg)
+	if err != nil {
+		slog.Error("Redis connection failed", "err", err)
+		os.Exit(1)
+	}
+
 	mailService, err := utils.NewMailService(cfg.EmailFrom)
 	if err != nil {
 		slog.Error("NewMailService failed", "err", err)
 		os.Exit(1)
+	} else if err := mailService.Ping(); err != nil {
+		slog.Error("NewMailService failed Ping", "err", err)
+		os.Exit(1)
 	}
+	slog.Info("Successfully ping to the email service")
 
 	usersRepo := users.NewUsersRepositoryPostgres(db)
-	sessionsRepo := users.NewSessionsRepositoryRedis(cfg.RedisAddr, "", 0)
+	sessionsRepo := users.NewSessionsRepositoryRedis(redisClient)
 	usersService := users.NewUsersService(usersRepo, sessionsRepo, mailService, cfg.SiteUrl)
 	usersHandlers := users.NewUsersHandlers(usersService)
 
@@ -120,6 +131,21 @@ func connectToDatabase(cfg *config.Config) (*pgxpool.Pool, error) {
 	}
 	slog.Info("Successfully connected to the database")
 	return db, nil
+}
+
+func connectToRedis(cfg *config.Config) (*redis.Client, error) {
+	client := redis.NewClient(&redis.Options{
+		Addr:     cfg.RedisAddr,
+		Password: "",
+		DB:       0,
+	})
+	ctx := context.Background()
+	_, err := client.Ping(ctx).Result()
+	if err != nil {
+		return nil, err
+	}
+	slog.Info("Successfully connected to the redis")
+	return client, nil
 }
 
 func setLogger(env string) {

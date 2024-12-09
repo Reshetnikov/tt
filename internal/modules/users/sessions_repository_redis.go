@@ -13,27 +13,7 @@ type SessionsRepositoryRedis struct {
 	client *redis.Client
 }
 
-func NewSessionsRepositoryRedis(addr string, password string, db int) *SessionsRepositoryRedis {
-	client := redis.NewClient(&redis.Options{
-		Addr:     addr,
-		Password: password,
-		DB:       0,
-	})
-
-	// ctx := context.Background()
-	// keys, err := client.Keys(ctx, "*").Result() // Получаем все ключи
-	// if err != nil {
-	// 	log.Fatalf("Error fetching keys: %v", err)
-	// }
-	// for _, key := range keys {
-	// 	value, err := client.Get(ctx, key).Result()
-	// 	if err != nil {
-	// 		log.Printf("Error fetching value for key %s: %v", key, err)
-	// 		continue
-	// 	}
-	// 	log.Printf("Key: %s, Value: %s", key, value)
-	// }
-
+func NewSessionsRepositoryRedis(client *redis.Client) *SessionsRepositoryRedis {
 	return &SessionsRepositoryRedis{client: client}
 }
 

@@ -18,6 +18,7 @@ var loginWithTokenTplPath = filepath.Join("web", "templates", "email", "login-wi
 // For tests. Instead of *ses.Client
 type SESClient interface {
 	SendEmail(ctx context.Context, params *ses.SendEmailInput, optFns ...func(*ses.Options)) (*ses.SendEmailOutput, error)
+	GetSendQuota(ctx context.Context, params *ses.GetSendQuotaInput, optFns ...func(*ses.Options)) (*ses.GetSendQuotaOutput, error)
 }
 
 type MailService struct {
@@ -65,6 +66,15 @@ func (ms *MailService) sendEmail(to string, subject string, body string) error {
 		return err
 	}
 
+	return nil
+}
+
+func (ms *MailService) Ping() error {
+	ctx := context.Background()
+	_, err := ms.client.GetSendQuota(ctx, &ses.GetSendQuotaInput{})
+	if err != nil {
+		return err
+	}
 	return nil
 }
 

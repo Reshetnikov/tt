@@ -23,6 +23,11 @@ func (m *MockSESClient) SendEmail(ctx context.Context, params *ses.SendEmailInpu
 	return args.Get(0).(*ses.SendEmailOutput), args.Error(1)
 }
 
+func (m *MockSESClient) GetSendQuota(ctx context.Context, params *ses.GetSendQuotaInput, optFns ...func(*ses.Options)) (*ses.GetSendQuotaOutput, error) {
+	args := m.Called(ctx, params, optFns)
+	return args.Get(0).(*ses.GetSendQuotaOutput), args.Error(1)
+}
+
 // docker exec -it tt-app-1 go test -v ./internal/utils --tags=unit -cover -run TestMailService.*
 func TestMailService_NewMailService(t *testing.T) {
 	emailFrom := "test@example.com"
@@ -45,6 +50,44 @@ func TestMailService_NewMailService_InvalidEnv(t *testing.T) {
 	assert.Nil(t, mailService, "MailService should be nil on error")
 	assert.Error(t, err, "Expected error due to invalid AWS environment configuration")
 	assert.Contains(t, err.Error(), "failed to get shared config profile", "Error message should indicate a configuration issue")
+}
+func TestMailService_Ping(t *testing.T) {
+	mockSESClient := new(MockSESClient)
+
+	mockSESClient.On(
+		"GetSendQuota",
+		mock.Anything,
+		mock.Anything,
+		mock.Anything,
+	).Return(&ses.GetSendQuotaOutput{}, nil)
+
+	mailService := &MailService{
+		client:    mockSESClient,
+		emailFrom: "noreply@example.com",
+	}
+	err := mailService.Ping()
+
+	assert.Nil(t, err, "Expected nil Ping error")
+}
+
+func TestMailService_Ping_Invalid(t *testing.T) {
+	mockSESClient := new(MockSESClient)
+
+	mockSESClient.On(
+		"GetSendQuota",
+		mock.Anything,
+		mock.Anything,
+		mock.Anything,
+	).Return(&ses.GetSendQuotaOutput{}, fmt.Errorf("mock SES error GetSendQuota"))
+
+	mailService := &MailService{
+		client:    mockSESClient,
+		emailFrom: "noreply@example.com",
+	}
+	err := mailService.Ping()
+
+	assert.Error(t, err, "Expected error due to invalid AWS Ping")
+	assert.Contains(t, err.Error(), "mock SES error GetSendQuota", "Error message should indicate a configuration issue")
 }
 
 func TestMailService_SendEmail_Error(t *testing.T) {
