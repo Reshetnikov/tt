@@ -56,6 +56,14 @@ func sub(a, b float64) float64 {
 	return a - b
 }
 
+func includeRaw(path string) string {
+	content, err := os.ReadFile(path)
+	if err != nil {
+		return ""
+	}
+	return string(content)
+}
+
 func createTemplate(w http.ResponseWriter, tplPaths []string) (templates *template.Template) {
 	templates = template.New("").Funcs(template.FuncMap{
 		"dict":               dict,
@@ -65,6 +73,7 @@ func createTemplate(w http.ResponseWriter, tplPaths []string) (templates *templa
 		"add":                add,
 		"addInt":             addInt,
 		"sub":                sub,
+		"includeRaw":         includeRaw,
 	})
 
 	templates, err := templates.ParseGlob(componentsPath)

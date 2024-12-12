@@ -32,4 +32,3 @@ ENV APP_ENV=production
 EXPOSE 8080
 
 CMD ["/bin/sh", "-c", "./scripts/migrate.sh up && ./server"]
-#CMD ["./server"]

@@ -3,7 +3,6 @@ FROM golang:1.23.3-alpine3.20
 RUN apk update && apk add --no-cache bash nodejs npm mc
 WORKDIR /app
 
-# Сreating and installing of non-root user
 ARG USER_ID=1000
 ARG GROUP_ID=1000
 RUN addgroup -g ${GROUP_ID} appgroup && \
@@ -20,4 +19,3 @@ RUN go install -tags 'postgres' github.com/pressly/goose/v3/cmd/goose@latest
 EXPOSE 8080
 
 CMD ["sh", "/app/scripts/start.sh"]
-# CMD ["/bin/sh", "-c", "cd /app/web && npm run watch:css --loglevel=verbose"]

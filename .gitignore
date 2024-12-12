@@ -3,3 +3,4 @@
 tmp
 web/node_modules
 web/public/css/
+web/templates/appVer.txt

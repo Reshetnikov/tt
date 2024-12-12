@@ -1,6 +1,7 @@
 #!/bin/sh
 
-# Example:
+# Run from Dockerfile.prod
+# or
 # docker exec -it tt-app-1 scripts/migrate.sh up
 
 if [ -z "$DB_USER" ] || [ -z "$DB_PASSWORD" ] || [ -z "$DB_HOST" ] || [ -z "$DB_PORT" ] || [ -z "$DB_NAME" ]; then

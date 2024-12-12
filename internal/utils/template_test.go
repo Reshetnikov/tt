@@ -6,16 +6,10 @@ import (
 	"io"
 	"net/http"
 	"net/http/httptest"
-	"path/filepath"
 	"strings"
 	"testing"
 	"text/template"
 )
-
-func fileExists(path string) bool {
-	_, err := filepath.Abs(path)
-	return err == nil
-}
 
 // docker exec -it tt-app-1 go test -v ./internal/utils --tags=unit -cover -run TestTemplate.*
 func TestTemplate_FileVersion(t *testing.T) {
@@ -30,21 +24,50 @@ func TestTemplate_FileVersion(t *testing.T) {
 	}
 }
 
-func TestAdd(t *testing.T) {
+func TestTemplate_Add(t *testing.T) {
 	if add(1.5, 2.5) != 4.0 {
 		t.Error("add(1.5, 2.5) != 4.0")
 	}
 }
 
-func TestAddInt(t *testing.T) {
+func TestTemplate_AddInt(t *testing.T) {
 	if addInt(1, 2) != 3 {
 		t.Error("addInt(1, 2) != 3")
 	}
 }
 
-func TestSub(t *testing.T) {
+func TestTemplate_Sub(t *testing.T) {
 	if sub(5.0, 3.0) != 2.0 {
 		t.Error("sub(5.0, 3.0) != 2.0")
+	}
+}
+
+func TestTemplate_IncludeRaw(t *testing.T) {
+	SetAppDir()
+	tests := []struct {
+		name     string
+		path     string
+		expected string
+	}{
+		{
+			name:     "Existing file",
+			path:     "web/templates/test/appVer.txt",
+			expected: "v123",
+		},
+		{
+			name:     "Non-existing file",
+			path:     "web/templates/test/noFile",
+			expected: "",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			result := includeRaw(tt.path)
+			if result != tt.expected {
+				t.Errorf("expected %q, got %q", tt.expected, result)
+			}
+		})
 	}
 }
 
