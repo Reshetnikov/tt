@@ -45,59 +45,78 @@
     <p class="mb-4 text-gray-600">
       This dashboard showcases how you can use the tracker for your daily activities like rest, study, or exercise.
     </p>
-    <label>
-      <input type="checkbox" />
-      <div class="modal">
+    <label class="group">
+      <input type="checkbox" class="peer hidden" />
+      <div
+        class="pointer-events-none fixed left-0 top-0 z-50 flex h-full w-full items-center justify-center bg-black bg-opacity-80 opacity-0 transition-opacity duration-300 ease-in-out peer-checked:pointer-events-auto peer-checked:opacity-100"
+      >
         <img src="/img/index/human-dashboard.png" alt="Human Dashboard" />
       </div>
       <img
         src="/img/index/human-dashboard.png"
         alt="Human Dashboard"
-        class="mx-auto cursor-pointer rounded-lg shadow-lg"
+        class="group-[.peer:checked]+*:hidden mx-auto cursor-pointer rounded-lg shadow-lg"
       />
     </label>
   </div>
+
   <div class="text-center">
     <h3 class="mb-4 text-2xl font-semibold">Detailed Reporting for Everyday Use</h3>
     <p class="mb-4 text-gray-600">
       Analyze how you spend your time on everyday tasks with detailed reports and insights.
     </p>
-    <label>
-      <input type="checkbox" />
-      <div class="modal">
+    <label class="group">
+      <input type="checkbox" class="peer hidden" />
+      <div
+        class="pointer-events-none fixed left-0 top-0 z-50 flex h-full w-full items-center justify-center bg-black bg-opacity-80 opacity-0 transition-opacity duration-300 ease-in-out peer-checked:pointer-events-auto peer-checked:opacity-100"
+      >
         <img src="/img/index/human-report.png" alt="Human Report" />
       </div>
-      <img src="/img/index/human-report.png" alt="Human Report" class="mx-auto cursor-pointer rounded-lg shadow-lg" />
+      <img
+        src="/img/index/human-report.png"
+        alt="Human Report"
+        class="group-[.peer:checked]+*:hidden mx-auto cursor-pointer rounded-lg shadow-lg"
+      />
     </label>
   </div>
+
   <div class="text-center">
     <h3 class="mb-4 text-2xl font-semibold">Example: Work-Related Tasks</h3>
     <p class="mb-4 text-gray-600">
       This dashboard demonstrates how to track and optimize your work hours for maximum productivity.
     </p>
-    <label>
-      <input type="checkbox" />
-      <div class="modal">
+    <label class="group">
+      <input type="checkbox" class="peer hidden" />
+      <div
+        class="pointer-events-none fixed left-0 top-0 z-50 flex h-full w-full items-center justify-center bg-black bg-opacity-80 opacity-0 transition-opacity duration-300 ease-in-out peer-checked:pointer-events-auto peer-checked:opacity-100"
+      >
         <img src="/img/index/worker-dashboard.png" alt="Worker Dashboard" />
       </div>
       <img
         src="/img/index/worker-dashboard.png"
         alt="Worker Dashboard"
-        class="mx-auto cursor-pointer rounded-lg shadow-lg"
+        class="group-[.peer:checked]+*:hidden mx-auto cursor-pointer rounded-lg shadow-lg"
       />
     </label>
   </div>
+
   <div class="text-center">
     <h3 class="mb-4 text-2xl font-semibold">Detailed Reporting for Work</h3>
     <p class="mb-4 text-gray-600">
       Gain valuable insights into your work performance with detailed time tracking reports.
     </p>
-    <label>
-      <input type="checkbox" />
-      <div class="modal">
+    <label class="group">
+      <input type="checkbox" class="peer hidden" />
+      <div
+        class="pointer-events-none fixed left-0 top-0 z-50 flex h-full w-full items-center justify-center bg-black bg-opacity-80 opacity-0 transition-opacity duration-300 ease-in-out peer-checked:pointer-events-auto peer-checked:opacity-100"
+      >
         <img src="/img/index/worker-report.png" alt="Worker Report" />
       </div>
-      <img src="/img/index/worker-report.png" alt="Worker Report" class="mx-auto cursor-pointer rounded-lg shadow-lg" />
+      <img
+        src="/img/index/worker-report.png"
+        alt="Worker Report"
+        class="group-[.peer:checked]+*:hidden mx-auto cursor-pointer rounded-lg shadow-lg"
+      />
     </label>
   </div>
 </section>
