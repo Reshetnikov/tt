@@ -186,7 +186,7 @@ func (r *DashboardRepositoryPostgres) DailyRecords(filterRecords FilterRecords, 
 		lastDayRecord := timeEnd.Truncate(24 * time.Hour)
 
 		dayRecord := record.TimeStart.Truncate(24 * time.Hour)
-		for ; !dayRecord.After(lastDayRecord); dayRecord = dayRecord.Add(24 * time.Hour) {
+		for ; !dayRecord.After(lastDayRecord) && !dayRecord.Equal(*timeEnd); dayRecord = dayRecord.Add(24 * time.Hour) {
 			// Because there will be different StartPercent, DurationPercent, Duration if the recording lasts several days
 			recordCopy := *record
 			dayEndRecord := dayRecord.Add(24 * time.Hour)

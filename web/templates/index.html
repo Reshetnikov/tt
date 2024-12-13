@@ -1,3 +1,112 @@
 {{ define "content" }}
-<h2 class="mb-6 text-2xl font-bold">Index</h2>
+<style>
+  .modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.8);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+    z-index: 50;
+  }
+  .modal img {
+    max-width: 90%;
+    max-height: 90%;
+    transform: scale(0.95);
+    transition: transform 0.3s ease;
+  }
+  input:checked + .modal {
+    opacity: 1;
+    pointer-events: auto;
+  }
+  input:checked + .modal img {
+    transform: scale(1);
+  }
+  input {
+    display: none;
+  }
+</style>
+<section class="mb-16 text-center">
+  <h2 class="mb-4 text-4xl font-bold">Track Your Time, Enhance Your Productivity</h2>
+  <p class="text-lg text-gray-700">
+    Manage work, study, exercise, and daily routines effectively with our intuitive time tracker.
+  </p>
+</section>
+
+<section class="mb-16 grid grid-cols-1 gap-8 2xl:grid-cols-2">
+  <div class="text-center">
+    <h3 class="mb-4 text-2xl font-semibold">Example: Everyday Tasks</h3>
+    <p class="mb-4 text-gray-600">
+      This dashboard showcases how you can use the tracker for your daily activities like rest, study, or exercise.
+    </p>
+    <label>
+      <input type="checkbox" />
+      <div class="modal">
+        <img src="/img/index/human-dashboard.png" alt="Human Dashboard" />
+      </div>
+      <img
+        src="/img/index/human-dashboard.png"
+        alt="Human Dashboard"
+        class="mx-auto cursor-pointer rounded-lg shadow-lg"
+      />
+    </label>
+  </div>
+  <div class="text-center">
+    <h3 class="mb-4 text-2xl font-semibold">Detailed Reporting for Everyday Use</h3>
+    <p class="mb-4 text-gray-600">
+      Analyze how you spend your time on everyday tasks with detailed reports and insights.
+    </p>
+    <label>
+      <input type="checkbox" />
+      <div class="modal">
+        <img src="/img/index/human-report.png" alt="Human Report" />
+      </div>
+      <img src="/img/index/human-report.png" alt="Human Report" class="mx-auto cursor-pointer rounded-lg shadow-lg" />
+    </label>
+  </div>
+  <div class="text-center">
+    <h3 class="mb-4 text-2xl font-semibold">Example: Work-Related Tasks</h3>
+    <p class="mb-4 text-gray-600">
+      This dashboard demonstrates how to track and optimize your work hours for maximum productivity.
+    </p>
+    <label>
+      <input type="checkbox" />
+      <div class="modal">
+        <img src="/img/index/worker-dashboard.png" alt="Worker Dashboard" />
+      </div>
+      <img
+        src="/img/index/worker-dashboard.png"
+        alt="Worker Dashboard"
+        class="mx-auto cursor-pointer rounded-lg shadow-lg"
+      />
+    </label>
+  </div>
+  <div class="text-center">
+    <h3 class="mb-4 text-2xl font-semibold">Detailed Reporting for Work</h3>
+    <p class="mb-4 text-gray-600">
+      Gain valuable insights into your work performance with detailed time tracking reports.
+    </p>
+    <label>
+      <input type="checkbox" />
+      <div class="modal">
+        <img src="/img/index/worker-report.png" alt="Worker Report" />
+      </div>
+      <img src="/img/index/worker-report.png" alt="Worker Report" class="mx-auto cursor-pointer rounded-lg shadow-lg" />
+    </label>
+  </div>
+</section>
+
+<section class="rounded-lg bg-blue-100 p-8 text-center">
+  <h3 class="mb-4 text-3xl font-bold">Start Tracking Now</h3>
+  <p class="mb-6 text-lg text-gray-700">
+    Join hundreds of users optimizing their time management. It's simple and efficient.
+  </p>
+  <a href="/signup" class="rounded-full bg-blue-600 px-6 py-3 text-lg text-white hover:bg-blue-700">Get Started</a>
+</section>
 {{ end }}
