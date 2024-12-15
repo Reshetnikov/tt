@@ -25,7 +25,7 @@ Time Tracker is a web application for tracking and managing time. It helps effic
 
    ```bash
    git clone https://github.com/Reshetnikov/tt.git
-   cd time-tracker
+   cd tt
    ```
 
 2. Prepare the environment:
