@@ -22,6 +22,8 @@ services:
       - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
       - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
       - EMAIL_FROM=${EMAIL_FROM}
+      - MAILGUN_DOMAIN=${MAILGUN_DOMAIN}
+      - MAILGUN_API_KEY=${MAILGUN_API_KEY}
     volumes:
       - .:/app
     tty: true # For "npm run watch:css" https://github.com/rails/rails/issues/44048

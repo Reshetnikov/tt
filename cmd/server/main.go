@@ -13,7 +13,7 @@ import (
 	"time-tracker/internal/modules/pages"
 	"time-tracker/internal/modules/users"
 	"time-tracker/internal/utils"
-	"time-tracker/internal/utils/ses"
+	"time-tracker/internal/utils/mailgun"
 
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/redis/go-redis/v9"
@@ -37,11 +37,17 @@ func main() {
 		os.Exit(1)
 	}
 
-	mailService, err := ses.NewMailService(cfg.EmailFrom)
-	if err != nil {
-		slog.Error("NewMailService failed", "err", err)
-		os.Exit(1)
-	} else if err := mailService.Ping(); err != nil {
+	// mailService, err := ses.NewMailService(cfg.EmailFrom)
+	// if err != nil {
+	// 	slog.Error("NewMailService failed", "err", err)
+	// 	os.Exit(1)
+	// }
+	mailService := mailgun.NewMailService(
+		cfg.MailgunDomain,
+		cfg.MailgunApiKey,
+		cfg.EmailFrom,
+	)
+	if err := mailService.Ping(); err != nil {
 		slog.Error("NewMailService failed Ping", "err", err)
 		os.Exit(1)
 	}
