@@ -1,7 +1,7 @@
 //go:build manual
 
 // The tests are designed for manual launch and visual control of the result.
-package utils
+package ses
 
 import (
 	"flag"

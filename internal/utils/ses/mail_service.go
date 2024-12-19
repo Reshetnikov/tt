@@ -1,4 +1,4 @@
-package utils
+package ses
 
 import (
 	"bytes"

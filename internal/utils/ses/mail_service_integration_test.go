@@ -1,7 +1,7 @@
 //go:build integration
 
 // docker exec -it tt-app-1 go test -v ./internal/utils --tags=integration
-package utils
+package ses
 
 import (
 	"testing"
