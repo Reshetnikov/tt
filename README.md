@@ -9,7 +9,7 @@ Time Tracker is a web application for tracking and managing time. It helps effic
 - **Language**: Go
 - **Database**: PostgreSQL
 - **Cache**: Redis
-- **Email Service**: AWS SES
+- **Email Service**: AWS SES or Mailgun
 - **Hosting**: AWS
 
 ## Quick Start

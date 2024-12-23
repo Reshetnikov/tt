@@ -28,7 +28,7 @@ func (m *MockSESClient) GetSendQuota(ctx context.Context, params *ses.GetSendQuo
 	return args.Get(0).(*ses.GetSendQuotaOutput), args.Error(1)
 }
 
-// docker exec -it tt-app-1 go test -v ./internal/utils --tags=unit -cover -run TestMailService.*
+// docker exec -it tt-app-1 go test -v ./internal/utils/ses --tags=unit -cover -run TestMailService.*
 func TestMailService_NewMailService(t *testing.T) {
 	emailFrom := "test@example.com"
 	mailService, err := NewMailService(emailFrom)
@@ -161,12 +161,12 @@ func TestMailService_SendLoginWithTokenEmail(t *testing.T) {
 }
 
 func TestMailService_TemplateError(t *testing.T) {
-	os.Chdir("/tmp")
 	mockSESClient := new(MockSESClient)
 	mailService := &MailService{
 		client:    mockSESClient,
 		emailFrom: "noreply@example.com",
 	}
+	os.Chdir("/tmp")
 	err := mailService.SendActivationEmail("user@example.com", "John Doe", "http://link")
 	assert.Error(t, err)
 	err = mailService.SendLoginWithTokenEmail("user@example.com", "John Doe", "http://link")
@@ -174,13 +174,13 @@ func TestMailService_TemplateError(t *testing.T) {
 
 	SetAppDir()
 	oldActivationTplPath := activationTplPath
-	activationTplPath = filepath.Join("web", "templates", "test", "missing_emplate.html")
+	activationTplPath = filepath.Join("web", "templates", "test", "missing_template.html")
 	err = mailService.SendActivationEmail("user@example.com", "John Doe", "http://link")
 	assert.Error(t, err)
 	activationTplPath = oldActivationTplPath
 
 	oldLoginWithTokenTplPath := loginWithTokenTplPath
-	loginWithTokenTplPath = filepath.Join("web", "templates", "test", "missing_emplate.html")
+	loginWithTokenTplPath = filepath.Join("web", "templates", "test", "missing_template.html")
 	err = mailService.SendLoginWithTokenEmail("user@example.com", "John Doe", "http://link")
 	assert.Error(t, err)
 	loginWithTokenTplPath = oldLoginWithTokenTplPath

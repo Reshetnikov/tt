@@ -15,14 +15,13 @@ var loginWithTokenTplPath = filepath.Join("web", "templates", "email", "login-wi
 
 // For tests
 type MailgunClient interface {
-	NewMessage(from, subject, text string, to ...string) *mailgun.Message
 	Send(ctx context.Context, message *mailgun.Message) (string, string, error)
 	GetDomain(ctx context.Context, domain string) (mailgun.DomainResponse, error)
 }
 
 type MailService struct {
-	client *mailgun.MailgunImpl
-	// client    MailgunClient
+	// client *mailgun.MailgunImpl
+	client    MailgunClient
 	emailFrom string
 	domain    string
 }

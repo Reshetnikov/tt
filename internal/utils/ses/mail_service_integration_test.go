@@ -9,8 +9,8 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-// docker exec -it tt-app-1 go test -v ./internal/utils --tags=integration -run TestMailService_SendEmail
-// docker exec -it tt-app-1 go test -v ./internal/utils --tags=integration -run TestMailService_SendEmail/SuppressionList
+// docker exec -it tt-app-1 go test -v ./internal/utils/ses --tags=integration -run TestMailService_SendEmail
+// docker exec -it tt-app-1 go test -v ./internal/utils/ses --tags=integration -run TestMailService_SendEmail/SuppressionList
 func TestMailService_SendEmail(t *testing.T) {
 	TShort(t)
 	tests := []struct {
@@ -35,7 +35,7 @@ func TestMailService_SendEmail(t *testing.T) {
 	}
 }
 
-// docker exec -it tt-app-1 go test -v ./internal/utils --tags=integration -run TestMailService_SendActivationEmail_SimulatorSuccess
+// docker exec -it tt-app-1 go test -v ./internal/utils/ses --tags=integration -run TestMailService_SendActivationEmail_SimulatorSuccess
 func TestMailService_SendActivationEmail_SimulatorSuccess(t *testing.T) {
 	TShort(t)
 	SetAppDir()
@@ -48,7 +48,7 @@ func TestMailService_SendActivationEmail_SimulatorSuccess(t *testing.T) {
 	assert.NoError(t, err, "failed to send email")
 }
 
-// docker exec -it tt-app-1 go test -v ./internal/utils --tags=integration -run TestMailService_SendLoginWithTokenEmail_SimulatorSuccess
+// docker exec -it tt-app-1 go test -v ./internal/utils/ses --tags=integration -run TestMailService_SendLoginWithTokenEmail_SimulatorSuccess
 func TestMailService_SendLoginWithTokenEmail_SimulatorSuccess(t *testing.T) {
 	TShort(t)
 	SetAppDir()
