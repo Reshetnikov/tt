@@ -21,11 +21,9 @@ func TestSessionsRepositoryMem(t *testing.T) {
 			Expiry:    time.Now().Add(time.Hour),
 		}
 
-		// Создаем сессию
 		err := repo.Create(sessionID, session)
 		assert.NoError(t, err)
 
-		// Проверяем, что сессия существует
 		got, err := repo.Get(sessionID)
 		assert.NoError(t, err)
 		assert.NotNil(t, got)
@@ -37,13 +35,13 @@ func TestSessionsRepositoryMem(t *testing.T) {
 		session := &Session{
 			SessionID: sessionID,
 			UserID:    2,
-			Expiry:    time.Now().Add(-time.Hour), // Истекшая сессия
+			Expiry:    time.Now().Add(-time.Hour), // Expired session
 		}
 
 		err := repo.Create(sessionID, session)
 		assert.NoError(t, err)
 
-		// Проверяем, что истекшая сессия недоступна
+		// Check that the expired session is not available
 		got, err := repo.Get(sessionID)
 		assert.NoError(t, err)
 		assert.Nil(t, got)
@@ -60,11 +58,9 @@ func TestSessionsRepositoryMem(t *testing.T) {
 		err := repo.Create(sessionID, session)
 		assert.NoError(t, err)
 
-		// Удаляем сессию
 		err = repo.Delete(sessionID)
 		assert.NoError(t, err)
 
-		// Проверяем, что сессия удалена
 		got, err := repo.Get(sessionID)
 		assert.NoError(t, err)
 		assert.Nil(t, got)
@@ -72,7 +68,6 @@ func TestSessionsRepositoryMem(t *testing.T) {
 
 	t.Run("delete non-existent session", func(t *testing.T) {
 		sessionID := "nonExistent"
-		// Попытка удалить несуществующую сессию
 		err := repo.Delete(sessionID)
 		assert.NoError(t, err)
 	})
