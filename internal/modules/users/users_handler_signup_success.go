@@ -25,7 +25,7 @@ func (h *UsersHandler) HandleSignupSuccess(w http.ResponseWriter, r *http.Reques
 		return
 	}
 
-	notActiveUser := h.usersService.usersRepo.GetByEmail(email)
+	notActiveUser := h.usersService.UserGetByEmail(email)
 	if notActiveUser == nil {
 		w.WriteHeader(http.StatusNotFound)
 		utils.RenderTemplate(w, []string{"error"}, utils.TplData{

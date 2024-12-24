@@ -58,7 +58,7 @@ func (h *UsersHandler) HandleSettings(w http.ResponseWriter, r *http.Request) {
 			}
 			user.Password = hashedPassword
 		}
-		err = h.usersService.usersRepo.Update(user)
+		err = h.usersService.UserUpdate(user)
 		if err != nil {
 			slog.Error("HandleSettings Update()", "err", err)
 			w.WriteHeader(http.StatusBadGateway)

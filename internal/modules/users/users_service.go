@@ -19,7 +19,6 @@ type UsersService struct {
 	siteUrl      string
 }
 
-// Конструктор для UserService
 func NewUsersService(usersRepo UsersRepository, sessionsRepo SessionsRepository, mailService MailService, siteUrl string) *UsersService {
 	return &UsersService{
 		usersRepo:    usersRepo,
@@ -181,6 +180,14 @@ func (s *UsersService) ReSendActivationEmail(user *User) error {
 	}
 	s.mailService.SendActivationEmail(user.Email, user.Name, s.activationLink(user.ActivationHash))
 	return nil
+}
+
+func (s *UsersService) UserGetByEmail(email string) *User {
+	return s.usersRepo.GetByEmail(email)
+}
+
+func (s *UsersService) UserUpdate(user *User) error {
+	return s.usersRepo.Update(user)
 }
 
 func (s *UsersService) makeSession(userId int) (*Session, error) {

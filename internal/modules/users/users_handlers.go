@@ -9,11 +9,23 @@ import (
 	"time"
 )
 
-type UsersHandler struct {
-	usersService *UsersService
+type UsersServiceInterface interface {
+	ActivateUser(activationHash string) (*Session, error)
+	RegisterUser(registerUserData RegisterUserData) error
+	LoginWithToken(token string) (*Session, error)
+	LoginUser(email, password string) (*Session, error)
+	LogoutUser(sessionID string) error
+	SendLinkToLogin(email string) (timeUntilResend int, err error)
+	ReSendActivationEmail(user *User) error
+	UserGetByEmail(email string) *User
+	UserUpdate(user *User) error
 }
 
-func NewUsersHandlers(usersService *UsersService) *UsersHandler {
+type UsersHandler struct {
+	usersService UsersServiceInterface
+}
+
+func NewUsersHandlers(usersService UsersServiceInterface) *UsersHandler {
 	return &UsersHandler{
 		usersService: usersService,
 	}
