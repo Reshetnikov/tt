@@ -10,16 +10,20 @@ import (
 )
 
 type SessionsRepositoryRedis struct {
-	client *redis.Client
+	client      *redis.Client
+	jsonMarshal func(v any) ([]byte, error)
 }
 
 func NewSessionsRepositoryRedis(client *redis.Client) *SessionsRepositoryRedis {
-	return &SessionsRepositoryRedis{client: client}
+	return &SessionsRepositoryRedis{
+		client:      client,
+		jsonMarshal: json.Marshal,
+	}
 }
 
 func (repo *SessionsRepositoryRedis) Create(sessionID string, session *Session) error {
 	ctx := context.Background()
-	data, err := json.Marshal(session)
+	data, err := repo.jsonMarshal(session)
 	if err != nil {
 		return fmt.Errorf("failed to marshal session: %w", err)
 	}

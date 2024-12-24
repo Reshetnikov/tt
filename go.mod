@@ -7,6 +7,7 @@ require (
 	github.com/aws/aws-sdk-go-v2/config v1.28.5
 	github.com/aws/aws-sdk-go-v2/service/ses v1.29.0
 	github.com/go-playground/validator/v10 v10.22.1
+	github.com/go-redis/redismock/v9 v9.2.0
 	github.com/google/uuid v1.6.0
 	github.com/jackc/pgx/v5 v5.7.1
 	github.com/mailgun/mailgun-go/v4 v4.21.0
