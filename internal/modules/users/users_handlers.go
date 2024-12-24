@@ -25,7 +25,7 @@ func setSessionCookie(w http.ResponseWriter, sessionID string, expires time.Time
 		Value:    sessionID,
 		Expires:  expires,
 		HttpOnly: true,
-		// Secure:   true,  // Используйте Secure, если работаете через HTTPS
+		// Secure:   true,  // Use Secure if you work via HTTPS
 		Path: "/",
 	})
 }
