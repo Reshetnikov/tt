@@ -15,17 +15,6 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-// mockSetSession подготавливает мок для операции сохранения сессии
-func mockSetSession(t *testing.T, mock redismock.ClientMock, session *Session) {
-	data, err := json.Marshal(session)
-	require.NoError(t, err)
-	mock.ExpectSet(
-		session.SessionID,
-		data, // Передаем []byte напрямую
-		time.Until(session.Expiry),
-	).SetVal("OK")
-}
-
 func TestSessionsRepositoryRedis_Create(t *testing.T) {
 	t.Run("successful creation", func(t *testing.T) {
 		client, mock := redismock.NewClientMock()
@@ -79,7 +68,7 @@ func TestSessionsRepositoryRedis_Create(t *testing.T) {
 		client, _ := redismock.NewClientMock()
 		repo := NewSessionsRepositoryRedis(client)
 
-		// Подменяем json.Marshal на функцию, которая всегда возвращает ошибку
+		// Replace json.Marshal with a function that always returns an error
 		repo.jsonMarshal = func(v any) ([]byte, error) {
 			return nil, errors.New("mock marshal error")
 		}
