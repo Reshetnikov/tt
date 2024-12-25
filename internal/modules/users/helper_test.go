@@ -46,5 +46,10 @@ func (m *MockUsersService) UserGetByEmail(email string) *User {
 	return nil
 }
 func (m *MockUsersService) UserUpdate(user *User) error {
-	return nil
+	args := m.Called(user)
+	return args.Error(0)
+}
+func (m *MockUsersService) HashPassword(password string) (string, error) {
+	args := m.Called(password)
+	return args.String(0), args.Error(1)
 }

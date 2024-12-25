@@ -52,7 +52,7 @@ func (s *UsersService) RegisterUser(registerUserData RegisterUserData) error {
 		return ErrEmailExists
 	}
 
-	hashedPassword, err := hashPassword(registerUserData.Password)
+	hashedPassword, err := s.HashPassword(registerUserData.Password)
 	if err != nil {
 		return err
 	}
@@ -190,6 +190,14 @@ func (s *UsersService) UserUpdate(user *User) error {
 	return s.usersRepo.Update(user)
 }
 
+func (s *UsersService) HashPassword(password string) (string, error) {
+	hashedBytes, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
+	if err != nil {
+		return "", err
+	}
+	return string(hashedBytes), nil
+}
+
 func (s *UsersService) makeSession(userId int) (*Session, error) {
 	sessionID := uuid.New().String()
 	session := &Session{
@@ -209,14 +217,6 @@ func (s *UsersService) activationLink(hash string) (link string) {
 }
 func (s *UsersService) loginWithTokenLink(token string) (link string) {
 	return fmt.Sprintf("%s/login-with-token?token=%s", s.siteUrl, token)
-}
-
-func hashPassword(password string) (string, error) {
-	hashedBytes, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
-	if err != nil {
-		return "", err
-	}
-	return string(hashedBytes), nil
 }
 
 func checkPasswordHash(password, hashedPassword string) bool {

@@ -46,7 +46,7 @@ func (h *UsersHandler) HandleSettings(w http.ResponseWriter, r *http.Request) {
 		user.TimeZone = form.TimeZone
 		user.IsWeekStartMonday = form.IsWeekStartMonday
 		if form.Password != "" {
-			hashedPassword, err := hashPassword(form.Password)
+			hashedPassword, err := h.usersService.HashPassword(form.Password)
 			if err != nil {
 				slog.Error("HandleSettings hashPassword()", "err", err)
 				w.WriteHeader(http.StatusBadGateway)

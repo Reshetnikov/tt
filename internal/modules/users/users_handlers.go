@@ -19,6 +19,7 @@ type UsersServiceInterface interface {
 	ReSendActivationEmail(user *User) error
 	UserGetByEmail(email string) *User
 	UserUpdate(user *User) error
+	HashPassword(password string) (string, error)
 }
 
 type UsersHandler struct {
