@@ -4,15 +4,44 @@ package users
 
 import (
 	"os"
-	"testing"
+
+	"github.com/stretchr/testify/mock"
 )
 
 func SetAppDir() {
 	os.Chdir("/app")
 }
 
-func TShort(t *testing.T) {
-	if testing.Short() {
-		t.Skip("Skipping integration test in short mode.")
-	}
+type MockUsersService struct {
+	mock.Mock
+}
+
+func (m *MockUsersService) ActivateUser(activationHash string) (*Session, error) {
+	args := m.Called(activationHash)
+	return args.Get(0).(*Session), args.Error(1)
+}
+func (m *MockUsersService) RegisterUser(registerUserData RegisterUserData) error {
+	return nil
+}
+func (m *MockUsersService) LoginWithToken(token string) (*Session, error) {
+	return nil, nil
+}
+func (m *MockUsersService) LoginUser(email, password string) (*Session, error) {
+	return nil, nil
+}
+func (m *MockUsersService) LogoutUser(sessionID string) error {
+	return nil
+}
+func (m *MockUsersService) SendLinkToLogin(email string) (int, error) {
+	args := m.Called(email)
+	return args.Int(0), args.Error(1)
+}
+func (m *MockUsersService) ReSendActivationEmail(user *User) error {
+	return nil
+}
+func (m *MockUsersService) UserGetByEmail(email string) *User {
+	return nil
+}
+func (m *MockUsersService) UserUpdate(user *User) error {
+	return nil
 }

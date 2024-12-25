@@ -1,6 +1,6 @@
 //go:build unit
 
-// docker exec -it tt-app-1 go test -v ./internal/modules/users --tags=unit -cover -run TestHandleActivation
+// docker exec -it tt-app-1 go test -v ./internal/modules/users --tags=unit -cover -run TestHandleActivation.*
 package users
 
 import (
@@ -13,41 +13,7 @@ import (
 	"time"
 
 	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/mock"
 )
-
-type MockUsersService struct {
-	mock.Mock
-}
-
-func (m *MockUsersService) ActivateUser(activationHash string) (*Session, error) {
-	args := m.Called(activationHash)
-	return args.Get(0).(*Session), args.Error(1)
-}
-func (m *MockUsersService) RegisterUser(registerUserData RegisterUserData) error {
-	return nil
-}
-func (m *MockUsersService) LoginWithToken(token string) (*Session, error) {
-	return nil, nil
-}
-func (m *MockUsersService) LoginUser(email, password string) (*Session, error) {
-	return nil, nil
-}
-func (m *MockUsersService) LogoutUser(sessionID string) error {
-	return nil
-}
-func (m *MockUsersService) SendLinkToLogin(email string) (int, error) {
-	return 0, nil
-}
-func (m *MockUsersService) ReSendActivationEmail(user *User) error {
-	return nil
-}
-func (m *MockUsersService) UserGetByEmail(email string) *User {
-	return nil
-}
-func (m *MockUsersService) UserUpdate(user *User) error {
-	return nil
-}
 
 func TestHandleActivation_Success(t *testing.T) {
 	SetAppDir()
