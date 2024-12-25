@@ -24,10 +24,12 @@ func (m *MockUsersService) RegisterUser(registerUserData RegisterUserData) error
 	return nil
 }
 func (m *MockUsersService) LoginWithToken(token string) (*Session, error) {
-	return nil, nil
+	args := m.Called(token)
+	return args.Get(0).(*Session), args.Error(1)
 }
 func (m *MockUsersService) LoginUser(email, password string) (*Session, error) {
-	return nil, nil
+	args := m.Called(email, password)
+	return args.Get(0).(*Session), args.Error(1)
 }
 func (m *MockUsersService) LogoutUser(sessionID string) error {
 	return nil
