@@ -32,7 +32,8 @@ func (m *MockUsersService) LoginUser(email, password string) (*Session, error) {
 	return args.Get(0).(*Session), args.Error(1)
 }
 func (m *MockUsersService) LogoutUser(sessionID string) error {
-	return nil
+	args := m.Called(sessionID)
+	return args.Error(0)
 }
 func (m *MockUsersService) SendLinkToLogin(email string) (int, error) {
 	args := m.Called(email)
