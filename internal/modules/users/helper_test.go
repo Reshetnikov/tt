@@ -3,13 +3,22 @@
 package users
 
 import (
+	"net/http"
+	"net/http/httptest"
 	"os"
+	"strings"
 
 	"github.com/stretchr/testify/mock"
 )
 
 func SetAppDir() {
 	os.Chdir("/app")
+}
+
+func BadRequestPost(url string) *http.Request {
+	req := httptest.NewRequest(http.MethodPost, url, strings.NewReader("%%%"))
+	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+	return req
 }
 
 type MockUsersService struct {

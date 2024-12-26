@@ -148,26 +148,15 @@ func TestHandleSettings_FailUpdate(t *testing.T) {
 func TestHandleSettings_ParseFormError(t *testing.T) {
 	SetAppDir()
 	mockService := new(MockUsersService)
-
-	req, err := http.NewRequest("POST", "/settings", strings.NewReader("%%%"))
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
-
+	req := BadRequestPost("/settings")
 	ctx := req.Context()
 	ctx = context.WithValue(ctx, ContextUserKey, &User{})
 	req = req.WithContext(ctx)
-
 	rr := httptest.NewRecorder()
-
 	handler := &UsersHandler{
 		usersService: mockService,
 	}
-
 	handler.HandleSettings(rr, req)
-
 	assert.Equal(t, http.StatusBadRequest, rr.Code)
 }
 

@@ -162,13 +162,9 @@ func TestHandleForgotPassword_CommonError(t *testing.T) {
 
 func TestHandleForgotPassword_ParseFormError(t *testing.T) {
 	handler := NewUsersHandlers(new(MockUsersService))
-
-	req, _ := http.NewRequest(http.MethodPost, "/forgot-password", nil)
-
+	req := BadRequestPost("/forgot-password")
 	w := httptest.NewRecorder()
-
 	handler.HandleForgotPassword(w, req)
-
 	resp := w.Result()
 	assert.Equal(t, http.StatusBadRequest, resp.StatusCode)
 	assert.Contains(t, w.Body.String(), "Bad Request")
