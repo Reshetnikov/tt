@@ -86,7 +86,7 @@ func TestHandleLogin(t *testing.T) {
 			method: http.MethodPost,
 			setupMock: func(m *MockUsersService) {
 				m.On("LoginUser", "test@example.com", "wrongpass").
-					Return((*Session)(nil), ErrInvalidEmailOrPassword)
+					Return(nil, ErrInvalidEmailOrPassword)
 			},
 			formData: url.Values{
 				"email":    {"test@example.com"},
@@ -100,7 +100,7 @@ func TestHandleLogin(t *testing.T) {
 			method: http.MethodPost,
 			setupMock: func(m *MockUsersService) {
 				m.On("LoginUser", "test@example.com", "password123").
-					Return((*Session)(nil), ErrAccountNotActivated)
+					Return(nil, ErrAccountNotActivated)
 			},
 			formData: url.Values{
 				"email":    {"test@example.com"},
@@ -114,7 +114,7 @@ func TestHandleLogin(t *testing.T) {
 			method: http.MethodPost,
 			setupMock: func(m *MockUsersService) {
 				m.On("LoginUser", "test@example.com", "password123").
-					Return((*Session)(nil), errors.New("internal error"))
+					Return(nil, errors.New("internal error"))
 			},
 			formData: url.Values{
 				"email":    {"test@example.com"},

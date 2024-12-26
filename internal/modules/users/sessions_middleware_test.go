@@ -25,7 +25,8 @@ func (m *MockSessionsRepository) Create(sessionID string, session *Session) erro
 
 func (m *MockSessionsRepository) Get(sessionID string) (*Session, error) {
 	args := m.Called(sessionID)
-	return args.Get(0).(*Session), args.Error(1)
+	session, _ := args.Get(0).(*Session)
+	return session, args.Error(1)
 }
 
 func (m *MockSessionsRepository) Delete(sessionID string) error {
@@ -98,7 +99,7 @@ func TestSessionMiddleware(t *testing.T) {
 		req.AddCookie(&http.Cookie{Name: sessionCookieName, Value: sessionValue})
 		resp := httptest.NewRecorder()
 
-		mockSessionsRepo.On("Get", sessionValue).Return((*Session)(nil), nil)
+		mockSessionsRepo.On("Get", sessionValue).Return(nil, nil)
 
 		middleware.ServeHTTP(resp, req)
 

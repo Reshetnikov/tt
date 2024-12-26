@@ -54,7 +54,7 @@ func TestHandleLoginWithToken_InvalidToken(t *testing.T) {
 	handler := NewUsersHandlers(mockService)
 
 	token := "invalid_token"
-	mockService.On("LoginWithToken", token).Return((*Session)(nil), errors.New("invalid token"))
+	mockService.On("LoginWithToken", token).Return(nil, errors.New("invalid token"))
 
 	req := httptest.NewRequest(http.MethodGet, "/login-with-token?token="+token, nil)
 	w := httptest.NewRecorder()

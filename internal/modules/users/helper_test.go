@@ -18,7 +18,7 @@ type MockUsersService struct {
 
 func (m *MockUsersService) ActivateUser(activationHash string) (*Session, error) {
 	args := m.Called(activationHash)
-	session := args.Get(0).(*Session)
+	session, _ := args.Get(0).(*Session)
 	return session, args.Error(1)
 }
 func (m *MockUsersService) RegisterUser(registerUserData RegisterUserData) error {
@@ -27,11 +27,12 @@ func (m *MockUsersService) RegisterUser(registerUserData RegisterUserData) error
 }
 func (m *MockUsersService) LoginWithToken(token string) (*Session, error) {
 	args := m.Called(token)
-	return args.Get(0).(*Session), args.Error(1)
+	session, _ := args.Get(0).(*Session)
+	return session, args.Error(1)
 }
 func (m *MockUsersService) LoginUser(email, password string) (*Session, error) {
 	args := m.Called(email, password)
-	session := args.Get(0).(*Session)
+	session, _ := args.Get(0).(*Session)
 	return session, args.Error(1)
 }
 func (m *MockUsersService) LogoutUser(sessionID string) error {

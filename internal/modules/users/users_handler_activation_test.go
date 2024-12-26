@@ -70,7 +70,7 @@ func TestHandleActivation_InvalidHash(t *testing.T) {
 	handler := NewUsersHandlers(mockService)
 
 	activationHash := "invalid_hash"
-	mockService.On("ActivateUser", activationHash).Return((*Session)(nil), errors.New("activation failed"))
+	mockService.On("ActivateUser", activationHash).Return(nil, errors.New("activation failed"))
 
 	req := httptest.NewRequest(http.MethodGet, "/activation?hash="+activationHash, nil)
 	w := httptest.NewRecorder()
