@@ -18,10 +18,12 @@ type MockUsersService struct {
 
 func (m *MockUsersService) ActivateUser(activationHash string) (*Session, error) {
 	args := m.Called(activationHash)
-	return args.Get(0).(*Session), args.Error(1)
+	session := args.Get(0).(*Session)
+	return session, args.Error(1)
 }
 func (m *MockUsersService) RegisterUser(registerUserData RegisterUserData) error {
-	return nil
+	args := m.Called(registerUserData)
+	return args.Error(0)
 }
 func (m *MockUsersService) LoginWithToken(token string) (*Session, error) {
 	args := m.Called(token)
@@ -29,7 +31,8 @@ func (m *MockUsersService) LoginWithToken(token string) (*Session, error) {
 }
 func (m *MockUsersService) LoginUser(email, password string) (*Session, error) {
 	args := m.Called(email, password)
-	return args.Get(0).(*Session), args.Error(1)
+	session := args.Get(0).(*Session)
+	return session, args.Error(1)
 }
 func (m *MockUsersService) LogoutUser(sessionID string) error {
 	args := m.Called(sessionID)
@@ -40,9 +43,14 @@ func (m *MockUsersService) SendLinkToLogin(email string) (int, error) {
 	return args.Int(0), args.Error(1)
 }
 func (m *MockUsersService) ReSendActivationEmail(user *User) error {
-	return nil
+	args := m.Called(user)
+	return args.Error(0)
 }
 func (m *MockUsersService) UserGetByEmail(email string) *User {
+	args := m.Called(email)
+	if user, ok := args.Get(0).(*User); ok {
+		return user
+	}
 	return nil
 }
 func (m *MockUsersService) UserUpdate(user *User) error {
