@@ -28,39 +28,39 @@ func (repo *UsersRepositoryMem) Create(user *User) error {
 	return nil
 }
 
-func (repo *UsersRepositoryMem) GetByID(id int) (*User, error) {
+func (repo *UsersRepositoryMem) GetByID(id int) *User {
 	repo.mu.Lock()
 	defer repo.mu.Unlock()
 
 	user, exists := repo.users[id]
 	if !exists {
-		return nil, nil
+		return nil
 	}
-	return user, nil
+	return user
 }
 
-func (repo *UsersRepositoryMem) GetByEmail(email string) (*User, error) {
+func (repo *UsersRepositoryMem) GetByEmail(email string) *User {
 	repo.mu.Lock()
 	defer repo.mu.Unlock()
 
 	for _, user := range repo.users {
 		if user.Email == email {
-			return user, nil
+			return user
 		}
 	}
-	return nil, nil
+	return nil
 }
 
-func (repo *UsersRepositoryMem) GetByActivationHash(activationHash string) (*User, error) {
+func (repo *UsersRepositoryMem) GetByActivationHash(activationHash string) *User {
 	repo.mu.Lock()
 	defer repo.mu.Unlock()
 
 	for _, user := range repo.users {
 		if user.ActivationHash == activationHash {
-			return user, nil
+			return user
 		}
 	}
-	return nil, nil
+	return nil
 }
 
 func (repo *UsersRepositoryMem) Update(user *User) error {

@@ -53,7 +53,9 @@ func main() {
 	}
 	slog.Info("Successfully ping to the email service")
 
+	// usersRepo := users.NewUsersRepositoryMem()
 	usersRepo := users.NewUsersRepositoryPostgres(db)
+	// sessionsRepo := users.NewSessionsRepositoryMem()
 	sessionsRepo := users.NewSessionsRepositoryRedis(redisClient)
 	usersService := users.NewUsersService(usersRepo, sessionsRepo, mailService, cfg.SiteUrl)
 	usersHandlers := users.NewUsersHandlers(usersService)

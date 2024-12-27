@@ -7,15 +7,20 @@ import (
 	"time-tracker/internal/utils"
 
 	"github.com/jackc/pgx/v5"
-	"github.com/jackc/pgx/v5/pgxpool"
+	"github.com/jackc/pgx/v5/pgconn"
 )
 
-type UsersRepositoryPostgres struct {
-	db *pgxpool.Pool
+type DBInterface interface {
+	Query(ctx context.Context, sql string, args ...interface{}) (pgx.Rows, error)
+	Exec(ctx context.Context, sql string, args ...interface{}) (pgconn.CommandTag, error)
 }
 
-// NewUsersRepositoryPostgres создаёт новый репозиторий пользователей с подключением к базе данных
-func NewUsersRepositoryPostgres(db *pgxpool.Pool) *UsersRepositoryPostgres {
+type UsersRepositoryPostgres struct {
+	// db *pgxpool.Pool
+	db DBInterface
+}
+
+func NewUsersRepositoryPostgres(db DBInterface) *UsersRepositoryPostgres {
 	return &UsersRepositoryPostgres{db: db}
 }
 
