@@ -3,6 +3,7 @@
 package users
 
 import (
+	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"os"
@@ -19,6 +20,24 @@ func BadRequestPost(url string) *http.Request {
 	req := httptest.NewRequest(http.MethodPost, url, strings.NewReader("%%%"))
 	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
 	return req
+}
+
+// Mock randomBytesReader and return original.
+func RandomBytesReaderMock() func(_ []byte) (int, error) {
+	originalReader := randomBytesReader
+	randomBytesReader = func(_ []byte) (int, error) {
+		return 0, fmt.Errorf("mock error")
+	}
+	return originalReader
+}
+
+// Mock bcryptGenerateFromPassword and return original.
+func BcryptGenerateFromPasswordMock() func(password []byte, cost int) ([]byte, error) {
+	originalFunc := bcryptGenerateFromPassword
+	bcryptGenerateFromPassword = func(password []byte, cost int) ([]byte, error) {
+		return nil, fmt.Errorf("mock bcrypt error")
+	}
+	return originalFunc
 }
 
 type MockUsersService struct {

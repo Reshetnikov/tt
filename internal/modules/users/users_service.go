@@ -43,6 +43,9 @@ var ErrUserNotFoundOrActivationHashIsInvalid = errors.New("user not found or act
 var ErrUserNotFound = errors.New("user not found")
 var ErrTimeUntilResend = errors.New("please wait before resending")
 
+var randomBytesReader = rand.Read
+var bcryptGenerateFromPassword = bcrypt.GenerateFromPassword
+
 func (s *UsersService) RegisterUser(registerUserData RegisterUserData) error {
 	existingUser := s.usersRepo.GetByEmail(registerUserData.Email)
 	if existingUser != nil {
@@ -119,7 +122,6 @@ func (s *UsersService) LoginWithToken(token string) (*Session, error) {
 	return session, err
 }
 
-// Логика входа
 func (s *UsersService) LoginUser(email, password string) (*Session, error) {
 	user := s.usersRepo.GetByEmail(email)
 	if user == nil || !checkPasswordHash(password, user.Password) {
@@ -191,7 +193,7 @@ func (s *UsersService) UserUpdate(user *User) error {
 }
 
 func (s *UsersService) HashPassword(password string) (string, error) {
-	hashedBytes, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
+	hashedBytes, err := bcryptGenerateFromPassword([]byte(password), bcrypt.DefaultCost)
 	if err != nil {
 		return "", err
 	}
@@ -226,7 +228,7 @@ func checkPasswordHash(password, hashedPassword string) bool {
 
 func generateActivationHash(email string) (string, error) {
 	randomBytes := make([]byte, 16)
-	_, err := rand.Read(randomBytes)
+	_, err := randomBytesReader(randomBytes)
 	if err != nil {
 		return "", fmt.Errorf("could not generate random bytes: %w", err)
 	}

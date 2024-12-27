@@ -52,3 +52,4 @@ func getNotActivatedMessage(email string) string {
 }
 
 var D = slog.Debug
+var P = fmt.Println
