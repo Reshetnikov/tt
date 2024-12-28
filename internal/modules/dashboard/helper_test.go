@@ -24,6 +24,9 @@ func (m *MockDashboardRepository) Tasks(userID int, taskCompleted string) (tasks
 
 func (m *MockDashboardRepository) TaskByID(id int) *Task {
 	args := m.Called(id)
+	if args.Get(0) == nil {
+		return nil
+	}
 	return args.Get(0).(*Task)
 }
 
@@ -59,6 +62,9 @@ func (m *MockDashboardRepository) RecordsWithTasks(filterRecords FilterRecords) 
 
 func (m *MockDashboardRepository) RecordByIDWithTask(recordID int) *Record {
 	args := m.Called(recordID)
+	if args.Get(0) == nil {
+		return nil
+	}
 	return args.Get(0).(*Record)
 }
 
