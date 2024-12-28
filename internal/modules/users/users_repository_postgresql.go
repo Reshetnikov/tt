@@ -10,17 +10,17 @@ import (
 	"github.com/jackc/pgx/v5/pgconn"
 )
 
-type DBInterface interface {
+type PgxPool interface {
 	Query(ctx context.Context, sql string, args ...interface{}) (pgx.Rows, error)
 	Exec(ctx context.Context, sql string, args ...interface{}) (pgconn.CommandTag, error)
 }
 
 type UsersRepositoryPostgres struct {
 	// db *pgxpool.Pool
-	db DBInterface
+	db PgxPool
 }
 
-func NewUsersRepositoryPostgres(db DBInterface) *UsersRepositoryPostgres {
+func NewUsersRepositoryPostgres(db PgxPool) *UsersRepositoryPostgres {
 	return &UsersRepositoryPostgres{db: db}
 }
 
