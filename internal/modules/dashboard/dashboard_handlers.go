@@ -1,6 +1,7 @@
 package dashboard
 
 import (
+	"fmt"
 	"log/slog"
 	"net/http"
 	"time"
@@ -65,3 +66,4 @@ func getWeekInterval(weekStr string, nowWithTimezone time.Time, isWeekStartMonda
 }
 
 var D = slog.Debug
+var P = fmt.Println
