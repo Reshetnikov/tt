@@ -46,3 +46,26 @@ type ReportData struct {
 	DailyTotalDuration map[time.Time]time.Duration
 	TotalDuration      time.Duration
 }
+
+type DashboardRepository interface {
+	Tasks(userID int, taskCompleted string) (tasks []*Task)
+	TaskByID(id int) *Task
+	CreateTask(task *Task) (int, error)
+	UpdateTask(task *Task) error
+	DeleteTask(id int) error
+	GetMaxSortOrder(userId int, isCompleted bool) (maxSortOrder int)
+	UpdateTaskSortOrder(taskID, userID, sortOrder int) error
+
+	RecordsWithTasks(filterRecords FilterRecords) (records []*Record)
+	RecordByIDWithTask(recordID int) *Record
+	CreateRecord(record *Record) (int, error)
+	UpdateRecord(record *Record) error
+	DeleteRecord(recordID int) error
+	DailyRecords(filterRecords FilterRecords, nowWithTimezone time.Time) (dailyRecords []DailyRecords)
+	Reports(
+		userID int,
+		startInterval time.Time,
+		endInterval time.Time,
+		nowWithTimezone time.Time,
+	) ReportData
+}

@@ -10,10 +10,11 @@ import (
 )
 
 type DashboardHandlers struct {
-	repo *DashboardRepositoryPostgres
+	// repo *DashboardRepositoryPostgres
+	repo DashboardRepository
 }
 
-func NewDashboardHandler(repo *DashboardRepositoryPostgres) *DashboardHandlers {
+func NewDashboardHandler(repo DashboardRepository) *DashboardHandlers {
 	return &DashboardHandlers{repo: repo}
 }
 
