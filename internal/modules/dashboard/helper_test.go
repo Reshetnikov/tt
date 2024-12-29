@@ -3,7 +3,10 @@
 package dashboard
 
 import (
+	"net/http"
+	"net/http/httptest"
 	"os"
+	"strings"
 	"time"
 
 	"github.com/stretchr/testify/mock"
@@ -11,6 +14,12 @@ import (
 
 func SetAppDir() {
 	os.Chdir("/app")
+}
+
+func BadRequestPost(url string) *http.Request {
+	req := httptest.NewRequest(http.MethodPost, url, strings.NewReader("%%%"))
+	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+	return req
 }
 
 type MockDashboardRepository struct {
@@ -68,7 +77,7 @@ func (m *MockDashboardRepository) RecordByIDWithTask(recordID int) *Record {
 	return args.Get(0).(*Record)
 }
 
-func (m *MockDashboardRepository) CreateRecord(record *Record) (int, error) {
+func (m *MockDashboardRepository) CreateRecord(record *Record) (newRecordID int, error error) {
 	args := m.Called(record)
 	return args.Int(0), args.Error(1)
 }

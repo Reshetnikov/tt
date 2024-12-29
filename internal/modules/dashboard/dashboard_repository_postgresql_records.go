@@ -129,8 +129,7 @@ func (r *DashboardRepositoryPostgres) RecordByIDWithTask(recordID int) *Record {
 	return records[0]
 }
 
-func (r *DashboardRepositoryPostgres) CreateRecord(record *Record) (int, error) {
-	var newRecordID int
+func (r *DashboardRepositoryPostgres) CreateRecord(record *Record) (newRecordID int, error error) {
 	err := r.db.QueryRow(context.Background(), `
         INSERT INTO records (task_id, time_start, time_end, comment)
         VALUES ($1, $2, $3, $4)

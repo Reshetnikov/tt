@@ -39,15 +39,15 @@ func TestHandleSettings_Success(t *testing.T) {
 	ctx = context.WithValue(ctx, ContextUserKey, &User{})
 	req = req.WithContext(ctx)
 
-	rr := httptest.NewRecorder()
+	w := httptest.NewRecorder()
 
 	handler := &UsersHandler{
 		usersService: mockService,
 	}
 
-	handler.HandleSettings(rr, req)
+	handler.HandleSettings(w, req)
 
-	assert.Equal(t, http.StatusOK, rr.Code)
+	assert.Equal(t, http.StatusOK, w.Code)
 	mockService.AssertExpectations(t)
 }
 
@@ -60,16 +60,16 @@ func TestHandleSettings_Unauthenticated(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	rr := httptest.NewRecorder()
+	w := httptest.NewRecorder()
 
 	handler := &UsersHandler{
 		usersService: mockService,
 	}
 
-	handler.HandleSettings(rr, req)
+	handler.HandleSettings(w, req)
 
-	assert.Equal(t, http.StatusSeeOther, rr.Code)
-	assert.Equal(t, "/login", rr.Header().Get("Location"))
+	assert.Equal(t, http.StatusSeeOther, w.Code)
+	assert.Equal(t, "/login", w.Header().Get("Location"))
 	mockService.AssertNotCalled(t, "UserUpdate")
 }
 
@@ -97,15 +97,15 @@ func TestHandleSettings_ValidationError(t *testing.T) {
 	ctx = context.WithValue(ctx, ContextUserKey, &User{})
 	req = req.WithContext(ctx)
 
-	rr := httptest.NewRecorder()
+	w := httptest.NewRecorder()
 
 	handler := &UsersHandler{
 		usersService: mockService,
 	}
 
-	handler.HandleSettings(rr, req)
+	handler.HandleSettings(w, req)
 
-	assert.Equal(t, http.StatusOK, rr.Code)
+	assert.Equal(t, http.StatusOK, w.Code)
 	mockService.AssertNotCalled(t, "UserUpdate")
 }
 
@@ -133,15 +133,15 @@ func TestHandleSettings_FailUpdate(t *testing.T) {
 	ctx = context.WithValue(ctx, ContextUserKey, &User{})
 	req = req.WithContext(ctx)
 
-	rr := httptest.NewRecorder()
+	w := httptest.NewRecorder()
 
 	handler := &UsersHandler{
 		usersService: mockService,
 	}
 
-	handler.HandleSettings(rr, req)
+	handler.HandleSettings(w, req)
 
-	assert.Equal(t, http.StatusBadGateway, rr.Code)
+	assert.Equal(t, http.StatusBadGateway, w.Code)
 	mockService.AssertExpectations(t)
 }
 
@@ -152,12 +152,12 @@ func TestHandleSettings_ParseFormError(t *testing.T) {
 	ctx := req.Context()
 	ctx = context.WithValue(ctx, ContextUserKey, &User{})
 	req = req.WithContext(ctx)
-	rr := httptest.NewRecorder()
+	w := httptest.NewRecorder()
 	handler := &UsersHandler{
 		usersService: mockService,
 	}
-	handler.HandleSettings(rr, req)
-	assert.Equal(t, http.StatusBadRequest, rr.Code)
+	handler.HandleSettings(w, req)
+	assert.Equal(t, http.StatusBadRequest, w.Code)
 }
 
 func TestHandleSettings_SuccessfulPasswordHashing(t *testing.T) {
@@ -185,15 +185,15 @@ func TestHandleSettings_SuccessfulPasswordHashing(t *testing.T) {
 
 	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
 
-	rr := httptest.NewRecorder()
+	w := httptest.NewRecorder()
 
 	handler := &UsersHandler{
 		usersService: mockService,
 	}
 
-	handler.HandleSettings(rr, req)
+	handler.HandleSettings(w, req)
 
-	assert.Equal(t, http.StatusOK, rr.Code)
+	assert.Equal(t, http.StatusOK, w.Code)
 	mockService.AssertExpectations(t)
 }
 
@@ -222,14 +222,14 @@ func TestHandleSettings_PasswordHashingError(t *testing.T) {
 
 	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
 
-	rr := httptest.NewRecorder()
+	w := httptest.NewRecorder()
 
 	handler := &UsersHandler{
 		usersService: mockService,
 	}
 
-	handler.HandleSettings(rr, req)
+	handler.HandleSettings(w, req)
 
-	assert.Equal(t, http.StatusBadGateway, rr.Code)
+	assert.Equal(t, http.StatusBadGateway, w.Code)
 	mockService.AssertNotCalled(t, "UserUpdate")
 }

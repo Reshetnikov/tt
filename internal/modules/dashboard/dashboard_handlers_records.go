@@ -18,6 +18,7 @@ type recordForm struct {
 	Comment   string `form:"comment" validate:"max=10000"`
 }
 
+// GET /records/new
 func (h *DashboardHandlers) HandleRecordsNew(w http.ResponseWriter, r *http.Request) {
 	// time.Sleep(1 * time.Second)
 	user := users.GetUserFromRequest(r)
@@ -64,6 +65,7 @@ func (h *DashboardHandlers) HandleRecordsNew(w http.ResponseWriter, r *http.Requ
 	h.renderRecordForm(w, form, utils.FormErrors{}, h.repo.Tasks(user.ID, ""))
 }
 
+// POST /records
 func (h *DashboardHandlers) HandleRecordsCreate(w http.ResponseWriter, r *http.Request) {
 	user := users.GetUserFromRequest(r)
 	if user == nil {
@@ -110,6 +112,7 @@ func (h *DashboardHandlers) HandleRecordsCreate(w http.ResponseWriter, r *http.R
 	w.Write([]byte("ok"))
 }
 
+// GET /records/{id}
 func (h *DashboardHandlers) HandleRecordsEdit(w http.ResponseWriter, r *http.Request) {
 	user, record := h.getUserAndRecord(w, r)
 	if user == nil || record == nil {
@@ -133,6 +136,7 @@ func (h *DashboardHandlers) HandleRecordsEdit(w http.ResponseWriter, r *http.Req
 	h.renderRecordForm(w, form, utils.FormErrors{}, tasks)
 }
 
+// POST /records/{id}
 func (h *DashboardHandlers) HandleRecordsUpdate(w http.ResponseWriter, r *http.Request) {
 	user, record := h.getUserAndRecord(w, r)
 	if user == nil || record == nil {
@@ -157,10 +161,13 @@ func (h *DashboardHandlers) HandleRecordsUpdate(w http.ResponseWriter, r *http.R
 	formErrors := utils.NewValidator(&form).Validate()
 	if formErrors.HasErrors() {
 		h.renderRecordForm(w, form, formErrors, tasks)
+		return
 	}
+
 	h.validateIntersectingRecords(form, user, record.ID, formErrors)
 	if formErrors.HasErrors() {
 		h.renderRecordForm(w, form, formErrors, tasks)
+		return
 	}
 
 	h.repo.UpdateRecord(&Record{
@@ -174,6 +181,7 @@ func (h *DashboardHandlers) HandleRecordsUpdate(w http.ResponseWriter, r *http.R
 	w.Write([]byte(`ok`))
 }
 
+// DELETE /records/{id}
 func (h *DashboardHandlers) HandleRecordsDelete(w http.ResponseWriter, r *http.Request) {
 	user, record := h.getUserAndRecord(w, r)
 	if user == nil || record == nil {
@@ -184,6 +192,7 @@ func (h *DashboardHandlers) HandleRecordsDelete(w http.ResponseWriter, r *http.R
 	w.Write([]byte(`ok`))
 }
 
+// GET /records
 func (h *DashboardHandlers) HandleRecordsList(w http.ResponseWriter, r *http.Request) {
 	user := users.GetUserFromRequest(r)
 	if user == nil {
@@ -257,6 +266,7 @@ func (h *DashboardHandlers) validateIntersectingRecords(form recordForm, user *u
 
 	if timeEnd != nil && (timeEnd.Before(*timeStart) || timeEnd.Equal(*timeStart)) {
 		formErrors.Add("TimeEnd", "Time End must be greater than Time Start")
+		return
 	}
 
 	if timeEnd == nil {
