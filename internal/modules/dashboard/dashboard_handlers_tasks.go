@@ -16,6 +16,7 @@ type formTask struct {
 	IsCompleted bool   `form:"is_completed" label:"Completed"`
 }
 
+// GET /tasks/new
 func (h *DashboardHandlers) HandleTasksNew(w http.ResponseWriter, r *http.Request) {
 	// time.Sleep(1 * time.Second)
 	user := users.GetUserFromRequest(r)
@@ -26,6 +27,7 @@ func (h *DashboardHandlers) HandleTasksNew(w http.ResponseWriter, r *http.Reques
 	h.renderTaskForm(w, formTask{Color: "#EEEEEE"}, utils.FormErrors{}, "/tasks")
 }
 
+// POST /tasks
 func (h *DashboardHandlers) HandleTasksCreate(w http.ResponseWriter, r *http.Request) {
 	user := users.GetUserFromRequest(r)
 	if user == nil {
@@ -57,6 +59,7 @@ func (h *DashboardHandlers) HandleTasksCreate(w http.ResponseWriter, r *http.Req
 	w.Write([]byte("ok"))
 }
 
+// GET /tasks/{id}
 func (h *DashboardHandlers) HandleTasksEdit(w http.ResponseWriter, r *http.Request) {
 	user, task := h.getUserAndTask(w, r)
 	if user == nil || task == nil {
@@ -72,6 +75,7 @@ func (h *DashboardHandlers) HandleTasksEdit(w http.ResponseWriter, r *http.Reque
 	h.renderTaskForm(w, form, utils.FormErrors{}, fmt.Sprintf("/tasks/%d", task.ID))
 }
 
+// POST /tasks/{id}
 func (h *DashboardHandlers) HandleTasksUpdate(w http.ResponseWriter, r *http.Request) {
 	user, task := h.getUserAndTask(w, r)
 	if user == nil || task == nil {
@@ -106,6 +110,7 @@ func (h *DashboardHandlers) HandleTasksUpdate(w http.ResponseWriter, r *http.Req
 	w.Write([]byte(`ok`))
 }
 
+// DELETE /tasks/{id}
 func (h *DashboardHandlers) HandleTasksDelete(w http.ResponseWriter, r *http.Request) {
 	user, task := h.getUserAndTask(w, r)
 	if user == nil || task == nil {
@@ -116,6 +121,7 @@ func (h *DashboardHandlers) HandleTasksDelete(w http.ResponseWriter, r *http.Req
 	w.Write([]byte(`ok`))
 }
 
+// GET /tasks
 func (h *DashboardHandlers) HandleTaskList(w http.ResponseWriter, r *http.Request) {
 	user := users.GetUserFromRequest(r)
 	if user == nil {
@@ -130,6 +136,7 @@ func (h *DashboardHandlers) HandleTaskList(w http.ResponseWriter, r *http.Reques
 	})
 }
 
+// POST /tasks/update-sort-order
 func (h *DashboardHandlers) HandleUpdateSortOrder(w http.ResponseWriter, r *http.Request) {
 	// bytedata, err := io.ReadAll(r.Body)
 	// reqBodyString := string(bytedata)
@@ -195,7 +202,7 @@ func (h *DashboardHandlers) getUserAndTask(w http.ResponseWriter, r *http.Reques
 
 	if task.UserID != user.ID {
 		http.Error(w, "Access denied", http.StatusForbidden)
-		return
+		return user, nil
 	}
 	return
 }
