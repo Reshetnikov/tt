@@ -6,6 +6,7 @@ import (
 	"encoding/hex"
 	"errors"
 	"fmt"
+	"log/slog"
 	"time"
 
 	"github.com/google/uuid"
@@ -76,11 +77,16 @@ func (s *UsersService) RegisterUser(registerUserData RegisterUserData) error {
 		ActivationHashDate: date,
 	}
 	err = s.usersRepo.Create(user)
-	if err == nil {
-		s.mailService.SendActivationEmail(user.Email, user.Name, s.activationLink(user.ActivationHash))
+	if err != nil {
+		return err
 	}
-
-	return err
+	go func() {
+		err := s.mailService.SendActivationEmail(user.Email, user.Name, s.activationLink(user.ActivationHash))
+		if err != nil {
+			slog.Error("Failed to send activation email.", "err", err)
+		}
+	}()
+	return nil
 }
 
 func (s *UsersService) ActivateUser(activationHash string) (*Session, error) {
@@ -163,7 +169,12 @@ func (s *UsersService) SendLinkToLogin(email string) (timeUntilResend int, err e
 	if err != nil {
 		return 0, err
 	}
-	s.mailService.SendLoginWithTokenEmail(user.Email, user.Name, s.loginWithTokenLink(user.ActivationHash))
+	go func() {
+		err := s.mailService.SendLoginWithTokenEmail(user.Email, user.Name, s.loginWithTokenLink(user.ActivationHash))
+		if err != nil {
+			slog.Error("Failed to send activation email.", "err", err)
+		}
+	}()
 
 	return user.TimeUntilResend(), nil
 }
@@ -180,7 +191,12 @@ func (s *UsersService) ReSendActivationEmail(user *User) error {
 	if err != nil {
 		return err
 	}
-	s.mailService.SendActivationEmail(user.Email, user.Name, s.activationLink(user.ActivationHash))
+	go func() {
+		err := s.mailService.SendActivationEmail(user.Email, user.Name, s.activationLink(user.ActivationHash))
+		if err != nil {
+			slog.Error("Failed to send activation email.", "err", err)
+		}
+	}()
 	return nil
 }
 

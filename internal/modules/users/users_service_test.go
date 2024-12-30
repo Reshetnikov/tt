@@ -21,25 +21,6 @@ func TestUsersService_RegisterUser(t *testing.T) {
 	mailService := new(MockMailService)
 	service := NewUsersService(usersRepo, sessionsRepo, mailService, "https://example.com")
 
-	t.Run("Success", func(t *testing.T) {
-		usersRepo.On("GetByEmail", email).Return(nil).Once()
-		usersRepo.On("Create", mock.Anything).Return(nil).Once()
-		mailService.On("SendActivationEmail", email, "Test User", mock.Anything).Return(nil).Once()
-
-		data := RegisterUserData{
-			Name:              "Test User",
-			Email:             email,
-			Password:          "password123",
-			TimeZone:          "UTC",
-			IsWeekStartMonday: true,
-		}
-
-		err := service.RegisterUser(data)
-		require.NoError(t, err)
-		usersRepo.AssertExpectations(t)
-		mailService.AssertExpectations(t)
-	})
-
 	t.Run("EmailExists", func(t *testing.T) {
 		existingUser := &User{Email: email, IsActive: true}
 		usersRepo.On("GetByEmail", email).Return(existingUser).Once()
@@ -111,13 +92,98 @@ func TestUsersService_RegisterUser(t *testing.T) {
 		require.Error(t, err)
 		usersRepo.AssertExpectations(t)
 	})
+
+	t.Run("CreateError", func(t *testing.T) {
+		usersRepo.On("GetByEmail", email).Return(nil).Once()
+		usersRepo.On("Create", mock.Anything).Return(errors.New("create error")).Once()
+
+		data := RegisterUserData{
+			Name:              "Test User",
+			Email:             email,
+			Password:          "password123",
+			TimeZone:          "UTC",
+			IsWeekStartMonday: true,
+		}
+
+		err := service.RegisterUser(data)
+		require.Error(t, err)
+		usersRepo.AssertExpectations(t)
+	})
+
+	t.Run("Success", func(t *testing.T) {
+		done := make(chan struct{})
+
+		usersRepo.On("GetByEmail", email).Return(nil).Once()
+		usersRepo.On("Create", mock.Anything).Return(nil).Once()
+		mailService.On("SendActivationEmail", email, "Test User", mock.Anything).
+			Return(nil).
+			Once().
+			Run(func(args mock.Arguments) {
+				close(done)
+			})
+
+		data := RegisterUserData{
+			Name:              "Test User",
+			Email:             email,
+			Password:          "password123",
+			TimeZone:          "UTC",
+			IsWeekStartMonday: true,
+		}
+
+		err := service.RegisterUser(data)
+		require.NoError(t, err)
+
+		// Waiting for SendActivationEmail to complete
+		select {
+		case <-done:
+			// t.Log("Activation email sent successfully")
+		case <-time.After(1 * time.Second):
+			t.Fatal("Test timed out waiting for goroutine to complete")
+		}
+
+		usersRepo.AssertExpectations(t)
+		mailService.AssertExpectations(t)
+	})
+	t.Run("SuccessButSendActivationEmailError", func(t *testing.T) {
+		done := make(chan struct{})
+
+		usersRepo.On("GetByEmail", email).Return(nil).Once()
+		usersRepo.On("Create", mock.Anything).Return(nil).Once()
+		mailService.On("SendActivationEmail", email, "Test User", mock.Anything).
+			Return(errors.New("SendActivationEmail error")).
+			Once().
+			Run(func(args mock.Arguments) {
+				close(done)
+			})
+
+		data := RegisterUserData{
+			Name:              "Test User",
+			Email:             email,
+			Password:          "password123",
+			TimeZone:          "UTC",
+			IsWeekStartMonday: true,
+		}
+
+		err := service.RegisterUser(data)
+		require.NoError(t, err)
+
+		// Waiting for SendActivationEmail to complete
+		select {
+		case <-done:
+			// t.Log("Activation email sent successfully")
+		case <-time.After(1 * time.Second):
+			t.Fatal("Test timed out waiting for goroutine to complete")
+		}
+
+		usersRepo.AssertExpectations(t)
+		mailService.AssertExpectations(t)
+	})
 }
 
 func TestUsersService_ActivateUser(t *testing.T) {
 	usersRepo := new(MockUsersRepo)
 	sessionsRepo := new(MockSessionsRepo)
-	mailService := new(MockMailService)
-	service := NewUsersService(usersRepo, sessionsRepo, mailService, "https://example.com")
+	service := NewUsersService(usersRepo, sessionsRepo, nil, "https://example.com")
 
 	t.Run("Success", func(t *testing.T) {
 		user := &User{
@@ -172,8 +238,7 @@ func TestUsersService_ActivateUser(t *testing.T) {
 func TestUsersService_LoginWithToken(t *testing.T) {
 	usersRepo := new(MockUsersRepo)
 	sessionsRepo := new(MockSessionsRepo)
-	mailService := new(MockMailService)
-	service := NewUsersService(usersRepo, sessionsRepo, mailService, "https://example.com")
+	service := NewUsersService(usersRepo, sessionsRepo, nil, "https://example.com")
 
 	t.Run("Success", func(t *testing.T) {
 		user := &User{
@@ -247,8 +312,7 @@ func TestUsersService_LoginWithToken(t *testing.T) {
 func TestUsersService_LoginUser(t *testing.T) {
 	usersRepo := new(MockUsersRepo)
 	sessionsRepo := new(MockSessionsRepo)
-	mailService := new(MockMailService)
-	service := NewUsersService(usersRepo, sessionsRepo, mailService, "https://example.com")
+	service := NewUsersService(usersRepo, sessionsRepo, nil, "https://example.com")
 
 	t.Run("Success", func(t *testing.T) {
 		pas := "password123"
@@ -381,6 +445,8 @@ func TestUsersService_SendLinkToLogin(t *testing.T) {
 	})
 
 	t.Run("success", func(t *testing.T) {
+		done := make(chan struct{})
+
 		user := &User{
 			Email:    "success@example.com",
 			Name:     "Test User",
@@ -390,10 +456,57 @@ func TestUsersService_SendLinkToLogin(t *testing.T) {
 		usersRepo.On("Update", mock.MatchedBy(func(user *User) bool {
 			return user.Email == "success@example.com"
 		})).Return(nil)
-		mailService.On("SendLoginWithTokenEmail", "success@example.com", "Test User", mock.Anything).Return(nil).Once()
-
+		mailService.On("SendLoginWithTokenEmail", "success@example.com", "Test User", mock.Anything).
+			Return(nil).
+			Once().
+			Run(func(args mock.Arguments) {
+				close(done)
+			})
 		timeUntilResend, err := service.SendLinkToLogin("success@example.com")
 		require.NoError(t, err)
+
+		// Waiting for SendLoginWithTokenEmail to complete
+		select {
+		case <-done:
+			// t.Log("Activation email sent successfully")
+		case <-time.After(1 * time.Second):
+			t.Fatal("Test timed out waiting for goroutine to complete")
+		}
+
+		require.Equal(t, 60, timeUntilResend)
+		usersRepo.AssertExpectations(t)
+		mailService.AssertExpectations(t)
+	})
+
+	t.Run("successButSendLoginWithTokenEmailError", func(t *testing.T) {
+		done := make(chan struct{})
+
+		user := &User{
+			Email:    "success@example.com",
+			Name:     "Test User",
+			IsActive: true,
+		}
+		usersRepo.On("GetByEmail", "success@example.com").Return(user).Once()
+		usersRepo.On("Update", mock.MatchedBy(func(user *User) bool {
+			return user.Email == "success@example.com"
+		})).Return(nil)
+		mailService.On("SendLoginWithTokenEmail", "success@example.com", "Test User", mock.Anything).
+			Return(errors.New("SendLoginWithTokenEmail error")).
+			Once().
+			Run(func(args mock.Arguments) {
+				close(done)
+			})
+		timeUntilResend, err := service.SendLinkToLogin("success@example.com")
+		require.NoError(t, err)
+
+		// Waiting for SendLoginWithTokenEmail to complete
+		select {
+		case <-done:
+			// t.Log("Activation email sent successfully")
+		case <-time.After(1 * time.Second):
+			t.Fatal("Test timed out waiting for goroutine to complete")
+		}
+
 		require.Equal(t, 60, timeUntilResend)
 		usersRepo.AssertExpectations(t)
 		mailService.AssertExpectations(t)
@@ -431,16 +544,6 @@ func TestUsersService_ReSendActivationEmail(t *testing.T) {
 		IsActive: false,
 	}
 
-	t.Run("Success", func(t *testing.T) {
-		usersRepo.On("Update", mock.Anything).Return(nil).Once()
-		mailService.On("SendActivationEmail", email, "Test User", mock.Anything).Return(nil).Once()
-
-		err := service.ReSendActivationEmail(user)
-		require.NoError(t, err)
-		usersRepo.AssertExpectations(t)
-		mailService.AssertExpectations(t)
-	})
-
 	t.Run("UpdateError", func(t *testing.T) {
 		usersRepo.On("Update", mock.Anything).Return(errors.New("update error")).Once()
 
@@ -456,6 +559,58 @@ func TestUsersService_ReSendActivationEmail(t *testing.T) {
 
 		err := service.ReSendActivationEmail(user)
 		require.Error(t, err)
+	})
+
+	t.Run("Success", func(t *testing.T) {
+		done := make(chan struct{})
+
+		usersRepo.On("Update", mock.Anything).Return(nil).Once()
+		mailService.On("SendActivationEmail", email, "Test User", mock.Anything).
+			Return(nil).
+			Once().
+			Run(func(args mock.Arguments) {
+				close(done)
+			})
+
+		err := service.ReSendActivationEmail(user)
+		require.NoError(t, err)
+
+		// Waiting for SendActivationEmail to complete
+		select {
+		case <-done:
+			// t.Log("Activation email sent successfully")
+		case <-time.After(1 * time.Second):
+			t.Fatal("Test timed out waiting for goroutine to complete")
+		}
+
+		usersRepo.AssertExpectations(t)
+		mailService.AssertExpectations(t)
+	})
+
+	t.Run("SuccessButSendActivationEmailError", func(t *testing.T) {
+		done := make(chan struct{})
+
+		usersRepo.On("Update", mock.Anything).Return(nil).Once()
+		mailService.On("SendActivationEmail", email, "Test User", mock.Anything).
+			Return(errors.New("SendActivationEmail error")).
+			Once().
+			Run(func(args mock.Arguments) {
+				close(done)
+			})
+
+		err := service.ReSendActivationEmail(user)
+		require.NoError(t, err)
+
+		// Waiting for SendActivationEmail to complete
+		select {
+		case <-done:
+			// t.Log("Activation email sent successfully")
+		case <-time.After(1 * time.Second):
+			t.Fatal("Test timed out waiting for goroutine to complete")
+		}
+
+		usersRepo.AssertExpectations(t)
+		mailService.AssertExpectations(t)
 	})
 }
 
