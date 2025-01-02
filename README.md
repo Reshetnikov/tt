@@ -1,5 +1,8 @@
 # Time Tracker
 
+Explore the production version of the project:
+[Time Tracker](http://time-tracker.me/)
+
 ## 🕒 Project Description
 
 Time Tracker is a web application for tracking and managing time. It helps efficiently plan and control work processes.
